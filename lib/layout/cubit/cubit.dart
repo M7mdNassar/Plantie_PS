@@ -26,10 +26,10 @@ class AppCubit extends Cubit<AppStates>
     "Profile",
   ];
   final List<IconData> iconList = [
-    Icons.home,
-    Icons.people,
-    Icons.real_estate_agent_sharp,
-    Icons.person,
+    Icons.eco_outlined,
+    Icons.forum_outlined,
+    Icons.photo_camera_back_outlined,
+    Icons.person_outlined,
   ];
   List<Widget> screens = [
     HomeScreen(),

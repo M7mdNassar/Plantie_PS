@@ -3,7 +3,7 @@ import 'package:flutter/services.dart';
 import 'colors.dart';
 
 ThemeData darkTheme = ThemeData(
-  colorScheme: ThemeData().colorScheme.copyWith(primary: Colors.teal),
+  colorScheme: ThemeData().colorScheme.copyWith(primary: plantieColor),
   primarySwatch: defaultColor,
   scaffoldBackgroundColor: mainAppColor,
   appBarTheme: AppBarTheme(
@@ -42,7 +42,7 @@ ThemeData darkTheme = ThemeData(
 
 
 ThemeData lightTheme = ThemeData(
-  colorScheme: ThemeData().colorScheme.copyWith(primary: Colors.teal),
+  colorScheme: ThemeData().colorScheme.copyWith(primary: plantieColor),
   primarySwatch: defaultColor,
   scaffoldBackgroundColor: Colors.white,
   appBarTheme: AppBarTheme(

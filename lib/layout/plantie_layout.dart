@@ -1,6 +1,7 @@
 import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../shared/styles/colors.dart';
 import 'cubit/cubit.dart';
 import 'cubit/states.dart';
 
@@ -21,7 +22,7 @@ class AppLayout extends StatelessWidget {
               // Define your middle button action here
               print("Middle button pressed");
             },
-            backgroundColor: Colors.teal,
+            backgroundColor: plantieColor,
             child: Icon(
               size: 34,
               Icons.camera_alt_rounded,
@@ -32,7 +33,7 @@ class AppLayout extends StatelessWidget {
           bottomNavigationBar: AnimatedBottomNavigationBar.builder(
             itemCount: cubit.iconList.length,
             tabBuilder: (int index, bool isActive) {
-              final color = isActive ? Colors.white : Colors.black38;
+              final color = isActive ? plantieColor : Colors.black38;
               return Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -42,9 +43,8 @@ class AppLayout extends StatelessWidget {
                     size: 24,
                     color: color,
                   ),
-                  if (isActive)
                     Text(
-                      cubit.titles[cubit.currentIndex],
+                      cubit.titles[index],
                       style: TextStyle(
                         color: color,
                         fontSize: 14,
@@ -53,7 +53,7 @@ class AppLayout extends StatelessWidget {
                 ],
               );
             },
-            backgroundColor: Colors.teal,
+            backgroundColor: Colors.white,
             activeIndex: cubit.currentIndex,
             gapLocation: GapLocation.center,
             notchSmoothness: NotchSmoothness.smoothEdge,
