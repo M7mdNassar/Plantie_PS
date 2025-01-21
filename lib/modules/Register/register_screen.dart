@@ -1,6 +1,5 @@
 
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../shared/components/components.dart';
@@ -184,7 +183,7 @@ class RegisterScreen extends StatelessWidget {
                       children: [
                         GestureDetector(
                           onTap: () {
-                            // RegisterCubit.get(context).signInWithGoogle();
+                            RegisterCubit.get(context).signInWithGoogle();
                           },
                           child: Image.asset(
                             'assets/images/google.png',
@@ -196,7 +195,7 @@ class RegisterScreen extends StatelessWidget {
                         const SizedBox(width: 30),
                         GestureDetector(
                           onTap: () {
-                            // RegisterCubit.get(context).signInWithFacebook();
+                            RegisterCubit.get(context).signInWithFacebook();
                           },
                           child: Image.asset(
                             'assets/images/facebook.png',

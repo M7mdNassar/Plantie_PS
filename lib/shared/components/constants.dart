@@ -7,6 +7,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import '../../layout/cubit/cubit.dart';
 import '../../models/user/user_model.dart';
+import '../../modules/Login/cubit/states.dart';
 import '../../modules/WelcomePlantie/welcome_screen.dart';
 import '../network/local/cache_helper.dart';
 import '../network/remote/dio.dart';
@@ -14,11 +15,6 @@ import 'components.dart';
 
 /// Variables ///
 String uId = '';
-
-
-
-
-
 
 /// Methods ///
 void signOut(context) {
@@ -34,8 +30,6 @@ void signOut(context) {
     }
   });
 }
-
-
 
 /// These Methods Importent for Facebook Authentecation ///
 Future<LoginResult> loginWithFacebook(String nonce) async {
@@ -81,21 +75,39 @@ Future<void> handleFirestoreUser(Map<String, dynamic> userData) async {
     CurrentUser.setUser(UserModel.fromJson(userDoc.data()!));
   } else {
     // Create new user in Firestore
-    final newUser = UserModel(
-      uId: userData["id"],
-      email: userData["email"] ?? "",
+
+    userCreate(
       name: userData["name"] ?? "",
-      image: imageUrl,
+      email: userData["email"] ?? "",
+      uId: userData["id"],
+      imageURL: imageUrl,
       isEmailVerified: true,
     );
-
-    await FirebaseFirestore.instance
-        .collection("users")
-        .doc(userData["id"])
-        .set(newUser.toMap());
-
-    CurrentUser.setUser(newUser);
   }
+}
+
+Future<void> userCreate({
+  required String name,
+  required String email,
+  required String uId,
+  imageURL = "",
+  isEmailVerified = false,
+}) async {
+  UserModel model = UserModel(
+    name: name,
+    email: email,
+    uId: uId,
+    isEmailVerified: isEmailVerified,
+    image: imageURL,
+  );
+
+  await FirebaseFirestore.instance
+      .collection('users')
+      .doc(uId)
+      .set(model.toMap())
+      .then((value) {
+    CurrentUser.setUser(model);
+  }).catchError((error) {});
 }
 
 String generateNonce([int length = 32]) {

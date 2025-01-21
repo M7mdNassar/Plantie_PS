@@ -8,7 +8,6 @@ import 'package:plantie/modules/Register/cubit/states.dart';
 import '../../../models/user/user_model.dart';
 import '../../../shared/components/components.dart';
 import '../../../shared/components/constants.dart';
-import '../../../shared/network/remote/dio.dart';
 
 
 class RegisterCubit extends Cubit<RegisterStates> {
@@ -46,31 +45,6 @@ class RegisterCubit extends Cubit<RegisterStates> {
     });
   }
 
-  void userCreate({
-    required String name,
-    required String email,
-    required String uId,
-  }) {
-    UserModel model = UserModel(
-      name: name,
-      email: email,
-      uId: uId,
-      isEmailVerified: false,
-    );
-
-    FirebaseFirestore.instance
-        .collection('users')
-        .doc(uId)
-        .set(model.toMap())
-        .then((value)
-    {
-      CurrentUser.setUser(model);
-      emit(CreateUserSuccessState(uId));
-    })
-        .catchError((error) {
-      emit(CreateUserErrorState(error.toString()));
-    });
-  }
 
   Future<void> signInWithGoogle() async {
 
@@ -115,20 +89,17 @@ class RegisterCubit extends Cubit<RegisterStates> {
         emit(CreateUserSuccessState(user.uid));
       } else {
         // Handle case where user data doesn't exist in Firestore
-        final newUser = UserModel(
+        userCreate(
+          name: user.displayName!,
+          email: user.email!,
           uId: user.uid,
-          email: user.email ?? "",
-          name: user.displayName ?? "",
-          image: user.photoURL ?? "",
-        );
-
-        await FirebaseFirestore.instance
-            .collection("users")
-            .doc(user.uid)
-            .set(newUser.toMap());
-
-        CurrentUser.setUser(newUser);
-        emit(CreateUserSuccessState(user.uid));
+          imageURL: user.photoURL,
+          isEmailVerified: user.emailVerified,
+        ).then((value){
+          emit(CreateUserSuccessState(user.uid));
+        }).catchError((error){
+          emit(CreateUserErrorState(error.toString()));
+        });
       }
     } catch (error) {
       emit(RegisterErrorState(error.toString()));
@@ -169,7 +140,7 @@ class RegisterCubit extends Cubit<RegisterStates> {
 
       emit(CreateUserSuccessState(userData["id"]));
     } catch (error) {
-      emit(CreateUserErrorState(error.toString()));
+      emit(RegisterErrorState(error.toString()));
     }
   }
 

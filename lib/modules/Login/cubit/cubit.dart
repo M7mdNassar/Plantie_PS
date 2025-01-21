@@ -1,11 +1,5 @@
 
-import 'dart:convert';
-import 'dart:io';
-import 'dart:math';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:crypto/crypto.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
@@ -14,7 +8,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:plantie/modules/Login/cubit/states.dart';
 import '../../../models/user/user_model.dart';
 import '../../../shared/components/constants.dart';
-import '../../../shared/network/remote/dio.dart';
+
 
 class LoginCubit extends Cubit<LoginStates> {
   LoginCubit() : super(LoginInitialState());
@@ -45,34 +39,6 @@ class LoginCubit extends Cubit<LoginStates> {
   }
 
 
-  void userCreate({
-    required String name,
-    required String email,
-    required String uId,
-    imageURL = "",
-    isEmailVerified = false,
-  }) {
-    UserModel model = UserModel(
-      name: name,
-      email: email,
-      uId: uId,
-      isEmailVerified: isEmailVerified,
-      image: imageURL,
-    );
-
-    FirebaseFirestore.instance
-        .collection('users')
-        .doc(uId)
-        .set(model.toMap())
-        .then((value)
-    {
-      CurrentUser.setUser(model);
-      emit(LoginSuccessState(uId));
-    })
-        .catchError((error) {
-        emit(LoginErrorState(error.toString()));
-    });
-  }
 
   Future<void> signInWithGoogle() async {
 
@@ -123,7 +89,11 @@ class LoginCubit extends Cubit<LoginStates> {
           uId: user.uid,
           imageURL: user.photoURL,
           isEmailVerified: user.emailVerified,
-        );
+        ).then((value){
+          emit(LoginSuccessState(user.uid));
+        }).catchError((error){
+          emit(LoginErrorState(error.toString()));
+        });
       }
     } catch (error) {
       emit(LoginErrorState(error.toString()));
