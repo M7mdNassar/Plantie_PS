@@ -18,33 +18,39 @@ class BoardingModel {
 }
 
 class OnBoardingScreen extends StatefulWidget {
+  const OnBoardingScreen({super.key});
+
   @override
-  _OnBoardingScreenState createState() => _OnBoardingScreenState();
+  OnBoardingScreenState createState() => OnBoardingScreenState();
 }
 
-class _OnBoardingScreenState extends State<OnBoardingScreen> {
+class OnBoardingScreenState extends State<OnBoardingScreen> {
   var boardController = PageController();
 
   List<BoardingModel> boarding = [
     BoardingModel(
       image: 'assets/images/onBoardingImages/10.jpg',
       title: 'Welcome to Plantie!',
-      body: 'Stay updated with real-time weather and plant care advice tailored to your needs, and calculate the right amount of fertilizer for optimal plant growth.',
+      body:
+          'Stay updated with real-time weather and plant care advice tailored to your needs, and calculate the right amount of fertilizer for optimal plant growth.',
     ),
     BoardingModel(
       image: 'assets/images/onBoardingImages/13.png',
       title: 'Detect Plant Diseases',
-      body: 'Upload a photo of your plant to identify diseases and get expert solutions instantly.',
+      body:
+          'Upload a photo of your plant to identify diseases and get expert solutions instantly.',
     ),
     BoardingModel(
       image: 'assets/images/onBoardingImages/10.jpg',
       title: 'Find Nearby Plant Stores',
-      body: 'Easily locate nearby plant stores with just a tap, helping you take better care of your plants.',
+      body:
+          'Easily locate nearby plant stores with just a tap, helping you take better care of your plants.',
     ),
     BoardingModel(
       image: 'assets/images/onBoardingImages/12.jpg',
       title: 'Join the Plantie Community',
-      body: 'Connect with fellow plant lovers, share tips, and learn from each other to grow your green space together.',
+      body:
+          'Connect with fellow plant lovers, share tips, and learn from each other to grow your green space together.',
     ),
   ];
 
@@ -54,13 +60,14 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     CacheHelper.saveData(
       key: 'onBoarding',
       value: true,
-    ).then((value)
-    {
+    ).then((value) {
       if (value) {
-        navigateAndFinish(
-          context,
-          WelcomeScreen(),
-        );
+        if (mounted) {
+          navigateAndFinish(
+            context,
+            WelcomeScreen(),
+          );
+        }
       }
     });
   }
@@ -70,11 +77,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
     return Scaffold(
       appBar: AppBar(
         actions: [
-          defaultTextButton(
-            function: submit,
-            text: 'skip',
-            isUperCase: true
-          ),
+          defaultTextButton(function: submit, text: 'skip', isUperCase: true),
           SizedBox(
             width: 10,
           ),
@@ -126,8 +129,7 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
                   backgroundColor: plantieColor,
                   shape: const CircleBorder(),
                   onPressed: () {
-                    if (isLast)
-                    {
+                    if (isLast) {
                       submit();
                     } else {
                       boardController.nextPage(
@@ -155,34 +157,34 @@ class _OnBoardingScreenState extends State<OnBoardingScreen> {
   }
 
   Widget buildBoardingItem(BoardingModel model) => Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      Expanded(
-        child: Image(
-          image: AssetImage('${model.image}'),
-        ),
-      ),
-      SizedBox(
-        height: 16.0,
-      ),
-      Text(
-        '${model.title}',
-        style: TextStyle(
-          fontSize: 28.0,
-        ),
-      ),
-      SizedBox(
-        height: 15.0,
-      ),
-      Text(
-        '${model.body}',
-        style: TextStyle(
-          fontSize: 18.0,
-        ),
-      ),
-      SizedBox(
-        height: 30.0,
-      ),
-    ],
-  );
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Expanded(
+            child: Image(
+              image: AssetImage(model.image),
+            ),
+          ),
+          SizedBox(
+            height: 16.0,
+          ),
+          Text(
+            model.title,
+            style: TextStyle(
+              fontSize: 28.0,
+            ),
+          ),
+          SizedBox(
+            height: 15.0,
+          ),
+          Text(
+            model.body,
+            style: TextStyle(
+              fontSize: 18.0,
+            ),
+          ),
+          SizedBox(
+            height: 30.0,
+          ),
+        ],
+      );
 }

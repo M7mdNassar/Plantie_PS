@@ -6,9 +6,7 @@ class RegisterLoadingState extends RegisterStates {}
 
 class RegisterSuccessState extends RegisterStates {}
 
-
-class RegisterErrorState extends RegisterStates
-{
+class RegisterErrorState extends RegisterStates {
   final String error;
 
   RegisterErrorState(this.error);
@@ -16,22 +14,20 @@ class RegisterErrorState extends RegisterStates
 
 class CreateUserSuccessState extends RegisterStates {
   final String uId;
+
   CreateUserSuccessState(this.uId);
 }
 
-class CreateUserErrorState extends RegisterStates
-{
+class CreateUserErrorState extends RegisterStates {
   final String error;
 
   CreateUserErrorState(this.error);
 }
 
-class RegisterCanceldState extends RegisterStates
-{
+class RegisterCanceldState extends RegisterStates {
   final String msg;
 
   RegisterCanceldState(this.msg);
 }
-
 
 class RegisterChangePasswordVisibilityState extends RegisterStates {}

@@ -3,14 +3,13 @@ import 'package:conditional_builder_null_safety/conditional_builder_null_safety.
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../shared/components/components.dart';
 import '../../shared/network/local/cache_helper.dart';
-import '../../shared/styles/colors.dart';
 import '../Register/register_screen.dart';
-import '../SplashScreen/lottie_loading_Screen.dart';
+import '../SplashScreen/lottie_loading_screen.dart';
 import 'cubit/cubit.dart';
 import 'cubit/states.dart';
 
 class LoginScreen extends StatelessWidget {
-   LoginScreen({super.key});
+  LoginScreen({super.key});
 
   final formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
@@ -20,9 +19,9 @@ class LoginScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => LoginCubit(),
-      child: BlocConsumer<LoginCubit , LoginStates>(
+      child: BlocConsumer<LoginCubit, LoginStates>(
         listener: (context, state) {
-          if (state is LoginLoadingState){
+          if (state is LoginLoadingState) {
             CircularProgressIndicator();
           }
 
@@ -31,19 +30,21 @@ class LoginScreen extends StatelessWidget {
               key: 'uId',
               value: state.uId,
             ).then((value) {
-              navigateAndFinish(context, LottieLoadingScreen());
+              if (context.mounted) {
+                navigateAndFinish(context, LottieLoadingScreen());
+              }
             });
           }
 
-          if (state is LoginCanceldState){
-            showToast(text: state.msg.toString(), state: ToastStates.WARNING);
+          if (state is LoginCanceldState) {
+            showToast(text: state.msg.toString(), state: ToastStates.warning);
           }
 
-          if (state is LoginErrorState){
-            showToast(text: state.error.toString(), state: ToastStates.ERROR);
+          if (state is LoginErrorState) {
+            showToast(text: state.error.toString(), state: ToastStates.error);
           }
         },
-        builder: (context , state){
+        builder: (context, state) {
           return Scaffold(
             appBar: AppBar(),
             body: SingleChildScrollView(
@@ -59,20 +60,13 @@ class LoginScreen extends StatelessWidget {
                       const SizedBox(height: 20),
 
                       // Welcome Text
-                      const Text(
+                      Text(
                         "Welcome",
-                        style: TextStyle(
-                          fontSize: 30,
-                          color: Colors.teal,
-                          fontWeight: FontWeight.bold,
-                        ),
+                        style: Theme.of(context).textTheme.labelLarge,
                       ),
-                      const Text(
+                      Text(
                         "Hello, Welcome back to Plantie!",
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.black54,
-                        ),
+                        style: Theme.of(context).textTheme.labelMedium,
                       ),
                       const SizedBox(height: 30),
 
@@ -80,10 +74,11 @@ class LoginScreen extends StatelessWidget {
                       defaultFormField(
                         controller: emailController,
                         type: TextInputType.emailAddress,
-                        validate: (String? value){
+                        validate: (String? value) {
                           if (value != null && value.isEmpty) {
                             return 'please enter your email address';
                           }
+                          return null;
                         },
                         label: "Email Address",
                         prefixIcon: Icons.email_outlined,
@@ -105,13 +100,13 @@ class LoginScreen extends StatelessWidget {
                         },
                         obscureText: LoginCubit.get(context).isPassword,
                         onSuffexPressed: () {
-                          LoginCubit.get(context)
-                              .changePasswordVisibility();
+                          LoginCubit.get(context).changePasswordVisibility();
                         },
                         validate: (String? value) {
                           if (value != null && value.isEmpty) {
                             return 'password is too short';
                           }
+                          return null;
                         },
                         label: "Password",
                         prefixIcon: Icons.lock_outline,
@@ -127,9 +122,9 @@ class LoginScreen extends StatelessWidget {
                           text: "Forget Password?",
                           isUperCase: false,
                           style: const TextStyle(
-                            color: Colors.blue, // Blue color for the text
-                            fontSize: 14, // Smaller font size
-                            fontWeight: FontWeight.normal, // Normal weight
+                            color: Colors.blue,
+                            fontSize: 14,
+                            fontWeight: FontWeight.normal,
                           ),
                         ),
                       ),
@@ -149,7 +144,6 @@ class LoginScreen extends StatelessWidget {
                             }
                           },
                           text: 'login',
-                          backgroundColor: plantieColor,
                         ),
                         fallback: (context) =>
                             Center(child: CircularProgressIndicator()),
@@ -166,7 +160,7 @@ class LoginScreen extends StatelessWidget {
                               navigateTo(context, RegisterScreen());
                             },
                             child: const Text(
-                              "Register?",
+                              "Register",
                               style: TextStyle(
                                 color: Colors.blue,
                               ),
@@ -208,7 +202,8 @@ class LoginScreen extends StatelessWidget {
                               LoginCubit.get(context).signInWithGoogle();
                             },
                             child: Image.asset(
-                              'assets/images/google.png', // Replace with your Google icon asset
+                              'assets/images/google.png',
+                              // Replace with your Google icon asset
                               height: 45,
                               width: 45,
                             ),
@@ -219,7 +214,8 @@ class LoginScreen extends StatelessWidget {
                               LoginCubit.get(context).signInWithFacebook();
                             },
                             child: Image.asset(
-                              'assets/images/facebook.png', // Replace with your Facebook icon asset
+                              'assets/images/facebook.png',
+                              // Replace with your Facebook icon asset
                               height: 45,
                               width: 45,
                             ),

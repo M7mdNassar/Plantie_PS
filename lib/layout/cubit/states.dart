@@ -4,8 +4,6 @@ final class AppInitialState extends AppStates {}
 
 final class AppChangeNavBottomBarState extends AppStates {}
 
-final class AppChangeModeState extends AppStates {}
-
 class AppGetLoadingState extends AppStates {}
 
 class GetUserLoadingState extends AppStates {}
@@ -17,3 +15,5 @@ class GetUserErrorState extends AppStates {
 
   GetUserErrorState(this.error);
 }
+
+class AppChangeModeState extends AppStates {}

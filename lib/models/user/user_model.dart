@@ -50,7 +50,7 @@ class UserModel {
       'phone': phone,
       'uId': uId,
       'image': image,
-      "country" : country,
+      "country": country,
       'bio': bio,
       'isEmailVerified': isEmailVerified,
     };

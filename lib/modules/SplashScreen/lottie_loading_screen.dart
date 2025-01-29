@@ -3,18 +3,20 @@ import 'package:lottie/lottie.dart';
 import '../../layout/plantie_layout.dart';
 
 class LottieLoadingScreen extends StatelessWidget {
+  const LottieLoadingScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
-
     Future.delayed(Duration(seconds: 3), () {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => AppLayout()),
-      );
+      if (context.mounted) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => AppLayout()),
+        );
+      }
     });
 
     return Scaffold(
-      backgroundColor: Colors.white,
       body: Center(
         child: SizedBox(
           width: double.infinity,

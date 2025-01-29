@@ -1,12 +1,10 @@
-
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../shared/components/components.dart';
 import '../../shared/network/local/cache_helper.dart';
-import '../../shared/styles/colors.dart';
 import '../Login/login_screen.dart';
-import '../SplashScreen/lottie_loading_Screen.dart';
+import '../SplashScreen/lottie_loading_screen.dart';
 import 'cubit/cubit.dart';
 import 'cubit/states.dart';
 
@@ -24,27 +22,28 @@ class RegisterScreen extends StatelessWidget {
       create: (context) => RegisterCubit(),
       child: BlocConsumer<RegisterCubit, RegisterStates>(
           listener: (context, state) {
-
-            if (state is CreateUserSuccessState) {
-              CacheHelper.saveData(
-                key: 'uId',
-                value: state.uId,
-              ).then((value) {
-                navigateAndFinish(context, LottieLoadingScreen());
-              });
+        if (state is CreateUserSuccessState) {
+          CacheHelper.saveData(
+            key: 'uId',
+            value: state.uId,
+          ).then((value) {
+            if (context.mounted) {
+              navigateAndFinish(context, LottieLoadingScreen());
             }
+          });
+        }
 
-            if (state is RegisterCanceldState){
-              showToast(text: state.msg.toString(), state: ToastStates.WARNING);
-            }
+        if (state is RegisterCanceldState) {
+          showToast(text: state.msg.toString(), state: ToastStates.warning);
+        }
 
-            if (state is RegisterErrorState){
-              showToast(
-                text: state.error,
-                state: ToastStates.ERROR,
-              );
-            }
-          }, builder: (context, state) {
+        if (state is RegisterErrorState) {
+          showToast(
+            text: state.error,
+            state: ToastStates.error,
+          );
+        }
+      }, builder: (context, state) {
         return Scaffold(
           appBar: AppBar(),
           body: SingleChildScrollView(
@@ -60,18 +59,11 @@ class RegisterScreen extends StatelessWidget {
                     SizedBox(height: 10),
                     Text(
                       "Create Account",
-                      style: TextStyle(
-                        fontSize: 30,
-                        color: Colors.teal,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: Theme.of(context).textTheme.labelLarge,
                     ),
                     Text(
                       "Complete your information to get started!",
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.black54,
-                      ),
+                      style: Theme.of(context).textTheme.labelMedium,
                     ),
                     SizedBox(height: 30),
                     defaultFormField(
@@ -83,6 +75,7 @@ class RegisterScreen extends StatelessWidget {
                         if (value != null && value.isEmpty) {
                           return 'please enter a user name';
                         }
+                        return null;
                       },
                     ),
                     SizedBox(height: 25),
@@ -95,6 +88,7 @@ class RegisterScreen extends StatelessWidget {
                         if (value != null && value.isEmpty) {
                           return 'please enter a valid email';
                         }
+                        return null;
                       },
                     ),
                     SizedBox(height: 25),
@@ -111,6 +105,7 @@ class RegisterScreen extends StatelessWidget {
                         if (value != null && value.isEmpty) {
                           return 'please enter your password';
                         }
+                        return null;
                       },
                       label: 'Password',
                       prefixIcon: Icons.lock_outline,
@@ -131,7 +126,6 @@ class RegisterScreen extends StatelessWidget {
                             }
                           },
                           text: 'Register',
-                          backgroundColor: plantieColor,
                         ),
                         fallback: (context) =>
                             Center(child: CircularProgressIndicator()),
@@ -167,7 +161,7 @@ class RegisterScreen extends StatelessWidget {
                         ),
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text("Or register by"),
+                          child: Text("or register by"),
                         ),
                         Expanded(
                           child: Divider(
@@ -187,7 +181,6 @@ class RegisterScreen extends StatelessWidget {
                           },
                           child: Image.asset(
                             'assets/images/google.png',
-                            // Replace with your Google icon asset
                             height: 45,
                             width: 45,
                           ),
@@ -199,7 +192,6 @@ class RegisterScreen extends StatelessWidget {
                           },
                           child: Image.asset(
                             'assets/images/facebook.png',
-                            // Replace with your Facebook icon asset
                             height: 45,
                             width: 45,
                           ),

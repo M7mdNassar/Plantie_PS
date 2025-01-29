@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import '../../shared/components/components.dart';
-import '../../shared/styles/colors.dart';
 import '../Login/login_screen.dart';
 import '../Register/register_screen.dart';
 
@@ -35,21 +34,13 @@ class WelcomeScreen extends StatelessWidget {
                 children: [
                   Text(
                     "Plantie",
-                    style: TextStyle(
-                      fontSize: 35,
-                      fontFamily: "jannah",
-                      color: Colors.black,
-                    ),
+                    style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   SizedBox(height: 8),
                   Text(
                     "Get more crops with Plantie's help!",
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontFamily: "jannah",
-                      color: Colors.grey[700],
-                    ),
+                    style: Theme.of(context).textTheme.titleSmall,
                   ),
                 ],
               ),
@@ -70,7 +61,6 @@ class WelcomeScreen extends StatelessWidget {
                         navigateTo(context, LoginScreen());
                       },
                       text: "Login",
-                      backgroundColor: plantieColor,
                     ),
                   ),
                   // Register Button using defaultButton from components
@@ -82,7 +72,6 @@ class WelcomeScreen extends StatelessWidget {
                         navigateTo(context, RegisterScreen());
                       },
                       text: "Register",
-                      backgroundColor: plantieColor,
                     ),
                   ),
                 ],
@@ -95,10 +84,7 @@ class WelcomeScreen extends StatelessWidget {
               child: Text(
                 "By logging in or registering, you agree to our Terms of Service and Privacy Policy",
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey[600],
-                ),
+                style: Theme.of(context).textTheme.titleSmall,
               ),
             ),
           ],

@@ -9,7 +9,6 @@ import '../../../models/user/user_model.dart';
 import '../../../shared/components/components.dart';
 import '../../../shared/components/constants.dart';
 
-
 class RegisterCubit extends Cubit<RegisterStates> {
   RegisterCubit() : super(RegisterInitialState());
 
@@ -29,14 +28,13 @@ class RegisterCubit extends Cubit<RegisterStates> {
         emit(RegisterSuccessState());
         showToast(
           text: "Verification email sent. Please check your inbox.",
-          state: ToastStates.SUCCESS,
+          state: ToastStates.success,
         );
         userCreate(
           name: name,
           email: email,
           uId: value.user!.uid,
         );
-
       }).catchError((error) {
         emit(RegisterErrorState(error.toString()));
       });
@@ -45,9 +43,7 @@ class RegisterCubit extends Cubit<RegisterStates> {
     });
   }
 
-
   Future<void> signInWithGoogle() async {
-
     try {
       // Begin interactive sign-in process
       final GoogleSignInAccount? gUser = await GoogleSignIn().signIn();
@@ -69,7 +65,7 @@ class RegisterCubit extends Cubit<RegisterStates> {
 
       // Sign in with the obtained credential
       final userCredential =
-      await FirebaseAuth.instance.signInWithCredential(credential);
+          await FirebaseAuth.instance.signInWithCredential(credential);
 
       final user = userCredential.user;
 
@@ -80,8 +76,10 @@ class RegisterCubit extends Cubit<RegisterStates> {
       emit(RegisterLoadingState());
 
       // Check if user exists in Firestore
-      final userDoc =
-      await FirebaseFirestore.instance.collection("users").doc(user.uid).get();
+      final userDoc = await FirebaseFirestore.instance
+          .collection("users")
+          .doc(user.uid)
+          .get();
 
       if (userDoc.exists && userDoc.data() != null) {
         // Set current user data
@@ -95,9 +93,9 @@ class RegisterCubit extends Cubit<RegisterStates> {
           uId: user.uid,
           imageURL: user.photoURL,
           isEmailVerified: user.emailVerified,
-        ).then((value){
+        ).then((value) {
           emit(CreateUserSuccessState(user.uid));
-        }).catchError((error){
+        }).catchError((error) {
           emit(CreateUserErrorState(error.toString()));
         });
       }
@@ -107,7 +105,6 @@ class RegisterCubit extends Cubit<RegisterStates> {
   }
 
   Future<void> signInWithFacebook() async {
-
     try {
       // Step 1: Generate nonce for security
       final rawNonce = generateNonce();
@@ -129,8 +126,8 @@ class RegisterCubit extends Cubit<RegisterStates> {
       emit(RegisterLoadingState());
 
       // Step 4: Sign in to Firebase with the credential
-      final userCredential =
-      await FirebaseAuth.instance.signInWithCredential(facebookAuthCredential);
+      final userCredential = await FirebaseAuth.instance
+          .signInWithCredential(facebookAuthCredential);
 
       // Step 5: Fetch Facebook user data
       final userData = await FacebookAuth.instance.getUserData();
@@ -144,15 +141,13 @@ class RegisterCubit extends Cubit<RegisterStates> {
     }
   }
 
-
-
   IconData suffix = Icons.visibility_off_outlined;
   bool isPassword = true;
 
   void changePasswordVisibility() {
     isPassword = !isPassword;
     suffix =
-    isPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined;
+        isPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined;
 
     emit(RegisterChangePasswordVisibilityState());
   }

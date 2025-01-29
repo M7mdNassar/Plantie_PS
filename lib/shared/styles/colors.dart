@@ -1,9 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 
 
-const defaultColor = Colors.blue;
+var plantieColor = HexColor("47B88A");
 
-var plantieColor = HexColor("00b984");
 
-var mainAppColor = HexColor('333739');
