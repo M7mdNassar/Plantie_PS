@@ -1,4 +1,3 @@
-
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -26,10 +25,10 @@ class AppCubit extends Cubit<AppStates>
     "Profile",
   ];
   final List<IconData> iconList = [
-    Icons.home,
-    Icons.people,
-    Icons.real_estate_agent_sharp,
-    Icons.person,
+    Icons.eco_outlined,
+    Icons.forum_outlined,
+    Icons.photo_camera_back_outlined,
+    Icons.person_outlined,
   ];
   List<Widget> screens = [
     HomeScreen(),
@@ -58,18 +57,16 @@ class AppCubit extends Cubit<AppStates>
   }
 
 
-
-
   void resendVerificationEmail() {
     FirebaseAuth.instance.currentUser!.sendEmailVerification().then((_) {
       showToast(
         text: "Verification email resent. Please check your inbox.",
-        state: ToastStates.SUCCESS,
+        state: ToastStates.success,
       );
     }).catchError((error) {
       showToast(
         text: error.toString(),
-        state: ToastStates.ERROR,
+        state: ToastStates.error,
       );
     });
   }

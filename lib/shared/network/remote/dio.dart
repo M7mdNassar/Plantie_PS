@@ -14,11 +14,11 @@ class DioHelper {
     );
   }
 
-
   // Download image using Dio
   static Future downloadImage(String imageUrl) async {
     try {
-      Response response = await dio.get(imageUrl, options: Options(responseType: ResponseType.bytes));
+      Response response = await dio.get(imageUrl,
+          options: Options(responseType: ResponseType.bytes));
       return response.data;
     } catch (e) {
       throw Exception('Failed to download image: $e');
@@ -26,13 +26,16 @@ class DioHelper {
   }
 
   // Upload image to Firebase Storage
-  static Future<String> uploadImageToFirebase(imageBytes) async {
+// Upload image to Firebase Storage
+  static Future<String> uploadImageToFirebase(
+      imageBytes, String storagePath) async {
     try {
       // Generate a unique file name
       String fileName = 'image_${DateTime.now().millisecondsSinceEpoch}.jpg';
 
-      // Firebase Storage reference
-      Reference storageRef = FirebaseStorage.instance.ref().child("images/$fileName");
+      // Firebase Storage reference with dynamic storage path
+      Reference storageRef =
+          FirebaseStorage.instance.ref().child("$storagePath$fileName");
 
       // Upload the image to Firebase Storage
       await storageRef.putData(imageBytes);
@@ -51,7 +54,7 @@ class DioHelper {
       var imageBytes = await downloadImage(imageUrl);
 
       // Upload the image and get the URL
-      return await uploadImageToFirebase(imageBytes);
+      return await uploadImageToFirebase(imageBytes, "profiles/");
     } catch (e) {
       throw Exception('Failed to download and upload image: $e');
     }
