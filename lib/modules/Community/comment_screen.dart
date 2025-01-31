@@ -2,8 +2,9 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:plantie/models/post/post_model.dart';
+import 'package:plantie/shared/components/components.dart';
 import '../../models/user/user_model.dart';
-import '../../shared/components/components.dart';
+import '../../shared/styles/colors.dart';
 import '../../shared/styles/icon_broken.dart';
 import 'cubit/cubit.dart';
 
@@ -22,21 +23,6 @@ class CommentScreen extends StatelessWidget {
       appBar: AppBar(title: const Text("Comments")),
       body: Column(
         children: [
-          FutureBuilder<DocumentSnapshot>(
-            future: FirebaseFirestore.instance
-                .collection('posts')
-                .doc(postId)
-                .get(),
-            builder: (context, snapshot) {
-              if (!snapshot.hasData) {
-                return const SizedBox.shrink();
-              }
-              final post = PostModel.fromJson(
-                  snapshot.data!.data() as Map<String, dynamic>,
-                  id: snapshot.data!.id);
-              return buildPostItem(post, context, 0); // Reuse post item UI
-            },
-          ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: FirebaseFirestore.instance
@@ -56,13 +42,23 @@ class CommentScreen extends StatelessWidget {
                         snapshot.data!.docs[index].data() as Map<String, dynamic>);
                     return ListTile(
                       leading: CircleAvatar(
-                        backgroundImage: NetworkImage(comment.userImage ?? ''),
+                        backgroundImage: (comment.userImage != null && comment.userImage!.isNotEmpty)
+                            ? NetworkImage(comment.userImage!)
+                            : const AssetImage('assets/images/user.png'),
                       ),
-                      title: Text(comment.userName),
-                      subtitle: Text(comment.text),
+                      title: Text(comment.userName,
+                        style: Theme.of(context).textTheme.titleMedium,
+
+                      ),
+                      subtitle: Text(comment.text,
+                        style: Theme.of(context).textTheme.titleLarge,
+                      ),
                       trailing: Text(
                         DateFormat('MMM dd, HH:mm')
                             .format(comment.timestamp),
+                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          height: 1.4,
+                        ),
                       ),
                     );
                   },
@@ -71,11 +67,13 @@ class CommentScreen extends StatelessWidget {
             ),
           ),
           Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(20.0),
             child: Row(
+
               children: [
                 Expanded(
                   child: TextField(
+                    style: Theme.of(context).textTheme.titleMedium,
                     controller: _commentController,
                     decoration: const InputDecoration(
                       hintText: "Write a comment...",
@@ -84,7 +82,7 @@ class CommentScreen extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  icon: const Icon(IconBroken.Send),
+                  icon:  Icon(IconBroken.Send , color: plantieColor,),
                   onPressed: () {
                     if (_commentController.text.isNotEmpty) {
                       cubit.addComment(
@@ -105,4 +103,6 @@ class CommentScreen extends StatelessWidget {
       ),
     );
   }
+
+
 }

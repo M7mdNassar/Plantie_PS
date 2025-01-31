@@ -13,6 +13,7 @@ import '../../models/post/post_model.dart';
 import '../../models/user/user_model.dart';
 import '../../modules/Community/comment_screen.dart';
 import '../../modules/Community/cubit/cubit.dart';
+import '../../modules/Community/image_carousel.dart';
 import '../styles/icon_broken.dart';
 
 Widget defaultButton({
@@ -312,7 +313,7 @@ Widget buildPostItem(PostModel post, context, index) {
 
   return Card(
     color:
-        AppCubit.get(context).isDark ? HexColor("1C1C1E") : HexColor("FFFFFF"),
+    AppCubit.get(context).isDark ? HexColor("1C1C1E") : HexColor("FFFFFF"),
     clipBehavior: Clip.antiAliasWithSaveLayer,
     elevation: 5.0,
     margin: EdgeInsets.symmetric(
@@ -329,7 +330,7 @@ Widget buildPostItem(PostModel post, context, index) {
                 radius: 25.0,
                 child: ClipOval(
                   child: CachedNetworkImage(
-                    imageUrl: CurrentUser.user!.image!,
+                    imageUrl: post.image ?? "",
                     fit: BoxFit.cover,
                     width: 50.0,
                     height: 50.0,
@@ -351,13 +352,13 @@ Widget buildPostItem(PostModel post, context, index) {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      CurrentUser.user!.name,
+                      post.name,
                     ),
                     Text(
                       DateFormat('d MMM h:mm a').format(post.dateTime),
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                            height: 1.4,
-                          ),
+                        height: 1.4,
+                      ),
                     ),
                   ],
                 ),
@@ -437,54 +438,7 @@ Widget buildPostItem(PostModel post, context, index) {
 
           // post images
           if (post.postImage != null && post.postImage!.isNotEmpty)
-            StatefulBuilder(
-              builder: (context, setState) {
-                final PageController _pageController = PageController();
-                int _currentPage = 0;
-
-                return Column(
-                  children: [
-                    SizedBox(
-                      height: 300, // Adjust height as needed
-                      child: PageView.builder(
-                        controller: _pageController,
-                        onPageChanged: (int page) {
-                          setState(() {
-                            _currentPage = page;
-                          });
-                        },
-                        itemCount: post.postImage!.length,
-                        itemBuilder: (context, index) {
-                          return CachedNetworkImage(
-                            imageUrl: post.postImage![index],
-                            fit: BoxFit.cover,
-                            // width: MediaQuery.of(context).size.width,
-                          );
-                        },
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: List<Widget>.generate(
-                        post.postImage!.length,
-                            (index) => Container(
-                          width: 8,
-                          height: 8,
-                          margin: const EdgeInsets.symmetric(horizontal: 4),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: _currentPage == index
-                                ? plantieColor
-                                : Colors.grey.withOpacity(0.5),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
+            ImageCarousel(imageUrls: post.postImage!),
 
           // likes count and comment count icons
           Padding(
@@ -552,9 +506,9 @@ Widget buildPostItem(PostModel post, context, index) {
                     children: [
                       CircleAvatar(
                         radius: 18.0,
-                        backgroundImage: NetworkImage(
-                          CurrentUser.user!.image!,
-                        ),
+                        backgroundImage: (CurrentUser.user!.image!.isNotEmpty)
+                            ? NetworkImage(CurrentUser.user!.image!)
+                            : AssetImage('assets/images/user.png'),
                       ),
                       SizedBox(
                         width: 15.0,
@@ -605,3 +559,4 @@ Widget buildPostItem(PostModel post, context, index) {
     ),
   );
 }
+

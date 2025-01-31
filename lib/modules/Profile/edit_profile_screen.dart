@@ -74,9 +74,9 @@ class EditProfileScreen extends StatelessWidget {
                         child: CircleAvatar(
                           radius: 70.0,
                           backgroundImage: cubit.image == null
-                              ? NetworkImage(
-                                  currentUser!.image!,
-                                )
+                              ? (currentUser!.image!.isNotEmpty)
+                              ? NetworkImage(currentUser.image!)
+                              : const AssetImage('assets/images/user.png')
                               : FileImage(cubit.image!),
                         ),
                       ),

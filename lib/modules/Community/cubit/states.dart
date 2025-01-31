@@ -26,3 +26,8 @@ class PostImagesPickedState extends CommunityStates {
   final List<File> images;
   PostImagesPickedState(this.images);
 }
+
+class CommunitySearchResultsState extends CommunityStates{
+  final  List<PostModel> results;
+  CommunitySearchResultsState(this.results);
+}

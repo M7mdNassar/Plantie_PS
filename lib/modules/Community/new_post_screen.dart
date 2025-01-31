@@ -36,7 +36,14 @@ class NewPostScreen extends StatelessWidget {
             actions: [
               defaultTextButton(
                 function: () {
-
+                  if (_textController.text.isNotEmpty || cubit.postImages.isNotEmpty) {
+                    cubit.createPost(
+                      text: _textController.text,
+                      userId: currentUser.uId,
+                      userName: currentUser.name,
+                      userImage: currentUser.image,
+                    );
+                  }
                 },
                 text: "Post",
               ),
@@ -133,19 +140,8 @@ class NewPostScreen extends StatelessWidget {
                     ),
                   ],
                 ),
-                ElevatedButton(
-                  onPressed: () {
-                    if (_textController.text.isNotEmpty || cubit.postImages.isNotEmpty) {
-                      cubit.createPost(
-                        text: _textController.text,
-                        userId: currentUser.uId,
-                        userName: currentUser.name,
-                        userImage: currentUser.image,
-                      );
-                    }
-                  },
-                  child: const Text('Post'),
-                ),
+
+
                 SizedBox(height: 20),
               ],
             ),

@@ -9,6 +9,7 @@ class PostModel {
   final String? text;
   final List<String>? postImage;
   final List<String>? likes;
+  int commentCount = 0;
 
   PostModel({
     required this.postId,

@@ -1,7 +1,8 @@
+import 'dart:async';
 import 'dart:io';
-import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
@@ -25,6 +26,9 @@ class CommunityCubit extends Cubit<CommunityStates> {
   DocumentSnapshot? _lastDocument;
   bool _hasMore = true;
 
+  bool isLoading = false;
+  bool isCreatingPost = false;
+
   void _init() {
     getPosts();
   }
@@ -38,8 +42,17 @@ class CommunityCubit extends Cubit<CommunityStates> {
 
   List<File> get postImages => _postImages;
 
-  Future<void> getPosts() async {
+  Future<void> getPosts({bool refresh = false}) async {
     try {
+      if (refresh) {
+        _posts.clear();
+        _lastDocument = null;
+        _hasMore = true;
+      }
+
+      if (!_hasMore || isLoading) return;
+
+      isLoading = true;
       emit(CommunityLoadingState());
 
       Query query = _firestore.collection('posts')
@@ -58,13 +71,18 @@ class CommunityCubit extends Cubit<CommunityStates> {
       }
 
       _lastDocument = snapshot.docs.last;
-      List<PostModel> newPosts = snapshot.docs.map((doc) =>
-          PostModel.fromJson(doc.data() as Map<String, dynamic>, id: doc.id)).toList();
+      List<PostModel> newPosts = await Future.wait(snapshot.docs.map((doc) async {
+        final comments = await doc.reference.collection('comments').get();
+        return PostModel.fromJson(doc.data() as Map<String, dynamic>, id: doc.id)
+          ..commentCount = comments.size;
+      }));
 
       _posts.addAll(newPosts);
       emit(CommunityPostsLoadedState(_posts));
     } catch (e) {
       emit(CommunityErrorState(e.toString()));
+    }finally {
+      isLoading = false;
     }
   }
 
@@ -208,5 +226,35 @@ class CommunityCubit extends Cubit<CommunityStates> {
     } catch (e) {
       emit(CommunityErrorState("Failed to delete post: ${e.toString()}"));
     }
+  }
+
+
+
+
+  final TextEditingController searchController = TextEditingController();
+  List<PostModel> filteredPosts = [];
+  bool isSearching = false;
+  Timer? _searchTimer;
+
+  void searchPosts(String query) {
+    _searchTimer?.cancel();
+    _searchTimer = Timer(const Duration(milliseconds: 300), () {
+      if (query.isEmpty) {
+        filteredPosts = _posts;
+      } else {
+        final searchTerms = query.toLowerCase().split(' ');
+        filteredPosts = _posts.where((post) {
+          final postText = post.text?.toLowerCase() ?? '';
+          return searchTerms.any((term) => postText.contains(term));
+        }).toList();
+      }
+      emit(CommunitySearchResultsState(filteredPosts));
+    });
+  }
+
+  void clearSearch() {
+    searchController.clear();
+    filteredPosts = _posts;
+    emit(CommunityPostsLoadedState(_posts));
   }
 }
