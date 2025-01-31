@@ -7,6 +7,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
 import 'package:plantie/shared/styles/colors.dart';
+import 'package:readmore/readmore.dart';
 
 import '../../layout/cubit/cubit.dart';
 import '../../models/post/post_model.dart';
@@ -401,11 +402,20 @@ Widget buildPostItem(PostModel post, context, index) {
                   if (post.uId == CurrentUser.user!.uId)
                     const PopupMenuItem<String>(
                       value: 'delete',
-                      child: Text('Delete Post'),
+                      child: Text('Delete Post',
+                       style: TextStyle(
+                         fontSize: 18,
+                       ),
+
+                      ),
                     ),
                   const PopupMenuItem<String>(
                     value: 'share',
-                    child: Text('Share Post'),
+                    child: Text('Share Post',
+                      style: TextStyle(
+                        fontSize: 18,
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -430,10 +440,17 @@ Widget buildPostItem(PostModel post, context, index) {
             padding: const EdgeInsets.only(
               bottom: 10,
             ),
-            child: Text(
-              post.text!,
-              style: Theme.of(context).textTheme.titleLarge,
-            ),
+
+              child:ReadMoreText(
+                post.text!,
+                trimMode: TrimMode.Line,
+                trimLines: 2,
+                colorClickableText: plantieColor,
+                trimCollapsedText: 'Show more',
+                trimExpandedText: 'Show less',
+                style: Theme.of(context).textTheme.titleLarge,
+                // moreStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
           ),
 
           // post images
