@@ -7,7 +7,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import '../../layout/cubit/cubit.dart';
 import '../../models/user/user_model.dart';
-import '../../modules/Login/cubit/states.dart';
 import '../../modules/WelcomePlantie/welcome_screen.dart';
 import '../network/local/cache_helper.dart';
 import '../network/remote/dio.dart';

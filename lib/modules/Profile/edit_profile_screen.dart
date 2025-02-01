@@ -19,7 +19,6 @@ class EditProfileScreen extends StatelessWidget {
     final currentUser = CurrentUser.getUser();
     final cubit = ProfileCubit.get(context);
 
-
     final nameController = TextEditingController(text: currentUser?.name ?? "");
     final emailController =
         TextEditingController(text: currentUser?.email ?? "");
@@ -47,7 +46,6 @@ class EditProfileScreen extends StatelessWidget {
         }
       },
       builder: (context, state) {
-
         // var profileImage = ProfileCubit.get(context).image;
 
         return Scaffold(
@@ -62,8 +60,6 @@ class EditProfileScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-
-
                   Stack(
                     alignment: AlignmentDirectional.bottomEnd,
                     children: [
@@ -75,8 +71,8 @@ class EditProfileScreen extends StatelessWidget {
                           radius: 70.0,
                           backgroundImage: cubit.image == null
                               ? (currentUser!.image!.isNotEmpty)
-                              ? NetworkImage(currentUser.image!)
-                              : const AssetImage('assets/images/user.png')
+                                  ? NetworkImage(currentUser.image!)
+                                  : const AssetImage('assets/images/user.png')
                               : FileImage(cubit.image!),
                         ),
                       ),
@@ -87,7 +83,6 @@ class EditProfileScreen extends StatelessWidget {
                           child: Icon(
                             IconBroken.Camera,
                             color: Colors.white,
-
                           ),
                         ),
                         onPressed: () {
@@ -96,7 +91,6 @@ class EditProfileScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-
 
                   const SizedBox(height: 20),
 
@@ -124,14 +118,10 @@ class EditProfileScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-
                       ],
                     ),
                   if (state is ProfileImageUpdateLoadingState)
                     const LinearProgressIndicator(),
-
-
-
 
                   const SizedBox(height: 20),
                   // Form Card

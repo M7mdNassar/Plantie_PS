@@ -1,4 +1,3 @@
-
 import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -9,7 +8,6 @@ import 'package:plantie/modules/Community/post_search.dart';
 import 'package:plantie/shared/components/components.dart';
 import 'package:plantie/shared/styles/colors.dart';
 import '../../shared/styles/icon_broken.dart';
-
 
 class CommunityScreen extends StatelessWidget {
   const CommunityScreen({super.key});
@@ -30,8 +28,9 @@ class CommunityScreen extends StatelessWidget {
                     icon: Icon(
                       IconBroken.Notification,
                     )),
-                IconButton(onPressed: () => _showSearch(context),
-                icon: Icon(IconBroken.Search)),
+                IconButton(
+                    onPressed: () => _showSearch(context),
+                    icon: Icon(IconBroken.Search)),
                 SizedBox(
                   width: 8,
                 ),
@@ -41,10 +40,13 @@ class CommunityScreen extends StatelessWidget {
               heroTag: "addPost",
               shape: CircleBorder(),
               onPressed: () {
-                navigateTo(context, BlocProvider.value(
-                  value: BlocProvider.of<CommunityCubit>(context),
-                  child: NewPostScreen(),
-                ),);
+                navigateTo(
+                  context,
+                  BlocProvider.value(
+                    value: BlocProvider.of<CommunityCubit>(context),
+                    child: NewPostScreen(),
+                  ),
+                );
               },
               backgroundColor: plantieColor,
               child: Icon(
@@ -64,49 +66,50 @@ class CommunityScreen extends StatelessWidget {
               },
               child: ConditionalBuilder(
                 condition: cubit.posts.isNotEmpty,
-                builder: (context) =>
-                    SingleChildScrollView(
-                      physics: const BouncingScrollPhysics(),
-                      child: Column(
-                        children: [
-                          ListView.separated(
-                            shrinkWrap: true,
-                            physics: const NeverScrollableScrollPhysics(),
-                            itemBuilder: (context, index) {
-                              if (index < cubit.posts.length) {
-                                return buildPostItem(
-                                    cubit.posts[index], context, index);
-                              } else if (cubit.hasMore()) {
-                                // Show loading indicator at the bottom if there are more posts to load
-                                return const Center(
-                                    child: CircularProgressIndicator());
-                              } else {
-                                // No more posts to load
-                                return const SizedBox.shrink();
-                              }
-                            },
-                            separatorBuilder: (context,
-                                index) => const SizedBox(height: 10),
-                            itemCount: cubit.posts.length +
-                                (cubit.hasMore() ? 1 : 0),
-                          ),
-                        ],
+                builder: (context) => SingleChildScrollView(
+                  physics: const BouncingScrollPhysics(),
+                  child: Column(
+                    children: [
+                      ListView.separated(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemBuilder: (context, index) {
+                          if (index < cubit.posts.length) {
+                            return buildPostItem(
+                                cubit.posts[index], context, index);
+                          } else if (cubit.hasMore()) {
+                            // Show loading indicator at the bottom if there are more posts to load
+                            return const Center(
+                                child: CircularProgressIndicator());
+                          } else {
+                            // No more posts to load
+                            return const SizedBox.shrink();
+                          }
+                        },
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 10),
+                        itemCount:
+                            cubit.posts.length + (cubit.hasMore() ? 1 : 0),
                       ),
-                    ),
+                    ],
+                  ),
+                ),
                 fallback: (context) =>
-                const Center(child: CircularProgressIndicator()),
+                    const Center(child: CircularProgressIndicator()),
               ),
             ),
           );
-        }
-
-    );
+        });
   }
 
   void _showSearch(BuildContext context) {
+    final theme = Theme.of(context);
     showSearch(
       context: context,
-      delegate: PostSearchDelegate(cubit: CommunityCubit.get(context)),
+      delegate: PostSearchDelegate(
+        cubit: CommunityCubit.get(context),
+        theme: theme,
+      ),
     );
   }
 }
