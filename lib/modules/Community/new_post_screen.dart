@@ -36,7 +36,8 @@ class NewPostScreen extends StatelessWidget {
             actions: [
               defaultTextButton(
                 function: () {
-                  if (_textController.text.isNotEmpty || cubit.postImages.isNotEmpty) {
+                  if (_textController.text.isNotEmpty ||
+                      cubit.postImages.isNotEmpty) {
                     cubit.createPost(
                       text: _textController.text,
                       userId: currentUser.uId,
@@ -107,10 +108,10 @@ class NewPostScreen extends StatelessWidget {
                                 fit: BoxFit.cover,
                               ),
                               IconButton(
-                                icon: const CircleAvatar(
-                                  radius: 12,
-                                  backgroundColor: Colors.red,
-                                  child: Icon(Icons.close, size: 16),
+                                icon: CircleAvatar(
+                                  radius: 20,
+                                  backgroundColor: plantieColor,
+                                  child: Icon(IconBroken.Delete, size: 25),
                                 ),
                                 onPressed: () => cubit.removePostImage(index),
                               ),
@@ -121,8 +122,6 @@ class NewPostScreen extends StatelessWidget {
                     ),
                   ),
                 SizedBox(height: 20),
-
-
                 Row(
                   children: [
                     Expanded(
@@ -131,18 +130,22 @@ class NewPostScreen extends StatelessWidget {
                         child: const Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(IconBroken.Image),
-                            SizedBox(width: 5),
-                            Text('Add Photos'),
+                            Icon(
+                              IconBroken.Image,
+                              size: 35,
+                            ),
+                            SizedBox(width: 8),
+                            Text(
+                              'Add Photos',
+                            ),
                           ],
                         ),
                       ),
                     ),
                   ],
                 ),
-
-
-                SizedBox(height: 20),
+                if (state is PostImagesLoadingState) LinearProgressIndicator(),
+                SizedBox(height: 30),
               ],
             ),
           ),

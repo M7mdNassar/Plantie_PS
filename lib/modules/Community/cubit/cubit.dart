@@ -105,7 +105,19 @@ class CommunityCubit extends Cubit<CommunityStates> {
         final index = _posts.indexWhere((post) => post.postId == postId);
         if (index != -1) {
           _posts[index] = _posts[index].copyWith(likes: likes);
-          emit(CommunityPostsLoadedState(_posts));
+
+          // Emit the correct state based on search mode
+          if (isSearching) {
+            // Update filteredPosts to reflect the like action
+            final updatedFilteredPosts = filteredPosts.map((post) {
+              return post.postId == postId ? _posts[index] : post;
+            }).toList();
+
+            filteredPosts = updatedFilteredPosts;
+            emit(CommunitySearchResultsState(filteredPosts));
+          } else {
+            emit(CommunityPostsLoadedState(_posts));
+          }
         }
       });
     } catch (e) {
@@ -144,10 +156,14 @@ class CommunityCubit extends Cubit<CommunityStates> {
 
   Future<void> pickPostImages() async {
     try {
+      emit(PostImagesLoadingState());
       final pickedFiles = await _picker.pickMultiImage();
       if (pickedFiles.isNotEmpty) {
         _postImages.addAll(pickedFiles.map((file) => File(file.path)).toList());
         emit(PostImagesPickedState(_postImages));
+      }
+      else{
+        emit(PostImagesPickedCancelState());
       }
     } catch (e) {
       emit(CommunityErrorState(e.toString()));
@@ -219,10 +235,20 @@ class CommunityCubit extends Cubit<CommunityStates> {
       // Delete from Firestore
       await _firestore.collection('posts').doc(postId).delete();
 
-      // Remove from local list
+      // Remove from local lists
       _posts.removeWhere((post) => post.postId == postId);
+      filteredPosts.removeWhere((post) => post.postId == postId);
 
-      emit(CommunityPostsLoadedState(_posts));
+      // Emit the correct state based on search mode
+      if (isSearching) {
+        if (filteredPosts.isEmpty) {
+          emit(CommunitySearchResultsState([])); // Emit empty results state
+        } else {
+          emit(CommunitySearchResultsState(filteredPosts));
+        }
+      } else {
+        emit(CommunityPostsLoadedState(_posts));
+      }
     } catch (e) {
       emit(CommunityErrorState("Failed to delete post: ${e.toString()}"));
     }
@@ -240,8 +266,10 @@ class CommunityCubit extends Cubit<CommunityStates> {
     _searchTimer?.cancel();
     _searchTimer = Timer(const Duration(milliseconds: 300), () {
       if (query.isEmpty) {
+        isSearching = false; // Exit search mode
         filteredPosts = _posts;
       } else {
+        isSearching = true; // Enter search mode
         final searchTerms = query.toLowerCase().split(' ');
         filteredPosts = _posts.where((post) {
           final postText = post.text?.toLowerCase() ?? '';
@@ -254,6 +282,7 @@ class CommunityCubit extends Cubit<CommunityStates> {
 
   void clearSearch() {
     searchController.clear();
+    isSearching = false; // Exit search mode
     filteredPosts = _posts;
     emit(CommunityPostsLoadedState(_posts));
   }

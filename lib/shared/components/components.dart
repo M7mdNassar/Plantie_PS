@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
@@ -8,7 +7,6 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
 import 'package:plantie/shared/styles/colors.dart';
 import 'package:readmore/readmore.dart';
-
 import '../../layout/cubit/cubit.dart';
 import '../../models/post/post_model.dart';
 import '../../models/user/user_model.dart';
@@ -314,7 +312,7 @@ Widget buildPostItem(PostModel post, context, index) {
 
   return Card(
     color:
-    AppCubit.get(context).isDark ? HexColor("1C1C1E") : HexColor("FFFFFF"),
+        AppCubit.get(context).isDark ? HexColor("1C1C1E") : HexColor("FFFFFF"),
     clipBehavior: Clip.antiAliasWithSaveLayer,
     elevation: 5.0,
     margin: EdgeInsets.symmetric(
@@ -358,8 +356,8 @@ Widget buildPostItem(PostModel post, context, index) {
                     Text(
                       DateFormat('d MMM h:mm a').format(post.dateTime),
                       style: Theme.of(context).textTheme.bodySmall!.copyWith(
-                        height: 1.4,
-                      ),
+                            height: 1.4,
+                          ),
                     ),
                   ],
                 ),
@@ -380,7 +378,8 @@ Widget buildPostItem(PostModel post, context, index) {
                       context: context,
                       builder: (context) => AlertDialog(
                         title: const Text("Delete Post"),
-                        content: const Text("Are you sure you want to delete this post?"),
+                        content: const Text(
+                            "Are you sure you want to delete this post?"),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context),
@@ -402,16 +401,17 @@ Widget buildPostItem(PostModel post, context, index) {
                   if (post.uId == CurrentUser.user!.uId)
                     const PopupMenuItem<String>(
                       value: 'delete',
-                      child: Text('Delete Post',
-                       style: TextStyle(
-                         fontSize: 18,
-                       ),
-
+                      child: Text(
+                        'Delete Post',
+                        style: TextStyle(
+                          fontSize: 18,
+                        ),
                       ),
                     ),
                   const PopupMenuItem<String>(
                     value: 'share',
-                    child: Text('Share Post',
+                    child: Text(
+                      'Share Post',
                       style: TextStyle(
                         fontSize: 18,
                       ),
@@ -440,17 +440,16 @@ Widget buildPostItem(PostModel post, context, index) {
             padding: const EdgeInsets.only(
               bottom: 10,
             ),
-
-              child:ReadMoreText(
-                post.text!,
-                trimMode: TrimMode.Line,
-                trimLines: 2,
-                colorClickableText: plantieColor,
-                trimCollapsedText: 'Show more',
-                trimExpandedText: 'Show less',
-                style: Theme.of(context).textTheme.titleLarge,
-                // moreStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
-              ),
+            child: ReadMoreText(
+              post.text!,
+              trimMode: TrimMode.Line,
+              trimLines: 2,
+              colorClickableText: plantieColor,
+              trimCollapsedText: 'Show more',
+              trimExpandedText: 'Show less',
+              style: Theme.of(context).textTheme.titleLarge,
+              // moreStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+            ),
           ),
 
           // post images
@@ -576,4 +575,3 @@ Widget buildPostItem(PostModel post, context, index) {
     ),
   );
 }
-

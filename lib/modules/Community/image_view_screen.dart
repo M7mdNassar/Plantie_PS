@@ -1,4 +1,3 @@
-
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
@@ -14,7 +13,8 @@ class ImageViewScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final PageController pageController = PageController(initialPage: initialIndex);
+    final PageController pageController =
+        PageController(initialPage: initialIndex);
 
     return Scaffold(
       appBar: AppBar(
