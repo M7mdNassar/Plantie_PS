@@ -1,0 +1,211 @@
+import 'package:conditional_builder_null_safety/conditional_builder_null_safety.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../shared/components/components.dart';
+import '../../shared/network/local/cache_helper.dart';
+import '../Login/login_screen.dart';
+import '../SplashScreen/lottie_loading_screen.dart';
+import 'cubit/cubit.dart';
+import 'cubit/states.dart';
+
+class RegisterScreen extends StatelessWidget {
+  RegisterScreen({super.key});
+
+  final formKey = GlobalKey<FormState>();
+  final userNameController = TextEditingController();
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => RegisterCubit(),
+      child: BlocConsumer<RegisterCubit, RegisterStates>(
+          listener: (context, state) {
+        if (state is CreateUserSuccessState) {
+          CacheHelper.saveData(
+            key: 'uId',
+            value: state.uId,
+          ).then((value) {
+            if (context.mounted) {
+              navigateAndFinish(context, LottieLoadingScreen());
+            }
+          });
+        }
+
+        if (state is RegisterCanceldState) {
+          showToast(text: state.msg.toString(), state: ToastStates.warning);
+        }
+
+        if (state is RegisterErrorState) {
+          showToast(
+            text: state.error,
+            state: ToastStates.error,
+          );
+        }
+      }, builder: (context, state) {
+        return Scaffold(
+          appBar: AppBar(),
+          body: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+              ),
+              child: Form(
+                key: formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(height: 10),
+                    Text(
+                      "Create Account",
+                      style: Theme.of(context).textTheme.labelLarge,
+                    ),
+                    Text(
+                      "Complete your information to get started!",
+                      style: Theme.of(context).textTheme.labelMedium,
+                    ),
+                    SizedBox(height: 30),
+                    defaultFormField(
+                      controller: userNameController,
+                      label: "Username",
+                      prefixIcon: Icons.person_outlined,
+                      type: TextInputType.text,
+                      validate: (String? value) {
+                        if (value != null && value.isEmpty) {
+                          return 'please enter a user name';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 25),
+                    defaultFormField(
+                      controller: emailController,
+                      label: "Email",
+                      prefixIcon: Icons.email_outlined,
+                      type: TextInputType.emailAddress,
+                      validate: (String? value) {
+                        if (value != null && value.isEmpty) {
+                          return 'please enter a valid email';
+                        }
+                        return null;
+                      },
+                    ),
+                    SizedBox(height: 25),
+                    defaultFormField(
+                      controller: passwordController,
+                      type: TextInputType.visiblePassword,
+                      suffixIcon: RegisterCubit.get(context).suffix,
+                      onSubmit: (value) {},
+                      obscureText: RegisterCubit.get(context).isPassword,
+                      onSuffexPressed: () {
+                        RegisterCubit.get(context).changePasswordVisibility();
+                      },
+                      validate: (String? value) {
+                        if (value != null && value.isEmpty) {
+                          return 'please enter your password';
+                        }
+                        return null;
+                      },
+                      label: 'Password',
+                      prefixIcon: Icons.lock_outline,
+                    ),
+                    SizedBox(height: 35),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 32),
+                      child: ConditionalBuilder(
+                        condition: state is! RegisterLoadingState,
+                        builder: (context) => defaultButton(
+                          function: () {
+                            if (formKey.currentState!.validate()) {
+                              RegisterCubit.get(context).userRegister(
+                                name: userNameController.text,
+                                email: emailController.text,
+                                password: passwordController.text,
+                              );
+                            }
+                          },
+                          text: 'Register',
+                        ),
+                        fallback: (context) =>
+                            Center(child: CircularProgressIndicator()),
+                      ),
+                    ),
+                    SizedBox(height: 25),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Text("Already have an account? "),
+                        GestureDetector(
+                          onTap: () {
+                            navigateTo(context, LoginScreen());
+                          },
+                          child: const Text(
+                            "Login",
+                            style: TextStyle(
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 30),
+                    Row(
+                      children: const [
+                        Expanded(
+                          child: Divider(
+                            thickness: 1,
+                            color: Colors.grey,
+                          ),
+                        ),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 8.0),
+                          child: Text("or register by"),
+                        ),
+                        Expanded(
+                          child: Divider(
+                            thickness: 1,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            RegisterCubit.get(context).signInWithGoogle();
+                          },
+                          child: Image.asset(
+                            'assets/images/google.png',
+                            height: 45,
+                            width: 45,
+                          ),
+                        ),
+                        const SizedBox(width: 30),
+                        GestureDetector(
+                          onTap: () {
+                            RegisterCubit.get(context).signInWithFacebook();
+                          },
+                          child: Image.asset(
+                            'assets/images/facebook.png',
+                            height: 45,
+                            width: 45,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 30),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+      }),
+    );
+  }
+}
