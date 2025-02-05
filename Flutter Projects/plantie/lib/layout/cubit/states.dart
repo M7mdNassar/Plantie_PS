@@ -17,3 +17,5 @@ class GetUserErrorState extends AppStates {
 }
 
 class AppChangeModeState extends AppStates {}
+
+class FloatActionButtonPressed extends AppStates {}

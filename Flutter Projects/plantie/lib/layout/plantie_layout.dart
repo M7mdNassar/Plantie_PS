@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:plantie/shared/styles/icon_broken.dart';
-import '../modules/Detection/Classification/image_picker_handler.dart';
 import '../shared/styles/colors.dart';
 import 'cubit/cubit.dart';
 import 'cubit/states.dart';
@@ -14,7 +13,12 @@ class AppLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AppCubit, AppStates>(
-      listener: (context, state) {},
+      listener: (context, state) {
+        if (state is FloatActionButtonPressed){
+          AppCubit.get(context).changeIndex(2);
+        }
+
+      },
       builder: (context, state) {
         final cubit = AppCubit.get(context);
         return Scaffold(
@@ -31,7 +35,7 @@ class AppLayout extends StatelessWidget {
   Widget _buildCameraFAB(BuildContext context) {
     return FloatingActionButton(
       shape: const CircleBorder(),
-      onPressed: () => ImagePickerHandler.processImage(context),
+      onPressed: () => AppCubit.get(context).startClassification(context),
       backgroundColor: plantieColor,
       child: const Icon(
         size: 34,

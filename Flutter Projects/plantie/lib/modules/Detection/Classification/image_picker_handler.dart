@@ -2,6 +2,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../shared/components/components.dart';
+import '../cubit/cubit.dart';
 import 'model_handler.dart';
 
 class ImagePickerHandler {
@@ -9,6 +10,7 @@ class ImagePickerHandler {
 
   static Future<void> processImage(BuildContext context) async {
     try {
+      final cubit = DetectionCubit.get(context);
 
       final imageSource = await _showImageSourceSelector(context);
       if (imageSource == null) return;
@@ -16,14 +18,30 @@ class ImagePickerHandler {
       final imageFile = await _pickImage(context, imageSource);
       if (imageFile == null) return;
 
-      await _handleImageClassification(context, imageFile);
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => const _LoadingOverlay(),
+      );
+
+      final result = await ModelHandler.classifyImage(imageFile);
+      Navigator.pop(context);
+
+      if (result != null) {
+        // Add to both database and local list
+        await cubit.addDetectionToHistory(imageFile, result);
+        cubit.setDetectionResult(imageFile, result);
+      }
     } catch (e) {
+      Navigator.pop(context); // Ensure loading dialog is dismissed
       showToast(
         text: 'Error: ${e.toString()}',
         state: ToastStates.error,
       );
     }
   }
+
+
 
   static Future<ImageSource?> _showImageSourceSelector(BuildContext context) {
     return showModalBottomSheet<ImageSource>(
@@ -54,41 +72,6 @@ class ImagePickerHandler {
       return File(pickedFile.path);
     }
     return null;
-  }
-
-
-
-  static Future<void> _handleImageClassification(
-      BuildContext context, File imageFile) async {
-    showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => const _LoadingOverlay(),
-    );
-
-    try {
-      final result = await ModelHandler.classifyImage(imageFile);
-
-      Navigator.pop(context);
-
-      if (result != null) {
-        showToast(
-          text: 'Detected: $result',
-          state: ToastStates.success,
-        );
-      } else {
-        showToast(
-          text: 'Classification failed',
-          state: ToastStates.error,
-        );
-      }
-    } catch (e) {
-      Navigator.pop(context);
-      showToast(
-        text: 'Error: ${e.toString()}',
-        state: ToastStates.error,
-      );
-    }
   }
 
 

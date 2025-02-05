@@ -7,11 +7,14 @@ import 'package:plantie/modules/Profile/cubit/cubit.dart';
 import 'package:plantie/shared/bloc_observer.dart';
 import 'package:plantie/shared/components/constants.dart';
 import 'package:plantie/shared/network/local/cache_helper.dart';
+import 'package:plantie/shared/network/local/history_db.dart';
 import 'package:plantie/shared/styles/themes.dart';
 import 'layout/cubit/cubit.dart';
 import 'layout/cubit/states.dart';
 import 'models/user/user_model.dart';
 import 'modules/Detection/Classification/model_handler.dart';
+import 'modules/Detection/cubit/cubit.dart';
+import 'modules/Home/cubit/cubit.dart';
 import 'modules/OnBoarding/on_boarding_screen.dart';
 import 'modules/SplashScreen/lottie_loading_screen.dart';
 import 'modules/WelcomePlantie/welcome_screen.dart';
@@ -21,6 +24,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await ModelHandler.initModel();
+  await HistoryDBHelper().database;
 
   Bloc.observer = MyBlocObserver();
   await CacheHelper.init();
@@ -74,7 +78,13 @@ class MyApp extends StatelessWidget {
           create: (context) => AppCubit()..changeAppMode(fromShared: isDark),
         ),
         BlocProvider(
+          create: (BuildContext context) => HomeCubit(),
+        ),
+        BlocProvider(
           create: (BuildContext context) => ProfileCubit(),
+        ),
+        BlocProvider(
+          create: (BuildContext context) => DetectionCubit(),
         ),
         BlocProvider(
           create: (BuildContext context) => CommunityCubit(),

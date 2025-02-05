@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:plantie/layout/cubit/states.dart';
 import '../../modules/Community/community_screen.dart';
+import '../../modules/Detection/Classification/image_picker_handler.dart';
 import '../../modules/Detection/detection_screen.dart';
 import '../../modules/Home/home_screen.dart';
 import '../../modules/Profile/profile_screen.dart';
@@ -54,6 +55,12 @@ class AppCubit extends Cubit<AppStates>
         emit(AppChangeModeState());
       });
     }
+  }
+
+
+  void startClassification(context){
+    emit(FloatActionButtonPressed());
+    ImagePickerHandler.processImage(context);
   }
 
 
