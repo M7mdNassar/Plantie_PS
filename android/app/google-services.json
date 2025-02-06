@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "404741528477",
+    "firebase_url": "https://plantie-8fb24-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "plantie-8fb24",
+    "storage_bucket": "plantie-8fb24.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:404741528477:android:dbbfe0fa3d4c6b19662d74",
+        "android_client_info": {
+          "package_name": "com.team.plantie.plantie"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "404741528477-6cpsvo31hlec9frnq6o21ab8335mmip5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_9z9HQHPhMK2SSca4jGfv7y8GzFQTZ-4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "404741528477-6cpsvo31hlec9frnq6o21ab8335mmip5.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "404741528477-5akc94bomp2eqk4e8tb8lrmppcn022pb.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.plantie.team.ps.plantieApp"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
