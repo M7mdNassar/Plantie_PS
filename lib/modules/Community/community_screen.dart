@@ -91,6 +91,11 @@ class CommunityScreen extends StatelessWidget {
                         itemCount:
                             cubit.posts.length + (cubit.hasMore() ? 1 : 0),
                       ),
+
+                      // empty space in bottom
+                      SizedBox(
+                        height: 85,
+                      ),
                     ],
                   ),
                 ),

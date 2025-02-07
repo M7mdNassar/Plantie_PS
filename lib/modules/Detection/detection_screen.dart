@@ -63,14 +63,12 @@ class DetectionScreen extends StatelessWidget {
     );
   }
 
-  // Add these missing UI components
   Widget _buildImagePreview(File file) {
     return ClipRRect(
       borderRadius: BorderRadius.circular(6),
       child: Image.file(
         file,
-        width: 60,
-        height: 60,
+        // height: 200,
         fit: BoxFit.cover,
       ),
     );
