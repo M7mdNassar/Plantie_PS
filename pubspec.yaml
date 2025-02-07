@@ -57,6 +57,9 @@ dependencies:
   permission_handler: ^11.3.1
   path_provider: ^2.1.5
   path: ^1.8.3
+  geolocator: ^11.0.0
+  url_launcher: ^6.3.0
+  geocoding: ^3.0.0
 
   #fierbase
   firebase_core: ^3.10.0
@@ -90,11 +93,12 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/model.tflite
-    - assets/labels.txt
+    - assets/MLModel/model.tflite
+    - assets/MLModel/labels.txt
     - assets/images/
     - assets/images/onBoardingImages/
     - assets/lottie/
+    - assets/
 
   fonts:
     - family: jannah

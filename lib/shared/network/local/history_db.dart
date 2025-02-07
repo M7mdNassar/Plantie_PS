@@ -3,13 +3,13 @@ import 'package:path/path.dart';
 
 class HistoryDBHelper {
   static final HistoryDBHelper _instance = HistoryDBHelper._internal();
+
   factory HistoryDBHelper() => _instance;
   static Database? _database;
 
   final String tableName = 'history';
+  final String columnDiseaseKey = 'diseaseKey';
   final String columnId = 'id';
-  final String columnTitle = 'title';
-  final String columnTreatment = 'treatment';
   final String columnImagePath = 'imagePath';
   final String columnDate = 'date';
 
@@ -22,20 +22,32 @@ class HistoryDBHelper {
   }
 
   Future<Database> _initDatabase() async {
-    final path = join(await getDatabasesPath(), 'plantie_history.db');
+    final databasePath = await getDatabasesPath();
+    final path = join(databasePath, 'history.db');
     return await openDatabase(
       path,
-      version: 1,
+      version: 2, // Increment version
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE $tableName (
             $columnId INTEGER PRIMARY KEY AUTOINCREMENT,
-            $columnTitle TEXT,
-            $columnTreatment TEXT,
+            $columnDiseaseKey TEXT,
             $columnImagePath TEXT,
             $columnDate TEXT
           )
         ''');
+      },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          await db.execute('''
+            ALTER TABLE $tableName 
+            RENAME COLUMN title TO $columnDiseaseKey
+          ''');
+          await db.execute('''
+            ALTER TABLE $tableName 
+            DROP COLUMN treatment
+          ''');
+        }
       },
     );
   }
@@ -50,7 +62,7 @@ class HistoryDBHelper {
     return await db.query(
       tableName,
       orderBy: '$columnId DESC',
-      columns: [columnId, columnTitle, columnTreatment, columnImagePath, columnDate],
+      columns: [columnId, columnDiseaseKey, columnImagePath, columnDate],
     );
   }
 }

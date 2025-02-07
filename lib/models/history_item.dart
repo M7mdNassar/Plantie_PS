@@ -1,29 +1,31 @@
+import 'DiseaseInfo.dart';
+
 class HistoryItem {
   final int id;
-  final String title;
-  final String treatment;
+  final String diseaseKey;
   final String imagePath;
   final DateTime date;
 
   HistoryItem({
     required this.id,
-    required this.title,
-    required this.treatment,
+    required this.diseaseKey,
     required this.imagePath,
     required this.date,
   });
 
+  String get title => DiseaseInfo.data[diseaseKey]?.name ?? diseaseKey;
+  String get treatment => DiseaseInfo.data[diseaseKey]?.treatment ?? '';
+  String get tips => DiseaseInfo.data[diseaseKey]?.tips ?? '';
+
   HistoryItem copyWith({
     int? id,
-    String? title,
-    String? treatment,
+    String? diseaseKey,
     String? imagePath,
     DateTime? date,
   }) {
     return HistoryItem(
       id: id ?? this.id,
-      title: title ?? this.title,
-      treatment: treatment ?? this.treatment,
+      diseaseKey: diseaseKey ?? this.diseaseKey,
       imagePath: imagePath ?? this.imagePath,
       date: date ?? this.date,
     );

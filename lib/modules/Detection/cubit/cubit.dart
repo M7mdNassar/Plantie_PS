@@ -1,8 +1,11 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:plantie/modules/Detection/cubit/states.dart';
+import '../../../models/DiseaseInfo.dart';
 import '../../../models/history_item.dart';
 import '../../../shared/network/local/history_db.dart';
+import '../../../shared/network/local/image_storage_helper.dart';
 
 class DetectionCubit extends Cubit<DetectionStates> {
   DetectionCubit() : super(DetectionInitialState()) {
@@ -36,13 +39,21 @@ class DetectionCubit extends Cubit<DetectionStates> {
       final dbHistory = await HistoryDBHelper().getHistory();
       history = dbHistory
           .map((item) => HistoryItem(
-                id: item['id'],
-                title: item['title'],
-                treatment: item['treatment'],
-                imagePath: item['imagePath'],
-                date: DateTime.parse(item['date']),
-              ))
+        id: item['id'],
+        diseaseKey: item['diseaseKey'],
+        imagePath: item['imagePath'],
+        date: DateTime.parse(item['date']),
+      ))
           .toList();
+
+      // Verify images exist
+      for (final item in history) {
+        final file = File(item.imagePath);
+        if (!await file.exists()) {
+          log('Missing image for history item ${item.id} at ${item.imagePath}');
+        }
+      }
+
       emit(HistoryLoadedState());
     } catch (e) {
       emit(HistoryErrorState(e.toString()));
@@ -53,24 +64,24 @@ class DetectionCubit extends Cubit<DetectionStates> {
     try {
       final newItem = HistoryItem(
         id: 0,
-        // Temporary ID, will be replaced by database ID
-        title: result,
-        treatment: 'none',
+        diseaseKey: result, // Store disease key instead of title
         imagePath: image.path,
         date: DateTime.now(),
       );
 
-      // Insert to database and get real ID
+      // Insert to database
       final id = await HistoryDBHelper().insertHistory({
-        'title': newItem.title,
-        'treatment': newItem.treatment,
-        'imagePath': newItem.imagePath,
-        'date': newItem.date.toIso8601String(),
+        'diseaseKey': result, // Changed from title
+        'imagePath': image.path,
+        'date': DateTime.now().toIso8601String(),
       });
 
-      // Update local list with database-generated ID
       history.insert(0, newItem.copyWith(id: id));
       emit(HistoryUpdatedState());
+
+      // Set detection result using DiseaseInfo
+      final diseaseName = DiseaseInfo.data[result]?.name ?? result;
+      setDetectionResult(image, diseaseName);
     } catch (e) {
       emit(HistoryErrorState('Failed to save detection: $e'));
     }
@@ -86,11 +97,8 @@ class DetectionCubit extends Cubit<DetectionStates> {
         whereArgs: [id],
       );
 
-      // Delete image file
-      final file = File(imagePath);
-      if (await file.exists()) {
-        await file.delete();
-      }
+      // Delete image file from permanent storage
+      await ImageStorageHelper.deleteImageFile(imagePath);
 
       // Update local list
       history.removeWhere((item) => item.id == id);

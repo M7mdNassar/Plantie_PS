@@ -14,7 +14,7 @@ class ModelHandler {
     if (_isInitialized) return;
 
     try {
-      _interpreter = await Interpreter.fromAsset('assets/model.tflite',
+      _interpreter = await Interpreter.fromAsset('assets/MLModel/model.tflite',
           options: InterpreterOptions()..threads = 4);
 
       // Verify input tensor shape
@@ -25,7 +25,7 @@ class ModelHandler {
         throw Exception('Invalid input tensor shape');
       }
 
-      final labelData = await rootBundle.loadString('assets/labels.txt');
+      final labelData = await rootBundle.loadString('assets/MLModel/labels.txt');
       _labels = labelData.split('\n');
       _isInitialized = true;
     } catch (e) {

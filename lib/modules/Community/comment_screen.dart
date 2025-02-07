@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:plantie/models/post/post_model.dart';
-import 'package:plantie/shared/components/components.dart';
 import '../../models/user/user_model.dart';
 import '../../shared/styles/colors.dart';
 import '../../shared/styles/icon_broken.dart';

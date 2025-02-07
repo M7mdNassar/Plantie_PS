@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -63,13 +64,13 @@ class DetectionScreen extends StatelessWidget {
   }
 
   // Add these missing UI components
-  Widget _buildImagePreview(File image) {
+  Widget _buildImagePreview(File file) {
     return ClipRRect(
-      borderRadius: BorderRadius.circular(12),
+      borderRadius: BorderRadius.circular(6),
       child: Image.file(
-        image,
-        width: double.infinity,
-        height: 220,
+        file,
+        width: 60,
+        height: 60,
         fit: BoxFit.cover,
       ),
     );
@@ -200,26 +201,15 @@ class DetectionScreen extends StatelessWidget {
         leading: FutureBuilder<File>(
           future: _checkFileExists(item.imagePath),
           builder: (context, snapshot) {
-            if (snapshot.hasData && snapshot.data!.existsSync()) {
-              return ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: Image.file(
-                  snapshot.data!,
-                  width: 60,
-                  height: 60,
-                  fit: BoxFit.cover,
-                ),
-              );
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return _buildImagePlaceholder();
             }
-            return Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: Colors.grey[200],
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: const Icon(Icons.photo, color: Colors.grey),
-            );
+
+            if (snapshot.hasError || !snapshot.hasData || !snapshot.data!.existsSync()) {
+              log('Missing image at path: ${item.imagePath}');
+              return _buildImagePlaceholder();
+            }
+            return _buildImagePreview(snapshot.data!);
           },
         ),
         title: Text(
@@ -232,6 +222,19 @@ class DetectionScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _buildImagePlaceholder() {
+    return Container(
+      width: 60,
+      height: 60,
+      decoration: BoxDecoration(
+        color: Colors.grey[200],
+        borderRadius: BorderRadius.circular(6),
+      ),
+      child: const Icon(Icons.photo, color: Colors.grey),
+    );
+  }
+
 
   Future<File> _checkFileExists(String path) async {
     final file = File(path);

@@ -1,13 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../models/DiseaseInfo.dart';
 import '../../../shared/components/components.dart';
+import '../../../shared/network/local/image_storage_helper.dart';
 import '../cubit/cubit.dart';
 import 'model_handler.dart';
 
 class ImagePickerHandler {
-
-
   static Future<void> processImage(BuildContext context) async {
     try {
       final cubit = DetectionCubit.get(context);
@@ -15,33 +15,41 @@ class ImagePickerHandler {
       final imageSource = await _showImageSourceSelector(context);
       if (imageSource == null) return;
 
-      final imageFile = await _pickImage(context, imageSource);
-      if (imageFile == null) return;
+      // Get original image file
+      final originalImage = await _pickImage(context, imageSource);
+      if (originalImage == null) return;
 
+      // Show loading
       showDialog(
         context: context,
         barrierDismissible: false,
         builder: (context) => const _LoadingOverlay(),
       );
 
-      final result = await ModelHandler.classifyImage(imageFile);
+      // Save to permanent storage
+      final permanentImage =
+          await ImageStorageHelper.saveImagePermanently(originalImage);
+
+      // Process image
+      final result = await ModelHandler.classifyImage(permanentImage);
       Navigator.pop(context);
 
       if (result != null) {
-        // Add to both database and local list
-        await cubit.addDetectionToHistory(imageFile, result);
-        cubit.setDetectionResult(imageFile, result);
+        // Get disease info
+        final diseaseInfo = DiseaseInfo.data[result] ??
+            const DiseaseData("غير معروف", "", "لم يتم التعرف على المرض");
+
+        // Add to history with disease key
+        await cubit.addDetectionToHistory(permanentImage, result);
+
+        // Show result using DiseaseInfo
+        cubit.setDetectionResult(permanentImage, diseaseInfo.name);
       }
     } catch (e) {
-      Navigator.pop(context); // Ensure loading dialog is dismissed
-      showToast(
-        text: 'Error: ${e.toString()}',
-        state: ToastStates.error,
-      );
+      Navigator.pop(context);
+      showToast(text: 'Error: ${e.toString()}', state: ToastStates.error);
     }
   }
-
-
 
   static Future<ImageSource?> _showImageSourceSelector(BuildContext context) {
     return showModalBottomSheet<ImageSource>(
@@ -73,8 +81,6 @@ class ImagePickerHandler {
     }
     return null;
   }
-
-
 }
 
 class _ImageSourceSelector extends StatelessWidget {
@@ -99,7 +105,6 @@ class _ImageSourceSelector extends StatelessWidget {
     );
   }
 }
-
 
 class _LoadingOverlay extends StatelessWidget {
   const _LoadingOverlay();
