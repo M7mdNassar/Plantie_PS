@@ -78,7 +78,7 @@ class MyApp extends StatelessWidget {
           create: (context) => AppCubit()..changeAppMode(fromShared: isDark),
         ),
         BlocProvider(
-          create: (BuildContext context) => HomeCubit(),
+          create: (BuildContext context) => HomeCubit()..loadPlants(),
         ),
         BlocProvider(
           create: (BuildContext context) => ProfileCubit(),
