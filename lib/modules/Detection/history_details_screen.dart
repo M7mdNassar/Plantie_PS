@@ -8,6 +8,7 @@ import '../../models/plant_store.dart';
 import '../../models/store_service.dart';
 import '../../shared/components/components.dart';
 import '../../shared/network/local/location_service.dart';
+import '../../shared/styles/colors.dart';
 
 class HistoryDetailScreen extends StatelessWidget {
   final HistoryItem item;
@@ -39,6 +40,9 @@ class HistoryDetailScreen extends StatelessWidget {
             _buildDetailItem('العلاج:', item.treatment),
             _buildDetailItem('النصائح:', item.tips),
             _buildDetailItem('التاريخ:', _formatDate(item.date)),
+            SizedBox(
+              height: 10,
+            ),
             _buildMapButton(context),
           ],
         ),
@@ -75,17 +79,30 @@ class HistoryDetailScreen extends StatelessWidget {
   }
 
   Widget _buildMapButton(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      child: ElevatedButton.icon(
-        icon: const Icon(Icons.map),
-        label: const Text('أقرب مشتل نباتات'),
-        style: ElevatedButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 15),
+
+    return Container(
+        width: double.infinity,
+        height: 50.0,
+        decoration: BoxDecoration(
+          color: plantieColor, // Light green color
+          borderRadius: BorderRadius.circular(12.0),
         ),
-        onPressed: () => _openNearestStore(context),
-      ),
+
+       child:  TextButton(
+          onPressed: () {
+            _openNearestStore(context);
+          },
+          child: Text(
+            'أقرب مشتل نباتات',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20.0,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        )
     );
+
   }
 
   Future<void> _openNearestStore(BuildContext context) async {

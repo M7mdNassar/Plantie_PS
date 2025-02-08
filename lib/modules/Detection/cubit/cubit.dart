@@ -2,7 +2,7 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:plantie/modules/Detection/cubit/states.dart';
-import '../../../models/DiseaseInfo.dart';
+import '../../../models/disease_info.dart';
 import '../../../models/history_item.dart';
 import '../../../shared/network/local/history_db.dart';
 import '../../../shared/network/local/image_storage_helper.dart';
@@ -16,11 +16,14 @@ class DetectionCubit extends Cubit<DetectionStates> {
 
   File? _currentImage;
   String? _currentResult;
+  String? _orginalResult;
   List<HistoryItem> history = [];
 
   File? get currentImage => _currentImage;
 
   String? get currentResult => _currentResult;
+  String? get orginalResult => _orginalResult;
+
 
   void setDetectionResult(File image, String result) {
     _currentImage = image;
@@ -79,6 +82,7 @@ class DetectionCubit extends Cubit<DetectionStates> {
       history.insert(0, newItem.copyWith(id: id));
       emit(HistoryUpdatedState());
 
+      _orginalResult = result;
       // Set detection result using DiseaseInfo
       final diseaseName = DiseaseInfo.data[result]?.name ?? result;
       setDetectionResult(image, diseaseName);

@@ -1,4 +1,4 @@
-import 'DiseaseInfo.dart';
+import 'disease_info.dart';
 
 class HistoryItem {
   final int id;

@@ -75,7 +75,7 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(
-          create: (BuildContext context) => HomeCubit()..loadPlants(),
+          create: (BuildContext context) => HomeCubit()..getWeatherData()..loadPlants(),
         ),
         BlocProvider(
           create: (context) => AppCubit()..changeAppMode(fromShared: isDark),

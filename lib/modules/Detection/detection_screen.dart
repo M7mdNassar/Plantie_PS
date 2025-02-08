@@ -2,11 +2,13 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:plantie/models/disease_info.dart';
 import 'package:plantie/modules/Detection/cubit/cubit.dart';
 import 'package:plantie/modules/Detection/cubit/states.dart';
 import '../../models/history_item.dart';
 import '../../shared/components/components.dart';
 import 'history_details_screen.dart';
+import 'lottie_arrow.dart';
 
 class DetectionScreen extends StatelessWidget {
   const DetectionScreen({super.key});
@@ -37,28 +39,33 @@ class DetectionScreen extends StatelessWidget {
       return const Center(child: CircularProgressIndicator());
     }
 
-    if (cubit.currentImage == null) {
-      return SingleChildScrollView(
+    return Stack(
+      children: [
+        // Main scroll content
+        _buildScrollContent(context, cubit),
+
+        // Overlay elements
+        if (cubit.currentImage == null) const LottieArrow(),
+      ],
+    );
+  }
+
+  Widget _buildScrollContent(BuildContext context, DetectionCubit cubit) {
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 20),
+            if (cubit.currentImage != null) ...[
+              _buildImagePreview(cubit.currentImage!),
+              const SizedBox(height: 24),
+              _buildDetectionResult(cubit.orginalResult!),
+              const SizedBox(height: 32),
+            ],
             _buildHistorySection(context),
           ],
         ),
-      );
-    }
-
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          _buildImagePreview(cubit.currentImage!),
-          const SizedBox(height: 24),
-          _buildDetectionResult(cubit.currentResult!),
-          const SizedBox(height: 32),
-          _buildHistorySection(context),
-        ],
       ),
     );
   }
@@ -75,6 +82,8 @@ class DetectionScreen extends StatelessWidget {
   }
 
   Widget _buildDetectionResult(String result) {
+    final Map<String, DiseaseData> data = DiseaseInfo.data;
+
     return Card(
       elevation: 4,
       shape: RoundedRectangleBorder(
@@ -108,8 +117,8 @@ class DetectionScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            const Text(
-              'None',
+            Text(
+              data[result]!.treatment,
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
           ],
@@ -142,12 +151,39 @@ class DetectionScreen extends StatelessWidget {
     final cubit = DetectionCubit.get(context);
 
     if (cubit.history.isEmpty) {
-      return const Padding(
-        padding: EdgeInsets.symmetric(vertical: 16),
-        child: Text('No history available'),
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 40),
+        child: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.history, size: 80, color: Colors.grey),
+              const SizedBox(height: 24),
+              Text(
+                'No Detection History',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[600],
+                ),
+              ),
+              const SizedBox(height: 12),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: Text(
+                  'Your plant health scans will appear here',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.grey[500],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       );
     }
-
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -203,7 +239,9 @@ class DetectionScreen extends StatelessWidget {
               return _buildImagePlaceholder();
             }
 
-            if (snapshot.hasError || !snapshot.hasData || !snapshot.data!.existsSync()) {
+            if (snapshot.hasError ||
+                !snapshot.hasData ||
+                !snapshot.data!.existsSync()) {
               log('Missing image at path: ${item.imagePath}');
               return _buildImagePlaceholder();
             }
@@ -232,7 +270,6 @@ class DetectionScreen extends StatelessWidget {
       child: const Icon(Icons.photo, color: Colors.grey),
     );
   }
-
 
   Future<File> _checkFileExists(String path) async {
     final file = File(path);

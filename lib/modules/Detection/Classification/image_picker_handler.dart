@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../../models/DiseaseInfo.dart';
+import '../../../models/disease_info.dart';
 import '../../../shared/components/components.dart';
 import '../../../shared/network/local/image_storage_helper.dart';
 import '../cubit/cubit.dart';
