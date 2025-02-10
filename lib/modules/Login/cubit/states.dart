@@ -23,3 +23,13 @@ class LoginCanceldState extends LoginStates {
 }
 
 class ChangePasswordVisibilityState extends LoginStates {}
+
+class ResetPasswordLoadingState extends LoginStates {}
+
+class ResetPasswordSuccessState extends LoginStates {}
+
+class ResetPasswordErrorState extends LoginStates {
+  final String error;
+
+  ResetPasswordErrorState(this.error);
+}

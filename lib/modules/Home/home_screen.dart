@@ -37,7 +37,7 @@ class HomeScreen extends StatelessWidget {
                   SizedBox(
                     height: 8,
                   ),
-                  if (state is WeatherLoadedState)
+                  if (cubit.weatherData != null)
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -145,7 +145,7 @@ class HomeScreen extends StatelessWidget {
           Text(
             cubit.plantEmojis[index],
             style: TextStyle(
-              fontSize: 65,
+              fontSize: 60,
             ),
           ),
           const SizedBox(height: 5),
@@ -263,7 +263,7 @@ class HomeScreen extends StatelessWidget {
             ],
           ),
           SizedBox(
-            height: 300,
+            height: 320,
             child: TabBarView(
               children: [
                 _buildTabContent(Icons.description, plant.description),

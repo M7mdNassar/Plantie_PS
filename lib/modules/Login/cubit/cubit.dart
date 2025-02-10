@@ -142,4 +142,17 @@ class LoginCubit extends Cubit<LoginStates> {
 
     emit(ChangePasswordVisibilityState());
   }
+
+
+  Future<void> resetPassword({required String email}) async {
+    print(email);
+    emit(ResetPasswordLoadingState());
+    try {
+      await FirebaseAuth.instance.sendPasswordResetEmail(email: email);
+      emit(ResetPasswordSuccessState());
+    } catch (error) {
+      print(error);
+      emit(ResetPasswordErrorState(error.toString()));
+    }
+  }
 }

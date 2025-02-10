@@ -91,6 +91,7 @@ class HomeCubit extends Cubit<HomeStates> {
       );
 
       weatherData = WeatherData.fromJson(response.data);
+
       emit(WeatherLoadedState());
     } catch (e) {
       emit(WeatherFetchErrorState(e.toString()));

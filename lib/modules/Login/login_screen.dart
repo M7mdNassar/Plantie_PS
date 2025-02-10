@@ -7,6 +7,7 @@ import '../Register/register_screen.dart';
 import '../SplashScreen/lottie_loading_screen.dart';
 import 'cubit/cubit.dart';
 import 'cubit/states.dart';
+import '../../generated/l10n.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
@@ -14,6 +15,7 @@ class LoginScreen extends StatelessWidget {
   final formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final sendEmailController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +45,20 @@ class LoginScreen extends StatelessWidget {
           if (state is LoginErrorState) {
             showToast(text: state.error.toString(), state: ToastStates.error);
           }
+
+          if (state is ResetPasswordSuccessState) {
+            showToast(
+                text: S.of(context).sent_email_to_update_paassword +sendEmailController.text,
+                state: ToastStates.success
+            );
+          }
+
+          if (state is ResetPasswordErrorState) {
+            showToast(
+                text: state.error.toString(),
+                state: ToastStates.error
+            );
+          }
         },
         builder: (context, state) {
           return Scaffold(
@@ -61,11 +77,11 @@ class LoginScreen extends StatelessWidget {
 
                       // Welcome Text
                       Text(
-                        "Welcome",
+                        S.of(context).welcome,
                         style: Theme.of(context).textTheme.labelLarge,
                       ),
                       Text(
-                        "Hello, Welcome back to Plantie!",
+                        S.of(context).welcome_back,
                         style: Theme.of(context).textTheme.labelMedium,
                       ),
                       const SizedBox(height: 30),
@@ -76,11 +92,11 @@ class LoginScreen extends StatelessWidget {
                         type: TextInputType.emailAddress,
                         validate: (String? value) {
                           if (value != null && value.isEmpty) {
-                            return 'please enter your email address';
+                            return S.of(context).enter_email;
                           }
                           return null;
                         },
-                        label: "Email Address",
+                        label: S.of(context).email_address,
                         prefixIcon: Icons.email_outlined,
                       ),
                       const SizedBox(height: 20),
@@ -104,22 +120,54 @@ class LoginScreen extends StatelessWidget {
                         },
                         validate: (String? value) {
                           if (value != null && value.isEmpty) {
-                            return 'password is too short';
+                            return S.of(context).enter_password;
                           }
                           return null;
                         },
-                        label: "Password",
+                        label: S.of(context).password,
                         prefixIcon: Icons.lock_outline,
                       ),
                       const SizedBox(height: 15),
 
-                      // Forgot Password in Center
+                      // Forgot password action
                       Center(
                         child: defaultTextButton(
                           function: () {
-                            // Forgot password action
+                            // Capture the outer context before showing dialog
+                            final cubit = LoginCubit.get(context);
+                            final s = S.of(context);
+
+                            showDialog(
+                              context: context,
+                              builder: (dialogContext) => AlertDialog(
+                                title: Text(s.reset_password),
+                                content: TextField(
+                                  controller: sendEmailController,
+                                  decoration: InputDecoration(
+                                    labelText: s.email_address,
+                                    hintText: s.enter_email,
+                                  ),
+                                ),
+                                actions: [
+                                  TextButton(
+                                    onPressed: () => Navigator.pop(dialogContext),
+                                    child: Text(s.cancel),
+                                  ),
+                                  TextButton(
+                                    onPressed: () {
+                                      // Use the captured cubit instance
+                                      cubit.resetPassword(
+                                        email: sendEmailController.text,
+                                      );
+                                      Navigator.pop(dialogContext);
+                                    },
+                                    child: Text(s.submit),
+                                  ),
+                                ],
+                              ),
+                            );
                           },
-                          text: "Forget Password?",
+                          text: S.of(context).forget_password,
                           isUperCase: false,
                           style: const TextStyle(
                             color: Colors.blue,
@@ -143,7 +191,7 @@ class LoginScreen extends StatelessWidget {
                               );
                             }
                           },
-                          text: 'login',
+                          text: S.of(context).login,
                         ),
                         fallback: (context) =>
                             Center(child: CircularProgressIndicator()),
@@ -154,13 +202,13 @@ class LoginScreen extends StatelessWidget {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const Text("create account? "),
+                           Text(S.of(context).create_account),
                           GestureDetector(
                             onTap: () {
                               navigateTo(context, RegisterScreen());
                             },
-                            child: const Text(
-                              "Register",
+                            child: Text(
+                              S.of(context).register,
                               style: TextStyle(
                                 color: Colors.blue,
                               ),
@@ -172,7 +220,7 @@ class LoginScreen extends StatelessWidget {
 
                       // Divider with "Or login by"
                       Row(
-                        children: const [
+                        children:  [
                           Expanded(
                             child: Divider(
                               thickness: 1,
@@ -181,7 +229,7 @@ class LoginScreen extends StatelessWidget {
                           ),
                           Padding(
                             padding: EdgeInsets.symmetric(horizontal: 8.0),
-                            child: Text("or login by"),
+                            child: Text(S.of(context).or_login_by),
                           ),
                           Expanded(
                             child: Divider(

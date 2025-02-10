@@ -7,6 +7,8 @@ import '../Login/login_screen.dart';
 import '../SplashScreen/lottie_loading_screen.dart';
 import 'cubit/cubit.dart';
 import 'cubit/states.dart';
+import '../../generated/l10n.dart';
+
 
 class RegisterScreen extends StatelessWidget {
   RegisterScreen({super.key});
@@ -58,22 +60,22 @@ class RegisterScreen extends StatelessWidget {
                   children: [
                     SizedBox(height: 10),
                     Text(
-                      "Create Account",
+                      S.of(context).creat_account2,
                       style: Theme.of(context).textTheme.labelLarge,
                     ),
                     Text(
-                      "Complete your information to get started!",
+                        S.of(context).create_account3,
                       style: Theme.of(context).textTheme.labelMedium,
                     ),
                     SizedBox(height: 30),
                     defaultFormField(
                       controller: userNameController,
-                      label: "Username",
+                      label: S.of(context).name,
                       prefixIcon: Icons.person_outlined,
                       type: TextInputType.text,
                       validate: (String? value) {
                         if (value != null && value.isEmpty) {
-                          return 'please enter a user name';
+                          return S.of(context).enter_name;
                         }
                         return null;
                       },
@@ -81,12 +83,12 @@ class RegisterScreen extends StatelessWidget {
                     SizedBox(height: 25),
                     defaultFormField(
                       controller: emailController,
-                      label: "Email",
+                      label: S.of(context).email_address,
                       prefixIcon: Icons.email_outlined,
                       type: TextInputType.emailAddress,
                       validate: (String? value) {
                         if (value != null && value.isEmpty) {
-                          return 'please enter a valid email';
+                          return ;
                         }
                         return null;
                       },
@@ -103,11 +105,11 @@ class RegisterScreen extends StatelessWidget {
                       },
                       validate: (String? value) {
                         if (value != null && value.isEmpty) {
-                          return 'please enter your password';
+                          return S.of(context).enter_password;
                         }
                         return null;
                       },
-                      label: 'Password',
+                      label: S.of(context).password,
                       prefixIcon: Icons.lock_outline,
                     ),
                     SizedBox(height: 35),
@@ -125,7 +127,7 @@ class RegisterScreen extends StatelessWidget {
                               );
                             }
                           },
-                          text: 'Register',
+                          text: S.of(context).register,
                         ),
                         fallback: (context) =>
                             Center(child: CircularProgressIndicator()),
@@ -135,13 +137,13 @@ class RegisterScreen extends StatelessWidget {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Text("Already have an account? "),
+                         Text(S.of(context).have_account),
                         GestureDetector(
                           onTap: () {
                             navigateTo(context, LoginScreen());
                           },
-                          child: const Text(
-                            "Login",
+                          child: Text(
+                            S.of(context).login,
                             style: TextStyle(
                               color: Colors.blue,
                               fontWeight: FontWeight.bold,
@@ -152,7 +154,7 @@ class RegisterScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 30),
                     Row(
-                      children: const [
+                      children:  [
                         Expanded(
                           child: Divider(
                             thickness: 1,
@@ -161,7 +163,7 @@ class RegisterScreen extends StatelessWidget {
                         ),
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 8.0),
-                          child: Text("or register by"),
+                          child: Text(S.of(context).or_register_by),
                         ),
                         Expanded(
                           child: Divider(

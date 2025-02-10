@@ -24,6 +24,9 @@ ThemeData lightTheme = ThemeData(
       color: plantieColor,
     ),
   ),
+  bottomNavigationBarTheme: BottomNavigationBarThemeData(
+    backgroundColor: Colors.white,
+  ),
   textTheme: TextTheme(
     bodyLarge: TextStyle(
       fontSize: 35.0,
@@ -121,6 +124,9 @@ ThemeData darkTheme = ThemeData(
     iconTheme: IconThemeData(
       color: plantieColor,
     ),
+  ),
+  bottomNavigationBarTheme: BottomNavigationBarThemeData(
+    backgroundColor: HexColor('333739'),
   ),
   textTheme: TextTheme(
     bodyLarge: TextStyle(

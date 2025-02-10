@@ -9,7 +9,7 @@ class LottieArrow extends StatefulWidget {
 }
 
 class _LottieArrow extends State<LottieArrow> {
-  bool _visible = true;
+  final bool _visible = true;
 
   @override
   Widget build(BuildContext context) {

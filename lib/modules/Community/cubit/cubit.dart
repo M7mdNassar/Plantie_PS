@@ -22,7 +22,7 @@ class CommunityCubit extends Cubit<CommunityStates> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseStorage _storage = FirebaseStorage.instance;
   final ImagePicker _picker = ImagePicker();
-  List<File> _postImages = [];
+  final List<File> _postImages = [];
   DocumentSnapshot? _lastDocument;
   bool _hasMore = true;
 
@@ -37,7 +37,7 @@ class CommunityCubit extends Cubit<CommunityStates> {
     return _hasMore;
   }
 
-  List<PostModel> _posts = [];
+  final List<PostModel> _posts = [];
   List<PostModel> get posts => _posts;
 
   List<File> get postImages => _postImages;

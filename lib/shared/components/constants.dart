@@ -5,6 +5,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:crypto/crypto.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
+import 'package:intl/intl.dart';
 import '../../layout/cubit/cubit.dart';
 import '../../models/user/user_model.dart';
 import '../../modules/WelcomePlantie/welcome_screen.dart';
@@ -28,6 +29,10 @@ void signOut(context) {
       );
     }
   });
+}
+
+bool isArabic(){
+  return Intl.getCurrentLocale() == 'ar';
 }
 
 /// These Methods Importent for Facebook Authentecation ///

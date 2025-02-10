@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
+import '../../generated/l10n.dart';
 import '../../shared/components/components.dart';
 import '../../shared/network/local/cache_helper.dart';
 import '../../shared/styles/colors.dart';
@@ -26,61 +27,65 @@ class OnBoardingScreen extends StatefulWidget {
 
 class OnBoardingScreenState extends State<OnBoardingScreen> {
   var boardController = PageController();
-
-  List<BoardingModel> boarding = [
-    BoardingModel(
-      image: 'assets/images/onBoardingImages/10.jpg',
-      title: 'Welcome to Plantie!',
-      body:
-          'Stay updated with real-time weather and plant care advice tailored to your needs, and calculate the right amount of fertilizer for optimal plant growth.',
-    ),
-    BoardingModel(
-      image: 'assets/images/onBoardingImages/13.png',
-      title: 'Detect Plant Diseases',
-      body:
-          'Upload a photo of your plant to identify diseases and get expert solutions instantly.',
-    ),
-    BoardingModel(
-      image: 'assets/images/onBoardingImages/10.jpg',
-      title: 'Find Nearby Plant Stores',
-      body:
-          'Easily locate nearby plant stores with just a tap, helping you take better care of your plants.',
-    ),
-    BoardingModel(
-      image: 'assets/images/onBoardingImages/12.jpg',
-      title: 'Join the Plantie Community',
-      body:
-          'Connect with fellow plant lovers, share tips, and learn from each other to grow your green space together.',
-    ),
-  ];
-
+  late List<BoardingModel> boarding;
   bool isLast = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    boarding = _buildBoardingItems(context);
+  }
+
+  List<BoardingModel> _buildBoardingItems(BuildContext context) {
+    return [
+      BoardingModel(
+        image: 'assets/images/onBoardingImages/10.jpg',
+        title: S.of(context).onboardingTitle1,
+        body: S.of(context).onboardingBody1,
+      ),
+      BoardingModel(
+        image: 'assets/images/onBoardingImages/13.png',
+        title: S.of(context).onboardingTitle2,
+        body: S.of(context).onboardingBody2,
+      ),
+      BoardingModel(
+        image: 'assets/images/onBoardingImages/10.jpg',
+        title: S.of(context).onboardingTitle3,
+        body: S.of(context).onboardingBody3,
+      ),
+      BoardingModel(
+        image: 'assets/images/onBoardingImages/12.jpg',
+        title: S.of(context).onboardingTitle4,
+        body: S.of(context).onboardingBody4,
+      ),
+    ];
+  }
 
   void submit() {
     CacheHelper.saveData(
       key: 'onBoarding',
       value: true,
     ).then((value) {
-      if (value) {
-        if (mounted) {
-          navigateAndFinish(
-            context,
-            WelcomeScreen(),
-          );
-        }
+      if (value && mounted) {
+        navigateAndFinish(
+          context,
+          const WelcomeScreen(),
+        );
       }
     });
   }
 
   @override
   Widget build(BuildContext context) {
+
     return Scaffold(
       appBar: AppBar(
         actions: [
-          defaultTextButton(function: submit, text: 'skip', isUperCase: true),
-          SizedBox(
-            width: 10,
+          defaultTextButton(
+            function: submit,
+            text: S.of(context).skip,
           ),
+          const SizedBox(width: 10),
         ],
       ),
       body: Padding(
@@ -89,27 +94,18 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
           children: [
             Expanded(
               child: PageView.builder(
-                physics: BouncingScrollPhysics(),
+                physics: const BouncingScrollPhysics(),
                 controller: boardController,
                 onPageChanged: (int index) {
-                  if (index == boarding.length - 1) {
-                    setState(() {
-                      isLast = true;
-                    });
-                  } else {
-                    setState(() {
-                      isLast = false;
-                    });
-                  }
+                  setState(() {
+                    isLast = index == boarding.length - 1;
+                  });
                 },
-                itemBuilder: (context, index) =>
-                    buildBoardingItem(boarding[index]),
+                itemBuilder: (context, index) => buildBoardingItem(boarding[index]),
                 itemCount: boarding.length,
               ),
             ),
-            SizedBox(
-              height: 30.0,
-            ),
+            const SizedBox(height: 30.0),
             Row(
               children: [
                 SmoothPageIndicator(
@@ -124,7 +120,7 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
                   ),
                   count: boarding.length,
                 ),
-                Spacer(),
+                const Spacer(),
                 FloatingActionButton(
                   backgroundColor: plantieColor,
                   shape: const CircleBorder(),
@@ -133,23 +129,19 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
                       submit();
                     } else {
                       boardController.nextPage(
-                        duration: Duration(
-                          milliseconds: 750,
-                        ),
+                        duration: const Duration(milliseconds: 750),
                         curve: Curves.fastLinearToSlowEaseIn,
                       );
                     }
                   },
                   child: Icon(
-                    color: Colors.white,
                     Icons.arrow_forward_ios,
+                    color: Colors.white,
                   ),
                 ),
               ],
             ),
-            SizedBox(
-              height: 20.0,
-            ),
+            const SizedBox(height: 20.0),
           ],
         ),
       ),
@@ -157,34 +149,22 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
   }
 
   Widget buildBoardingItem(BoardingModel model) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Image(
-              image: AssetImage(model.image),
-            ),
-          ),
-          SizedBox(
-            height: 16.0,
-          ),
-          Text(
-            model.title,
-            style: TextStyle(
-              fontSize: 28.0,
-            ),
-          ),
-          SizedBox(
-            height: 15.0,
-          ),
-          Text(
-            model.body,
-            style: TextStyle(
-              fontSize: 18.0,
-            ),
-          ),
-          SizedBox(
-            height: 30.0,
-          ),
-        ],
-      );
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Expanded(
+        child: Image(image: AssetImage(model.image)),
+      ),
+      const SizedBox(height: 16.0),
+      Text(
+        model.title,
+        style: const TextStyle(fontSize: 28.0),
+      ),
+      const SizedBox(height: 15.0),
+      Text(
+        model.body,
+        style: const TextStyle(fontSize: 18.0),
+      ),
+      const SizedBox(height: 30.0),
+    ],
+  );
 }

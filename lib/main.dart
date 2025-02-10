@@ -18,6 +18,8 @@ import 'modules/OnBoarding/on_boarding_screen.dart';
 import 'modules/Profile/cubit/cubit.dart';
 import 'modules/SplashScreen/lottie_loading_screen.dart';
 import 'modules/WelcomePlantie/welcome_screen.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'generated/l10n.dart';
 
 void main() async {
   // بيتأكد ان كل اشي هون في الميثود خلصت و بعدين يتفح الابلكيشن
@@ -95,6 +97,14 @@ class MyApp extends StatelessWidget {
         builder: (context, state) {
           var cubit = AppCubit.get(context);
           return MaterialApp(
+            locale: Locale("ar"),
+              localizationsDelegates: [
+                S.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: S.delegate.supportedLocales,
             debugShowCheckedModeBanner: false,
             theme: lightTheme,
             darkTheme: darkTheme,

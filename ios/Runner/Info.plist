@@ -110,6 +110,13 @@
         <true/>
      </dict>
 
+     <key>CFBundleLocalizations</key>
+     <array>
+       <string>en</string>
+       <string>ar</string>
+     </array>
+
+
      <key>NSCameraUsageDescription</key>
      <string>We need to access your camera for plant detection.</string>
      <key>NSPhotoLibraryUsageDescription</key>

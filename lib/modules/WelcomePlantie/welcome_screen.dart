@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../shared/components/components.dart';
 import '../Login/login_screen.dart';
 import '../Register/register_screen.dart';
+import '../../generated/l10n.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key});
@@ -33,12 +34,12 @@ class WelcomeScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    "Plantie",
+                    S.of(context).welcome_title,
                     style: Theme.of(context).textTheme.bodyLarge,
                   ),
                   SizedBox(height: 8),
                   Text(
-                    "Get more crops with Plantie's help!",
+                    S.of(context).welcome_subtitle,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
@@ -60,7 +61,7 @@ class WelcomeScreen extends StatelessWidget {
                       function: () {
                         navigateTo(context, LoginScreen());
                       },
-                      text: "Login",
+                      text: S.of(context).login_button,
                     ),
                   ),
                   // Register Button using defaultButton from components
@@ -71,7 +72,7 @@ class WelcomeScreen extends StatelessWidget {
                       function: () {
                         navigateTo(context, RegisterScreen());
                       },
-                      text: "Register",
+                      text: S.of(context).register_button,
                     ),
                   ),
                 ],
@@ -82,7 +83,7 @@ class WelcomeScreen extends StatelessWidget {
               padding: const EdgeInsets.only(
                   left: 16.0, right: 16.0, bottom: 20.0), // Adjust padding
               child: Text(
-                "By logging in or registering, you agree to our Terms of Service and Privacy Policy",
+                S.of(context).terms_and_conditions,
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.titleSmall,
               ),

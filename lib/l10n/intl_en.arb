@@ -1,0 +1,62 @@
+{
+  "onboardingTitle1": "Welcome to Plantie!",
+  "onboardingBody1": "Stay updated with real-time weather and plant care advice tailored to your needs, and calculate the right amount of fertilizer for optimal plant growth.",
+  "onboardingTitle2": "Detect Plant Diseases",
+  "onboardingBody2": "Upload a photo of your plant to identify diseases and get expert solutions instantly.",
+  "onboardingTitle3": "Find Nearby Plant Stores",
+  "onboardingBody3": "Easily locate nearby plant stores with just a tap, helping you take better care of your plants.",
+  "onboardingTitle4": "Join the Plantie Community",
+  "onboardingBody4": "Connect with fellow plant lovers, share tips, and learn from each other to grow your green space together.",
+  "skip": "SKIP",
+
+
+
+  "welcome_title": "Plantie",
+  "welcome_subtitle": "Get more crops with Plantie's help!",
+  "login_button": "Login",
+  "register_button": "Register",
+  "terms_and_conditions": "By logging in or registering, you agree to our Terms of Service and Privacy Policy",
+
+
+
+  "welcome": "Welcome",
+  "welcome_back": "Hello, Welcome back to Plantie!",
+  "email_address": "Email Address",
+  "enter_email": "Please enter your email address",
+  "password": "Password",
+  "enter_password": "Password is too short",
+  "forget_password": "Forget Password?",
+  "login": "Login",
+  "create_account": "Create account?",
+  "register": "Register",
+  "or_login_by": "or login by",
+  "reset_password" : "Reset Password",
+  "sent_email_to_update_paassword" : "we sent to your email url to use it to reset the password",
+  "submit"  : "Submit",
+  "cancel" : "Cancel",
+
+
+
+  "name": "Name",
+  "creat_account2" : "Create Account",
+  "create_account3" : "Complete your information to get started!",
+  "enter_name" : "please enter a user name",
+  "email_valid" : "please enter a valid email",
+  "or_register_by" : "or register by",
+  "have_account" : "Already have an account? "
+
+
+
+
+
+
+
+
+
+
+
+}
+
+
+
+

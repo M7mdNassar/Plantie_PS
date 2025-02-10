@@ -190,7 +190,9 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppCubit.get(context).isDark
+                    ? HexColor("1C1C1E")
+                    : HexColor("FFFFFF"),
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
@@ -289,7 +291,14 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
           label: Text(unit , style: Theme.of(context).textTheme.bodyMedium,),
           selected: selectedUnit == unit,
           onSelected: (selected) => setState(() => selectedUnit = unit),
-        )).toList(),
+          backgroundColor: AppCubit.get(context).isDark
+              ? HexColor("1C1C1E")
+              : HexColor("FFFFFF"),
+          selectedColor: plantieColor,  // Your primary color
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+        )),
       ],
     );
   }
@@ -391,7 +400,7 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
             const SizedBox(height: 20),
             Text(
               isTree
-                  ? 'Note: Calculations include age factor for ${treeAge} year old trees'
+                  ? 'Note: Calculations include age factor for $treeAge year old trees'
                   : 'Note: 1 Dunam = 1000 m² (10,000 sq ft)',
               style: const TextStyle(color: Colors.grey, fontSize: 12),
               textAlign: TextAlign.center,

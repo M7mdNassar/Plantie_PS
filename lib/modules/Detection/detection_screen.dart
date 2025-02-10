@@ -2,9 +2,11 @@ import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hexcolor/hexcolor.dart';
 import 'package:plantie/models/disease_info.dart';
 import 'package:plantie/modules/Detection/cubit/cubit.dart';
 import 'package:plantie/modules/Detection/cubit/states.dart';
+import '../../layout/cubit/cubit.dart';
 import '../../models/history_item.dart';
 import '../../shared/components/components.dart';
 import 'history_details_screen.dart';
@@ -32,7 +34,6 @@ class DetectionScreen extends StatelessWidget {
     );
   }
 
-  // Add this missing method
   Widget _buildMainContent(
       BuildContext context, DetectionCubit cubit, DetectionStates state) {
     if (state is DetectionLoadingState) {
@@ -60,7 +61,7 @@ class DetectionScreen extends StatelessWidget {
             if (cubit.currentImage != null) ...[
               _buildImagePreview(cubit.currentImage!),
               const SizedBox(height: 24),
-              _buildDetectionResult(cubit.orginalResult!),
+              _buildDetectionResult(cubit.orginalResult! , context),
               const SizedBox(height: 32),
             ],
             _buildHistorySection(context),
@@ -81,10 +82,13 @@ class DetectionScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildDetectionResult(String result) {
+  Widget _buildDetectionResult(String result , context) {
     final Map<String, DiseaseData> data = DiseaseInfo.data;
 
     return Card(
+      color: AppCubit.get(context).isDark
+          ? HexColor("1C1C1E")
+          : HexColor("FFFFFF"),
       elevation: 4,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
@@ -96,30 +100,22 @@ class DetectionScreen extends StatelessWidget {
           children: [
             Text(
               'Detection Result',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
-              ),
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 12),
             Text(
-              result,
-              style: const TextStyle(fontSize: 16, height: 1.4),
+              DiseaseInfo.data[result]!.name,
+              style: TextStyle(fontSize: 18, color: Colors.grey),
             ),
             const Divider(height: 32),
             Text(
               'Recommended Treatment',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.grey[800],
-              ),
+              style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 12),
             Text(
               data[result]!.treatment,
-              style: TextStyle(fontSize: 16, color: Colors.grey),
+              style: TextStyle(fontSize: 18, color: Colors.grey),
             ),
           ],
         ),
@@ -135,11 +131,7 @@ class DetectionScreen extends StatelessWidget {
           padding: const EdgeInsets.only(bottom: 16),
           child: Text(
             'History',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.grey[800],
-            ),
+            style: Theme.of(context).textTheme.bodyMedium,
           ),
         ),
         _buildHistoryList(context),
@@ -192,15 +184,19 @@ class DetectionScreen extends StatelessWidget {
         final item = cubit.history[index];
         return Dismissible(
           key: Key(item.id.toString()),
-          background: Container(color: Colors.red),
+          background: Container( color: Colors.red ,),
           direction: DismissDirection.endToStart,
           confirmDismiss: (direction) async {
             return await showDialog(
               context: context,
+
               builder: (ctx) => AlertDialog(
-                title: const Text('Confirm Delete'),
+                backgroundColor: AppCubit.get(context).isDark
+                  ? HexColor("1C1C1E")
+                  : HexColor("FFFFFF"),
+                title:  Text('Confirm Delete' , style: Theme.of(ctx).textTheme.labelLarge,),
                 content:
-                    const Text('Are you sure you want to delete this item?'),
+                     Text('Are you sure you want to delete this item?' , style: Theme.of(ctx).textTheme.bodyMedium,),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(ctx, false),
@@ -226,6 +222,9 @@ class DetectionScreen extends StatelessWidget {
 
   Widget _buildHistoryItem(BuildContext context, HistoryItem item) {
     return Card(
+      color: AppCubit.get(context).isDark
+          ? HexColor("1C1C1E")
+          : HexColor("FFFFFF"),
       margin: const EdgeInsets.only(bottom: 12),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
@@ -250,9 +249,11 @@ class DetectionScreen extends StatelessWidget {
         ),
         title: Text(
           item.title,
-          style: const TextStyle(fontWeight: FontWeight.w500),
+          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+            fontSize: 20
+          ),
         ),
-        subtitle: Text('Treatment: ${item.treatment}'),
+        subtitle: Text('Treatment: ${item.treatment}' , style: Theme.of(context).textTheme.bodyMedium,),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => navigateTo(context, HistoryDetailScreen(item: item)),
       ),
