@@ -4,6 +4,7 @@ import 'package:plantie/models/user/user_model.dart';
 import 'package:plantie/shared/components/components.dart';
 import 'package:plantie/shared/styles/colors.dart';
 import 'package:plantie/shared/styles/icon_broken.dart';
+import '../../generated/l10n.dart';
 import '../../layout/cubit/cubit.dart';
 import '../../layout/cubit/states.dart';
 import '../../shared/components/constants.dart';
@@ -23,8 +24,8 @@ class ProfileScreen extends StatelessWidget {
       builder: (context, state) {
         return Scaffold(
           appBar: AppBar(
-            title: const Text(
-              'Profile',
+            title: Text(
+              S.of(context).profile,
             ),
           ),
           body: Padding(
@@ -49,13 +50,13 @@ class ProfileScreen extends StatelessWidget {
 
                   Padding(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 70,
+                      horizontal: 65,
                     ),
                     child: defaultButton(
                       function: () {
                         navigateTo(context, EditProfileScreen());
                       },
-                      text: 'Edit Profile',
+                      text: S.of(context).editProfile,
                       icon: IconBroken.Edit,
                     ),
                   ),
@@ -68,7 +69,7 @@ class ProfileScreen extends StatelessWidget {
                     child: buildCard(
                       context: context,
                       icon: Icons.dark_mode_outlined,
-                      title: "Dark Mode",
+                      title: S.of(context).darkMode,
                       trailing: BlocBuilder<AppCubit, AppStates>(
                         builder: (context, state) {
                           return Switch.adaptive(
@@ -93,11 +94,11 @@ class ProfileScreen extends StatelessWidget {
                     child: buildCard(
                       context: context,
                       icon: Icons.language,
-                      title: "Language",
+                      title: S.of(context).language,
                       trailing: Row(
                         children: [
                           Text(
-                            "English",
+                            S.of(context).english,
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium
@@ -121,7 +122,7 @@ class ProfileScreen extends StatelessWidget {
                     child: buildCard(
                       context: context,
                       icon: Icons.logout,
-                      title: "Logout",
+                      title: S.of(context).logout,
                       trailing: const Icon(
                         Icons.arrow_forward_ios,
                         size: 20.0,
@@ -130,11 +131,11 @@ class ProfileScreen extends StatelessWidget {
                         showCustomDialog(
                           context: context,
                           backgroundColor: plantieColor,
-                          title: "Confirm Logout",
-                          content: "Are you sure you want to log out?",
-                          cancelText: "Cancel",
+                          title: S.of(context).confirmLogout,
+                          content: S.of(context).logoutMessage,
+                          cancelText: S.of(context).cancel,
                           onCancel: () => Navigator.pop(context),
-                          confirmText: "Logout",
+                          confirmText: S.of(context).logout,
                           onConfirm: () {
                             signOut(context);
                           },

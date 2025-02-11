@@ -6,6 +6,7 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:plantie/models/disease_info.dart';
 import 'package:plantie/modules/Detection/cubit/cubit.dart';
 import 'package:plantie/modules/Detection/cubit/states.dart';
+import '../../generated/l10n.dart';
 import '../../layout/cubit/cubit.dart';
 import '../../models/history_item.dart';
 import '../../shared/components/components.dart';
@@ -27,7 +28,7 @@ class DetectionScreen extends StatelessWidget {
         final cubit = DetectionCubit.get(context);
 
         return Scaffold(
-          appBar: AppBar(title: const Text('Detection Results')),
+          appBar: AppBar(title:  Text(S.of(context).detectionResults)),
           body: _buildMainContent(context, cubit, state),
         );
       },
@@ -99,7 +100,7 @@ class DetectionScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Detection Result',
+              S.of(context).detectionResult,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 12),
@@ -109,7 +110,7 @@ class DetectionScreen extends StatelessWidget {
             ),
             const Divider(height: 32),
             Text(
-              'Recommended Treatment',
+              S.of(context).recommendedTreatment,
               style: Theme.of(context).textTheme.bodyMedium,
             ),
             const SizedBox(height: 12),
@@ -130,7 +131,7 @@ class DetectionScreen extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.only(bottom: 16),
           child: Text(
-            'History',
+            S.of(context).history,
             style: Theme.of(context).textTheme.bodyMedium,
           ),
         ),
@@ -152,7 +153,7 @@ class DetectionScreen extends StatelessWidget {
               const Icon(Icons.history, size: 80, color: Colors.grey),
               const SizedBox(height: 24),
               Text(
-                'No Detection History',
+                S.of(context).noDetectionHistory,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.w600,
@@ -163,7 +164,7 @@ class DetectionScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 40),
                 child: Text(
-                  'Your plant health scans will appear here',
+                  S.of(context).historyPlaceholder,
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
@@ -194,17 +195,17 @@ class DetectionScreen extends StatelessWidget {
                 backgroundColor: AppCubit.get(context).isDark
                   ? HexColor("1C1C1E")
                   : HexColor("FFFFFF"),
-                title:  Text('Confirm Delete' , style: Theme.of(ctx).textTheme.labelLarge,),
+                title:  Text(S.of(context).confirmDelete , style: Theme.of(ctx).textTheme.labelLarge,),
                 content:
-                     Text('Are you sure you want to delete this item?' , style: Theme.of(ctx).textTheme.bodyMedium,),
+                     Text(S.of(context).deleteConfirmation , style: Theme.of(ctx).textTheme.bodyMedium,),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(ctx, false),
-                    child: const Text('Cancel'),
+                    child:  Text(S.of(context).cancel),
                   ),
                   TextButton(
                     onPressed: () => Navigator.pop(ctx, true),
-                    child: const Text('Delete',
+                    child:  Text(S.of(context).delete,
                         style: TextStyle(color: Colors.red)),
                   ),
                 ],
@@ -253,7 +254,7 @@ class DetectionScreen extends StatelessWidget {
             fontSize: 20
           ),
         ),
-        subtitle: Text('Treatment: ${item.treatment}' , style: Theme.of(context).textTheme.bodyMedium,),
+        subtitle: Text(S.of(context).treatmentLabel(item.treatment) , style: Theme.of(context).textTheme.bodyMedium,),
         trailing: const Icon(Icons.chevron_right),
         onTap: () => navigateTo(context, HistoryDetailScreen(item: item)),
       ),

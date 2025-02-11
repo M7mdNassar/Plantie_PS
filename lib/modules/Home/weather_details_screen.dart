@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
-import 'package:plantie/shared/styles/colors.dart';
-import '../../layout/cubit/cubit.dart';
+import '../../generated/l10n.dart';
 import '../../models/weather_model.dart';
 
 class WeatherDetailsScreen extends StatefulWidget {
@@ -19,51 +17,38 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Weather Details'),
+        title: Text(S.of(context).weather_details),
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16),
         child: Column(
           children: [
-            _buildWeatherCard(),
+            _buildWeatherCard(context),
             SizedBox(height: 20),
-            _buildDetailGrid(),
+            _buildDetailGrid(context),
             SizedBox(height: 20),
-            _buildSunriseSunsetCard(),
+            _buildSunriseSunsetCard(context),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildWeatherCard() {
+  Widget _buildWeatherCard(BuildContext context) {
     return Card(
-      color: AppCubit.get(context).isDark
-          ? HexColor("1C1C1E")
-          : HexColor("FFFFFF"),
       elevation: 4,
       child: Padding(
         padding: EdgeInsets.all(16),
         child: Column(
           children: [
             Text(
-              'Current Weather',
+              S.of(context).current_weather,
               style: Theme.of(context).textTheme.bodyLarge,
             ),
             SizedBox(height: 16),
-            Image.network(
-              color: plantieColor,
-              'https://openweathermap.org/img/wn/${widget.weatherData.weather.first.icon}@4x.png',
-              width: 150,
-              height: 150,
-            ),
             Text(
               '${widget.weatherData.main.temp.round()}°C',
               style: TextStyle(fontSize: 48, fontWeight: FontWeight.bold),
-            ),
-            Text(
-              widget.weatherData.weather.first.description,
-              style: TextStyle(fontSize: 20),
             ),
           ],
         ),
@@ -71,35 +56,37 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
     );
   }
 
-  Widget _buildDetailGrid() {
+  Widget _buildDetailGrid(BuildContext context) {
     return GridView.count(
       shrinkWrap: true,
       physics: NeverScrollableScrollPhysics(),
       crossAxisCount: 2,
       childAspectRatio: 1.5,
       children: [
-        _buildDetailItem(
-            'Feels Like', '${widget.weatherData.main.feelsLike.round()}°C'),
-        _buildDetailItem('Humidity', '${widget.weatherData.main.humidity}%'),
-        _buildDetailItem('Wind Speed', '${widget.weatherData.wind.speed} m/s'),
-        _buildDetailItem('Pressure', '${widget.weatherData.main.pressure} hPa'),
+        _buildDetailItem(S.of(context).feels_like,
+            '${widget.weatherData.main.feelsLike.round()}°C'),
+        _buildDetailItem(S.of(context).humidity,
+            '${widget.weatherData.main.humidity}%'),
+        _buildDetailItem(S.of(context).wind_speed,
+            '${widget.weatherData.wind.speed} m/s'),
+        _buildDetailItem(S.of(context).pressure,
+            '${widget.weatherData.main.pressure} hPa'),
       ],
     );
   }
 
-  Widget _buildSunriseSunsetCard() {
+  Widget _buildSunriseSunsetCard(BuildContext context) {
     return Card(
-      color: AppCubit.get(context).isDark
-          ? HexColor("1C1C1E")
-          : HexColor("FFFFFF"),
       elevation: 4,
       child: Padding(
         padding: EdgeInsets.all(16),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildSunTime('Sunrise', widget.weatherData.sys.sunrise),
-            _buildSunTime('Sunset', widget.weatherData.sys.sunset),
+            _buildSunTime(S.of(context).sunrise,
+                widget.weatherData.sys.sunrise),
+            _buildSunTime(S.of(context).sunset,
+                widget.weatherData.sys.sunset),
           ],
         ),
       ),
@@ -108,9 +95,6 @@ class _WeatherDetailsScreenState extends State<WeatherDetailsScreen> {
 
   Widget _buildDetailItem(String title, String value) {
     return Card(
-      color: AppCubit.get(context).isDark
-          ? HexColor("1C1C1E")
-          : HexColor("FFFFFF"),
       elevation: 2,
       child: Padding(
         padding: EdgeInsets.all(12),

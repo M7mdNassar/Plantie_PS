@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:plantie/shared/styles/colors.dart';
+import '../../generated/l10n.dart';
 import '../../layout/cubit/cubit.dart';
 
 class PlantData {
@@ -32,8 +33,9 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
   int treeAge = 1;
   Map<String, double>? fertilizerAmounts;
   String selectedUnit = 'Dunam';
-  final List<String> units = ['Dunam', 'Acre'];
   String? calculationType;
+
+  List<String> get units => [S.of(context).dunam, S.of(context).acre];
 
 
   void calculateFertilizer() {
@@ -84,7 +86,10 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('${widget.plant.emoji} ${widget.plant.name} Fertilizer'),
+        title: Text(S.of(context).fertilizerCalculator(
+             widget.plant.emoji,
+             widget.plant.name
+        )),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -133,7 +138,7 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
                   ),
                 ),
                 Text(
-                  'Type: ${widget.plant.type.toUpperCase()}',
+                  S.of(context).plantType(widget.plant.type),
                   style: TextStyle(
                     color: Colors.grey[600],
                     fontSize: 16,
@@ -151,14 +156,14 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
     return Column(
       children: [
         _buildCounterInput(
-          label: 'Number of Trees',
+          label: S.of(context).numberOfTrees,
           value: treeCount,
           onDecrement: () => setState(() => treeCount = treeCount > 1 ? treeCount - 1 : 1),
           onIncrement: () => setState(() => treeCount++),
         ),
         const SizedBox(height: 20),
         _buildCounterInput(
-          label: 'Tree Age (Years)',
+          label: S.of(context).treeAge,
           value: treeAge,
           onDecrement: () => setState(() => treeAge = treeAge > 1 ? treeAge - 1 : 1),
           onIncrement: () => setState(() => treeAge++),
@@ -180,7 +185,7 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Land Area ($selectedUnit):',
+            S.of(context).landArea(selectedUnit),
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -285,7 +290,7 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
   Widget _buildUnitSelector() {
     return Row(
       children: [
-        const Text('Unit:'),
+         Text(S.of(context).unit),
         const SizedBox(width: 10),
         ...units.map((unit) => ChoiceChip(
           label: Text(unit , style: Theme.of(context).textTheme.bodyMedium,),
@@ -313,8 +318,8 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            const Text(
-              'Recommended NPK Ratio:',
+             Text(
+              S.of(context).recommendedNpk,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -335,7 +340,7 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
                       ),
                     ),
                     Text(
-                      ['Nitrogen', 'Phosphorus', 'Potassium'][entry.key],
+                    [S.of(context).nitrogen, S.of(context).phosphorus, S.of(context).potassium][entry.key],
                       style: const TextStyle(color: Colors.grey),
                     ),
                   ],
@@ -352,8 +357,8 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
     return Center(
       child: ElevatedButton.icon(
         icon: const Icon(Icons.calculate, color: Colors.white),
-        label: const Text(
-          'Calculate Requirements',
+        label: Text(
+            S.of(context).calculateRequirements,
           style: TextStyle(fontSize: 18),
         ),
         style: ElevatedButton.styleFrom(
@@ -381,7 +386,12 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
         child: Column(
           children: [
             Text(
-              'Required Fertilizers (${isTree ? 'for $treeCount trees' : calculationType}):',
+              S.of(context).requiredFertilizers(
+                  isTree
+                    ? S.of(context).numberOfTrees
+                    : calculationType ?? S.of(context).dunam,
+              ),
+
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -392,16 +402,16 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildFertilizerTile('SSP', fertilizerAmounts!['SSP']!),
-                _buildFertilizerTile('UREA', fertilizerAmounts!['UREA']!),
-                _buildFertilizerTile('MOP', fertilizerAmounts!['MOP']!),
+                _buildFertilizerTile(S.of(context).ssp, fertilizerAmounts!['SSP']!),
+                _buildFertilizerTile(S.of(context).urea, fertilizerAmounts!['UREA']!),
+                _buildFertilizerTile(S.of(context).mop, fertilizerAmounts!['MOP']!),
               ],
             ),
             const SizedBox(height: 20),
             Text(
               isTree
-                  ? 'Note: Calculations include age factor for $treeAge year old trees'
-                  : 'Note: 1 Dunam = 1000 m² (10,000 sq ft)',
+                  ? S.of(context).treeNote(treeAge.toString())
+                  : S.of(context).areaNote,
               style: const TextStyle(color: Colors.grey, fontSize: 12),
               textAlign: TextAlign.center,
             ),

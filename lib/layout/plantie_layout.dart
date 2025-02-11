@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:plantie/shared/styles/icon_broken.dart';
+import '../generated/l10n.dart';
 import '../shared/styles/colors.dart';
 import 'cubit/cubit.dart';
 import 'cubit/states.dart';
@@ -17,6 +18,10 @@ class AppLayout extends StatelessWidget {
         if (state is FloatActionButtonPressed){
           AppCubit.get(context).changeIndex(2);
         }
+
+
+        // i need handle verification email to use community (later)
+
 
       },
       builder: (context, state) {
@@ -46,6 +51,14 @@ class AppLayout extends StatelessWidget {
   }
 
   Widget _buildBottomNavBar(AppCubit cubit, BuildContext context) {
+
+    final titles = [
+      S.of(context).home,
+      S.of(context).community,
+      S.of(context).detection,
+      S.of(context).profile2,
+    ];
+
     return AnimatedBottomNavigationBar.builder(
       backgroundColor: cubit.isDark ? HexColor('333739') : Colors.white,
       itemCount: cubit.iconList.length,
@@ -59,7 +72,7 @@ class AppLayout extends StatelessWidget {
           children: [
             Icon(cubit.iconList[index], size: 24, color: color),
             Text(
-              cubit.titles[index],
+              titles[index],
               style: TextStyle(color: color, fontSize: 14),
             ),
           ],

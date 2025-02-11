@@ -6,6 +6,7 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:plantie/layout/cubit/cubit.dart';
 import 'package:plantie/modules/Profile/cubit/states.dart';
 import 'package:plantie/shared/styles/colors.dart';
+import '../../generated/l10n.dart';
 import '../../models/user/user_model.dart';
 import '../../shared/components/components.dart';
 import '../../shared/styles/icon_broken.dart';
@@ -32,14 +33,14 @@ class EditProfileScreen extends StatelessWidget {
       listener: (context, state) {
         if (state is ProfileUpdateSuccessState) {
           showToast(
-            text: "Profile updated successfully",
+            text: S.of(context).profileUpdated,
             gravity: ToastGravity.TOP,
             state: ToastStates.success,
           );
         }
         if (state is ProfileUpdateErrorState) {
           showToast(
-            text: state.error.toString(),
+            text: S.of(context).updateFailed(state.error.toString()),
             gravity: ToastGravity.TOP,
             state: ToastStates.error,
           );
@@ -50,8 +51,8 @@ class EditProfileScreen extends StatelessWidget {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text(
-              'Edit Profile',
+            title: Text(
+              S.of(context).editProfile,
             ),
           ),
           body: SingleChildScrollView(
@@ -104,7 +105,7 @@ class EditProfileScreen extends StatelessWidget {
                                 function: () {
                                   cubit.uploadProfileImage();
                                 },
-                                text: 'Save',
+                                text: S.of(context).save,
                               ),
                             ),
                             Expanded(
@@ -113,7 +114,7 @@ class EditProfileScreen extends StatelessWidget {
                                   cubit.setImageToNull();
                                   cubit.updateUserImagePickidButtons();
                                 },
-                                text: 'Cancel',
+                                text: S.of(context).cancel,
                               ),
                             ),
                           ],
@@ -141,11 +142,11 @@ class EditProfileScreen extends StatelessWidget {
                           defaultFormField(
                             controller: nameController,
                             type: TextInputType.text,
-                            label: 'Name',
+                            label: S.of(context).name,
                             prefixIcon: Icons.person,
                             validate: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Name must not be empty';
+                                return S.of(context).nameRequired ;
                               }
                               return null;
                             },
@@ -156,11 +157,11 @@ class EditProfileScreen extends StatelessWidget {
                           defaultFormField(
                             controller: bioController,
                             type: TextInputType.text,
-                            label: 'Bio',
+                            label: S.of(context).bio,
                             prefixIcon: Icons.info,
                             validate: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Bio must not be empty';
+                                return S.of(context).bioRequired;
                               }
                               return null;
                             },
@@ -171,11 +172,11 @@ class EditProfileScreen extends StatelessWidget {
                           defaultFormField(
                             controller: countryController,
                             type: TextInputType.text,
-                            label: 'Country',
+                            label: S.of(context).country,
                             prefixIcon: Icons.flag,
                             validate: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Country must not be empty';
+                                return S.of(context).countryRequired;
                               }
                               return null;
                             },
@@ -186,11 +187,11 @@ class EditProfileScreen extends StatelessWidget {
                           defaultFormField(
                             controller: phoneController,
                             type: TextInputType.phone,
-                            label: 'Phone',
+                            label: S.of(context).phone,
                             prefixIcon: Icons.phone,
                             validate: (value) {
                               if (value == null || value.isEmpty) {
-                                return 'Phone must not be empty';
+                                return S.of(context).phoneRequired;
                               }
                               return null;
                             },
@@ -201,7 +202,7 @@ class EditProfileScreen extends StatelessWidget {
                           defaultFormField(
                             controller: emailController,
                             type: TextInputType.emailAddress,
-                            label: 'Email',
+                            label: S.of(context).email,
                             prefixIcon: Icons.email,
                             enabled: false,
                             validate: (value) {
@@ -229,7 +230,7 @@ class EditProfileScreen extends StatelessWidget {
                             phone: phoneController.text,
                           );
                         },
-                        text: 'Save Changes',
+                        text: S.of(context).saveChanges,
                       ),
                     ),
                     fallback: (context) =>

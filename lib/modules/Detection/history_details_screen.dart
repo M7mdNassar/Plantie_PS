@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../generated/l10n.dart';
 import '../../models/history_item.dart';
 import '../../models/plant_store.dart';
 import '../../models/store_service.dart';
@@ -26,6 +27,7 @@ class HistoryDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Image preview
             ClipRRect(
               borderRadius: BorderRadius.circular(12),
               child: Image.file(
@@ -36,13 +38,13 @@ class HistoryDetailScreen extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            _buildDetailItem('الاسم:', item.title),
-            _buildDetailItem('العلاج:', item.treatment),
-            _buildDetailItem('النصائح:', item.tips),
-            _buildDetailItem('التاريخ:', _formatDate(item.date)),
-            SizedBox(
-              height: 10,
-            ),
+            // Details
+            _buildDetailItem(S.of(context).name, item.title),
+            _buildDetailItem(S.of(context).treatment, item.treatment),
+            _buildDetailItem(S.of(context).tips, item.tips),
+            _buildDetailItem(S.of(context).date, _formatDate(context, item.date)),
+            const SizedBox(height: 10),
+            // Map button
             _buildMapButton(context),
           ],
         ),
@@ -50,8 +52,9 @@ class HistoryDetailScreen extends StatelessWidget {
     );
   }
 
-  String _formatDate(DateTime date) {
-    return DateFormat('yyyy-MM-dd HH:mm').format(date);
+  String _formatDate(BuildContext context, DateTime date) {
+    return DateFormat.yMMMMEEEEd(Localizations.localeOf(context).toString()).format(date);
+
   }
 
   Widget _buildDetailItem(String label, String value) {
@@ -79,52 +82,51 @@ class HistoryDetailScreen extends StatelessWidget {
   }
 
   Widget _buildMapButton(BuildContext context) {
-
     return Container(
-        width: double.infinity,
-        height: 50.0,
-        decoration: BoxDecoration(
-          color: plantieColor, // Light green color
-          borderRadius: BorderRadius.circular(12.0),
-        ),
-
-       child:  TextButton(
-          onPressed: () {
-            _openNearestStore(context);
-          },
-          child: Text(
-            'أقرب مشتل نباتات',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 20.0,
-              fontWeight: FontWeight.w600,
-            ),
+      width: double.infinity,
+      height: 50.0,
+      decoration: BoxDecoration(
+        color: plantieColor,
+        borderRadius: BorderRadius.circular(12.0),
+      ),
+      child: TextButton(
+        onPressed: () => _openNearestStore(context),
+        child: Text(
+          S.of(context).nearestNursery,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 20.0,
+            fontWeight: FontWeight.w600,
           ),
-        )
+        ),
+      ),
     );
-
   }
 
   Future<void> _openNearestStore(BuildContext context) async {
     try {
-      // Check permissions and get location
       await locationService.checkLocationPermission();
       final Position position = await locationService.getCurrentPosition();
 
-      // Find the nearest store
       final nearest = await storeService.findNearestStore(position);
 
       if (nearest != null) {
-        _launchMaps(nearest, position);
+        _launchMaps(nearest, position , context);
       } else {
-        showToast(text: 'No nearby stores found', state: ToastStates.error);
+        showToast(
+            text: S.of(context).noStoresFound,
+            state: ToastStates.error
+        );
       }
     } catch (e) {
-      showToast(text: 'Error: $e', state: ToastStates.error);
+      showToast(
+          text: S.of(context).locationError(e.toString()),
+          state: ToastStates.error
+      );
     }
   }
 
-  void _launchMaps(PlantStore store, Position userPosition) async {
+  void _launchMaps(PlantStore store, Position userPosition , context) async {
     final url = Platform.isAndroid
         ? 'https://www.google.com/maps/dir/?api=1&origin=${userPosition.latitude},${userPosition.longitude}&destination=${store.latitude},${store.longitude}&travelmode=driving'
         : 'http://maps.apple.com/?daddr=${store.latitude},${store.longitude}&saddr=${userPosition.latitude},${userPosition.longitude}';
@@ -132,7 +134,7 @@ class HistoryDetailScreen extends StatelessWidget {
     if (await canLaunchUrl(Uri.parse(url))) {
       await launchUrl(Uri.parse(url));
     } else {
-      throw 'Could not launch $url';
+      throw S.of(context).launchError;
     }
   }
 }

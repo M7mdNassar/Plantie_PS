@@ -10,6 +10,7 @@ import 'package:plantie/modules/Home/weather_details_screen.dart';
 import 'package:plantie/shared/components/components.dart';
 import 'package:plantie/shared/styles/colors.dart';
 import 'package:shimmer/shimmer.dart';
+import '../../generated/l10n.dart';
 import '../../layout/cubit/cubit.dart';
 import '../../models/plant.dart';
 import '../../models/weather_model.dart';
@@ -42,7 +43,7 @@ class HomeScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          "Weather",
+                           S.of(context).weather,
                           style: Theme.of(context).textTheme.labelLarge,
                         ),
                         Text(
@@ -56,7 +57,7 @@ class HomeScreen extends StatelessWidget {
                     ),
 
                   Text(
-                    "Choose a Plant",
+                    S.of(context).choosePlant,
                     style: Theme.of(context).textTheme.labelLarge,
                   ),
                   SizedBox(
@@ -103,7 +104,7 @@ class HomeScreen extends StatelessWidget {
                             ));
                       },
                       child: Text(
-                        "Calculate Fertilizer",
+                        S.of(context).calculateFertilizer,
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 20.0,
@@ -234,10 +235,10 @@ class HomeScreen extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            _buildDetailRow(Icons.calendar_today, 'Planting Time',
+            _buildDetailRow(Icons.calendar_today, S.of(context).plantingTime,
                 plant.plantingTime, context),
             const SizedBox(height: 8),
-            _buildDetailRow(Icons.eco, 'NPK Formula', plant.npk, context),
+            _buildDetailRow(Icons.eco, S.of(context).npkFormula, plant.npk, context),
           ],
         ),
       ),
@@ -255,11 +256,11 @@ class HomeScreen extends StatelessWidget {
             labelColor: plantieColor,
             unselectedLabelColor: Colors.grey,
             indicatorColor: plantieColor,
-            tabs: const [
-              Tab(text: 'Description'),
-              Tab(text: 'Nutrition'),
-              Tab(text: 'Storage'),
-              Tab(text: 'Diseases'),
+            tabs:  [
+              Tab(text: S.of(context).description),
+              Tab(text: S.of(context).nutrition),
+              Tab(text: S.of(context).storage),
+              Tab(text: S.of(context).diseases),
             ],
           ),
           SizedBox(
@@ -353,8 +354,8 @@ class HomeScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        _buildStorageItem('Temperature', storage['temperature']!, context),
-        _buildStorageItem('Humidity', storage['humidity']!, context),
+        _buildStorageItem(S.of(context).temperature, storage['temperature']!, context),
+        _buildStorageItem(S.of(context).humidity, storage['humidity']!, context),
       ],
     );
   }
@@ -401,7 +402,7 @@ class HomeScreen extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Prevention:',
+                    S.of(context).prevention,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),
                   Text(diseases[index].prevention),
@@ -451,10 +452,10 @@ class HomeScreen extends StatelessWidget {
     }
 
     if (state is WeatherLoadingState) {
-      return _buildLoading();
+      return _buildLoading(context);
     }
     if (state is LocationPermissionDeniedState) {
-      return _buildPermissionDenied(cubit);
+      return _buildPermissionDenied(cubit, context);
     }
 
     if (state is WeatherLoadedState) {
@@ -462,15 +463,15 @@ class HomeScreen extends StatelessWidget {
     }
 
     if (state is LocationPermanentlyDeniedState) {
-      return _buildPermanentDenial(cubit);
+      return _buildPermanentDenial(cubit, context);
     }
     if (state is LocationServicesDisabledState) {
-      return _buildServicesDisabled(cubit);
+      return _buildServicesDisabled(cubit, context);
     }
     if (state is WeatherFetchErrorState) {
-      return _buildError(state.msg, cubit);
+      return _buildError(state.msg, cubit, context);
     }
-    return _buildInitial(cubit);
+    return _buildInitial(cubit , context);
   }
 
   Widget _buildWeatherData(WeatherData weather, BuildContext context) {
@@ -520,7 +521,7 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              DateFormat('EEEE, MMM d').format(weather.lastUpdated),
+              DateFormat.yMMMMEEEEd(Localizations.localeOf(context).toString()).format(weather.lastUpdated),
               style: textStyle,
             ),
             const SizedBox(height: 12),
@@ -532,7 +533,7 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             Text(
-              'Feels like ${weather.main.feelsLike.round()}°C',
+              S.of(context).feelsLike(weather.main.feelsLike.round().toString()),
               style: textStyle,
             ),
           ],
@@ -541,7 +542,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildLoading() {
+  Widget _buildLoading(context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -549,7 +550,7 @@ class HomeScreen extends StatelessWidget {
           CircularProgressIndicator(),
           SizedBox(height: 16),
           Text(
-            'Fetching weather...',
+            S.of(context).fetchingWeather,
             style: TextStyle(color: Colors.white),
           ),
         ],
@@ -557,7 +558,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPermissionDenied(HomeCubit cubit) {
+  Widget _buildPermissionDenied(HomeCubit cubit , context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -565,7 +566,7 @@ class HomeScreen extends StatelessWidget {
           Icon(Icons.location_off, size: 40, color: Colors.white),
           SizedBox(height: 16),
           Text(
-            'Location permission required',
+            S.of(context).locationRequired,
             style: TextStyle(color: Colors.white, fontSize: 16),
             textAlign: TextAlign.center,
           ),
@@ -573,7 +574,7 @@ class HomeScreen extends StatelessWidget {
           TextButton.icon(
             icon: Icon(Icons.location_on),
             label: Text(
-              'Enable Location',
+              S.of(context).enableLocation,
               style: TextStyle(fontSize: 20, color: Colors.white),
             ),
             onPressed: cubit.requestLocationPermission,
@@ -583,7 +584,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPermanentDenial(HomeCubit cubit) {
+  Widget _buildPermanentDenial(HomeCubit cubit , context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -591,7 +592,7 @@ class HomeScreen extends StatelessWidget {
           Icon(Icons.settings, size: 40, color: Colors.white),
           SizedBox(height: 16),
           Text(
-            'Location permissions permanently denied. Please enable in settings.',
+              S.of(context).permanentDenial,
             style: TextStyle(color: Colors.white, fontSize: 16),
             textAlign: TextAlign.center,
           ),
@@ -599,7 +600,7 @@ class HomeScreen extends StatelessWidget {
           TextButton.icon(
             icon: Icon(Icons.settings),
             label: Text(
-              'Open Settings',
+              S.of(context).openSettings,
               style: TextStyle(fontSize: 20, color: Colors.white),
             ),
             onPressed: cubit.openAppSettings,
@@ -609,7 +610,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildServicesDisabled(HomeCubit cubit) {
+  Widget _buildServicesDisabled(HomeCubit cubit , context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -617,7 +618,7 @@ class HomeScreen extends StatelessWidget {
           Icon(Icons.gps_off, size: 40, color: Colors.white),
           SizedBox(height: 16),
           Text(
-            'Location services disabled. Please enable GPS.',
+              S.of(context).gpsDisabled,
             style: TextStyle(color: Colors.white, fontSize: 16),
             textAlign: TextAlign.center,
           ),
@@ -625,7 +626,7 @@ class HomeScreen extends StatelessWidget {
           TextButton.icon(
             icon: Icon(Icons.gps_fixed),
             label: Text(
-              'Enable GPS',
+              S.of(context).enableGPS,
               style: TextStyle(fontSize: 20, color: Colors.white),
             ),
             onPressed: cubit.openLocationSettings,
@@ -635,7 +636,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildError(String error, HomeCubit cubit) {
+  Widget _buildError(String error, HomeCubit cubit , context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -643,7 +644,7 @@ class HomeScreen extends StatelessWidget {
           Icon(Icons.error_outline, size: 40, color: Colors.white),
           SizedBox(height: 16),
           Text(
-            'Error fetching weather: $error',
+              S.of(context).weatherError(error),
             style: TextStyle(color: Colors.white, fontSize: 16),
             textAlign: TextAlign.center,
           ),
@@ -651,7 +652,7 @@ class HomeScreen extends StatelessWidget {
           TextButton.icon(
             icon: Icon(Icons.refresh),
             label: Text(
-              'Try Again',
+                S.of(context).tryAgain,
               style: TextStyle(fontSize: 20, color: Colors.white),
             ),
             onPressed: cubit.getWeatherData,
@@ -661,11 +662,11 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInitial(HomeCubit cubit) {
+  Widget _buildInitial(HomeCubit cubit , context) {
     return Center(
       child: TextButton.icon(
         icon: Icon(Icons.cloud),
-        label: Text('Get Weather',
+        label: Text(S.of(context).getWeather,
             style: TextStyle(fontSize: 20, color: Colors.white)),
         onPressed: cubit.getWeatherData,
       ),

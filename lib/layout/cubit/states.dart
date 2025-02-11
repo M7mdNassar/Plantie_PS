@@ -19,3 +19,11 @@ class GetUserErrorState extends AppStates {
 class AppChangeModeState extends AppStates {}
 
 class FloatActionButtonPressed extends AppStates {}
+
+class VerificationEmailSentState extends AppStates {}
+
+class VerificationEmailErrorState extends AppStates {
+  final String error;
+
+  VerificationEmailErrorState(this.error);
+}

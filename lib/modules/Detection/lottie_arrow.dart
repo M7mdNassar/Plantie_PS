@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 
+import '../../generated/l10n.dart';
+
 class LottieArrow extends StatefulWidget {
   const LottieArrow({super.key});
 
@@ -25,7 +27,7 @@ class _LottieArrow extends State<LottieArrow> {
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
                   Text(
-                    'Tap the camera button below\nto start scanning your plants',
+                    S.of(context).tap_camera_to_scan,
                     textAlign: TextAlign.center,
                     style: Theme.of(context).textTheme.titleSmall,
                   ),

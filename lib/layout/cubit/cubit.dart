@@ -7,7 +7,6 @@ import '../../modules/Detection/Classification/image_picker_handler.dart';
 import '../../modules/Detection/detection_screen.dart';
 import '../../modules/Home/home_screen.dart';
 import '../../modules/Profile/profile_screen.dart';
-import '../../shared/components/components.dart';
 import '../../shared/network/local/cache_helper.dart';
 
 
@@ -63,18 +62,11 @@ class AppCubit extends Cubit<AppStates>
     ImagePickerHandler.processImage(context);
   }
 
-
   void resendVerificationEmail() {
     FirebaseAuth.instance.currentUser!.sendEmailVerification().then((_) {
-      showToast(
-        text: "Verification email resent. Please check your inbox.",
-        state: ToastStates.success,
-      );
+      emit(VerificationEmailSentState());
     }).catchError((error) {
-      showToast(
-        text: error.toString(),
-        state: ToastStates.error,
-      );
+      emit(VerificationEmailErrorState(error.toString()));
     });
   }
 

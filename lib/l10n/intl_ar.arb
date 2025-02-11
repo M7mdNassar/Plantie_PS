@@ -45,7 +45,171 @@
   "enter_name" : "الرجاء إدخال إسم المستخدم",
   "email_valid" : "الرجاء إدخال بريد إلكتروني صالح",
   "or_register_by" : "أو التسجيل بواسطة",
-  "have_account" : "هل لديك حساب ؟"
+  "have_account" : "هل لديك حساب ؟",
+
+
+
+
+
+
+
+  "weather": "الطقس",
+  "choosePlant": "اختر نبتة",
+  "calculateFertilizer": "حساب السماد",
+  "description": "الوصف",
+  "nutrition": "التغذية",
+  "storage": "التخزين",
+  "diseases": "الأمراض",
+  "plantingTime": "وقت الزراعة",
+  "npkFormula": "تركيبة NPK",
+  "temperature": "درجة الحرارة",
+  "humidity": "الرطوبة",
+  "prevention": "الوقاية",
+  "fetchingWeather": "جاري جلب بيانات الطقس...",
+  "locationRequired": "يطلب إذن الموقع",
+  "enableLocation": "تفعيل الموقع",
+  "permanentDenial": "تم رفض إذن الموقع بشكل دائم. يرجى التفعيل من الإعدادات.",
+  "openSettings": "فتح الإعدادات",
+  "gpsDisabled": "خدمة الموقع معطلة. يرجى تفعيل GPS.",
+  "enableGPS": "تفعيل GPS",
+  "weatherError": "خطأ في جلب بيانات الطقس: {error}",
+  "tryAgain": "حاول مرة أخرى",
+  "getWeather": "احصل على الطقس",
+  "feelsLike": "تشعر بـ {temp}°م",
+  "@feelsLike": {
+    "placeholders": {
+      "temp": {}
+    }
+  },
+
+
+
+
+
+  "weather_details": "تفاصيل الطقس",
+  "current_weather": "الطقس الحالي",
+  "feels_like": "درجة الحرارة المحسوسة",
+  "wind_speed": "سرعة الرياح",
+  "pressure": "الضغط الجوي",
+  "sunrise": "شروق الشمس",
+  "sunset": "غروب الشمس",
+
+
+
+
+
+
+
+  "fertilizerCalculator": "{emoji} {name} سماد",
+  "@fertilizerCalculator": {
+    "placeholders": {
+      "emoji": {},
+      "name": {}
+    }
+  },
+
+  "plantType": "النوع: {type}",
+  "landArea": "المساحة ({unit}):",
+  "numberOfTrees": "عدد الأشجار",
+  "treeAge": "عمر الشجرة (سنوات)",
+  "recommendedNpk": "نسبة NPK الموصى بها:",
+  "calculateRequirements": "حساب المتطلبات",
+  "requiredFertilizers": "السماد المطلوب ({calculationContext}):",
+  "@requiredFertilizers": {
+    "placeholders": {
+      "calculationContext": {}
+    }
+  },  "treeNote": "ملاحظة: الحسابات تشمل عامل العمر لأشجار عمرها {age} سنوات",
+  "areaNote": "ملاحظة: 1 دونم = 1000 متر مربع (10,000 قدم مربع)",
+  "nitrogen": "النيتروجين",
+  "phosphorus": "الفوسفور",
+  "potassium": "البوتاسيوم",
+  "dunam": "دونم",
+  "acre": "فدان",
+  "unit": "الوحدة:",
+  "urea": "يوريا",
+  "ssp": "سوبر فوسفات",
+  "mop": "كلوريد البوتاسيوم",
+
+
+
+
+
+
+
+  "profile": "الملف الشخصي",
+  "darkMode": "الوضع الليلي",
+  "language": "اللغة",
+  "english": "الإنجليزية",
+  "logout": "تسجيل الخروج",
+  "confirmLogout": "تأكيد الخروج",
+  "logoutMessage": "هل أنت متأكد من رغبتك في تسجيل الخروج؟",
+
+
+
+
+
+
+
+
+  "editProfile": "تعديل الملف الشخصي",
+  "save": "حفظ",
+  "bio": "السيرة الذاتية",
+  "country": "الدولة",
+  "phone": "الهاتف",
+  "email": "البريد الإلكتروني",
+  "saveChanges": "حفظ التغييرات",
+  "nameRequired": "الاسم مطلوب",
+  "bioRequired": "السيرة الذاتية مطلوبة",
+  "countryRequired": "الدولة مطلوبة",
+  "phoneRequired": "الهاتف مطلوب",
+  "profileUpdated": "تم تحديث الملف الشخصي بنجاح",
+  "updateFailed": "فشل التحديث: {error}",
+
+
+
+
+
+
+
+  "home": "الرئيسية",
+  "community": "المجتمع",
+  "detection": "الكشف",
+  "profile2" : "ملفي",
+  "verificationSent": "تم إعادة إرسال البريد التأكيدي. يرجى فحص صندوق الوارد.",
+  "verificationError": "خطأ في إرسال التأكيد: {error}",
+
+
+
+
+
+
+  "detectionResults": "نتائج الكشف",
+  "detectionResult": "نتيجة الكشف",
+  "recommendedTreatment": "العلاج الموصى به",
+  "history": "السجل",
+  "noDetectionHistory": "لا يوجد سجل كشف",
+  "historyPlaceholder": "سيظهر هنا مسحات صحة النبات الخاصة بك",
+  "confirmDelete": "تأكيد الحذف",
+  "deleteConfirmation": "هل أنت متأكد من رغبتك في حذف هذا العنصر؟",
+  "delete": "حذف",
+  "treatmentLabel": "{treatment}",
+
+
+
+
+
+
+
+  "treatment": "العلاج",
+  "tips": "النصائح",
+  "date": "التاريخ",
+  "nearestNursery": "أقرب مشتل نباتات",
+  "noStoresFound": "لم يتم العثور على مشاتل قريبة",
+  "locationError": "خطأ: {error}",
+  "launchError": "تعذر فتح الخرائط",
+  "tap_camera_to_scan": "اضغط على زر الكاميرا أدناه\nلبدء فحص نباتاتك"
+
 
 
 
