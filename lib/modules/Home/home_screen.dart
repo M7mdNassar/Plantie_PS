@@ -43,7 +43,7 @@ class HomeScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                           S.of(context).weather,
+                          S.of(context).weather,
                           style: Theme.of(context).textTheme.labelLarge,
                         ),
                         Text(
@@ -238,7 +238,8 @@ class HomeScreen extends StatelessWidget {
             _buildDetailRow(Icons.calendar_today, S.of(context).plantingTime,
                 plant.plantingTime, context),
             const SizedBox(height: 8),
-            _buildDetailRow(Icons.eco, S.of(context).npkFormula, plant.npk, context),
+            _buildDetailRow(
+                Icons.eco, S.of(context).npkFormula, plant.npk, context),
           ],
         ),
       ),
@@ -256,7 +257,7 @@ class HomeScreen extends StatelessWidget {
             labelColor: plantieColor,
             unselectedLabelColor: Colors.grey,
             indicatorColor: plantieColor,
-            tabs:  [
+            tabs: [
               Tab(text: S.of(context).description),
               Tab(text: S.of(context).nutrition),
               Tab(text: S.of(context).storage),
@@ -354,8 +355,10 @@ class HomeScreen extends StatelessWidget {
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
-        _buildStorageItem(S.of(context).temperature, storage['temperature']!, context),
-        _buildStorageItem(S.of(context).humidity, storage['humidity']!, context),
+        _buildStorageItem(
+            S.of(context).temperature, storage['temperature']!, context),
+        _buildStorageItem(
+            S.of(context).humidity, storage['humidity']!, context),
       ],
     );
   }
@@ -471,7 +474,7 @@ class HomeScreen extends StatelessWidget {
     if (state is WeatherFetchErrorState) {
       return _buildError(state.msg, cubit, context);
     }
-    return _buildInitial(cubit , context);
+    return _buildInitial(cubit, context);
   }
 
   Widget _buildWeatherData(WeatherData weather, BuildContext context) {
@@ -521,8 +524,11 @@ class HomeScreen extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              DateFormat.yMMMMEEEEd(Localizations.localeOf(context).toString()).format(weather.lastUpdated),
+              DateFormat.yMMMEd(Localizations.localeOf(context).toString())
+                  .format(weather.lastUpdated),
               style: textStyle,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 1,
             ),
             const SizedBox(height: 12),
             Text(
@@ -533,7 +539,9 @@ class HomeScreen extends StatelessWidget {
               ),
             ),
             Text(
-              S.of(context).feelsLike(weather.main.feelsLike.round().toString()),
+              S
+                  .of(context)
+                  .feelsLike(weather.main.feelsLike.round().toString()),
               style: textStyle,
             ),
           ],
@@ -558,7 +566,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPermissionDenied(HomeCubit cubit , context) {
+  Widget _buildPermissionDenied(HomeCubit cubit, context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -584,7 +592,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildPermanentDenial(HomeCubit cubit , context) {
+  Widget _buildPermanentDenial(HomeCubit cubit, context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -592,7 +600,7 @@ class HomeScreen extends StatelessWidget {
           Icon(Icons.settings, size: 40, color: Colors.white),
           SizedBox(height: 16),
           Text(
-              S.of(context).permanentDenial,
+            S.of(context).permanentDenial,
             style: TextStyle(color: Colors.white, fontSize: 16),
             textAlign: TextAlign.center,
           ),
@@ -610,7 +618,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildServicesDisabled(HomeCubit cubit , context) {
+  Widget _buildServicesDisabled(HomeCubit cubit, context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -618,7 +626,7 @@ class HomeScreen extends StatelessWidget {
           Icon(Icons.gps_off, size: 40, color: Colors.white),
           SizedBox(height: 16),
           Text(
-              S.of(context).gpsDisabled,
+            S.of(context).gpsDisabled,
             style: TextStyle(color: Colors.white, fontSize: 16),
             textAlign: TextAlign.center,
           ),
@@ -636,7 +644,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildError(String error, HomeCubit cubit , context) {
+  Widget _buildError(String error, HomeCubit cubit, context) {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -644,7 +652,7 @@ class HomeScreen extends StatelessWidget {
           Icon(Icons.error_outline, size: 40, color: Colors.white),
           SizedBox(height: 16),
           Text(
-              S.of(context).weatherError(error),
+            S.of(context).weatherError(error),
             style: TextStyle(color: Colors.white, fontSize: 16),
             textAlign: TextAlign.center,
           ),
@@ -652,7 +660,7 @@ class HomeScreen extends StatelessWidget {
           TextButton.icon(
             icon: Icon(Icons.refresh),
             label: Text(
-                S.of(context).tryAgain,
+              S.of(context).tryAgain,
               style: TextStyle(fontSize: 20, color: Colors.white),
             ),
             onPressed: cubit.getWeatherData,
@@ -662,7 +670,7 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInitial(HomeCubit cubit , context) {
+  Widget _buildInitial(HomeCubit cubit, context) {
     return Center(
       child: TextButton.icon(
         icon: Icon(Icons.cloud),

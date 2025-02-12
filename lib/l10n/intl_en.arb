@@ -250,7 +250,11 @@
   "diseaseNotDetected": "Disease not recognized",
 
   "good" : "Good",
-  "avoid" : "Avoid"
+  "avoid" : "Avoid",
+
+
+  "selectLanguage": "Select Language",
+  "languageChanged": "Language changed. Restart the app?"
 
 }
 

@@ -97,7 +97,7 @@ class MyApp extends StatelessWidget {
         builder: (context, state) {
           var cubit = AppCubit.get(context);
           return MaterialApp(
-            locale: Locale("ar"),
+            locale: Locale(cubit.currentLanguage),
               localizationsDelegates: [
                 S.delegate,
                 GlobalMaterialLocalizations.delegate,

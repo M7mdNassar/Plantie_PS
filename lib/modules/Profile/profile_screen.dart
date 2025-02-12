@@ -94,25 +94,14 @@ class ProfileScreen extends StatelessWidget {
                     child: buildCard(
                       context: context,
                       icon: Icons.language,
-                      title: S.of(context).language,
-                      trailing: Row(
-                        children: [
-                          Text(
-                            S.of(context).english,
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodyMedium
-                                ?.copyWith(
-                                  fontSize: 16.0,
-                                  color: Colors.white,
-                                ),
-                          ),
-                          const Icon(
-                            Icons.arrow_forward_ios,
-                            size: 20.0,
-                          ),
-                        ],
+                      title: isArabic() ? "العربية" : "English",
+                      trailing: const Icon(
+                        Icons.arrow_forward_ios,
+                        size: 20.0,
                       ),
+                      onTap: () {
+                        _showLanguageDialog(context);
+                      },
                     ),
                   ),
                   const SizedBox(height: 20.0),
@@ -149,6 +138,47 @@ class ProfileScreen extends StatelessWidget {
           ),
         );
       },
+    );
+  }
+
+  void _showLanguageDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => BlocBuilder<AppCubit, AppStates>(
+        builder: (context, state) {
+          final cubit = AppCubit.get(context);
+          return AlertDialog(
+            title: Text(S.of(context).selectLanguage),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ListTile(
+                  title: Text('English'),
+                  leading: Radio<String>(
+                    value: 'en',
+                    groupValue: cubit.currentLanguage,
+                    onChanged: (value) {
+                      cubit.changeLanguage(value!);
+                      Navigator.pop(context);
+                    },
+                  ),
+                ),
+                ListTile(
+                  title: Text('العربية'),
+                  leading: Radio<String>(
+                    value: 'ar',
+                    groupValue: cubit.currentLanguage,
+                    onChanged: (value) {
+                      cubit.changeLanguage(value!);
+                      Navigator.pop(context);
+                    },
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }

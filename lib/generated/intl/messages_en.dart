@@ -169,6 +169,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "landArea": m3,
     "language": MessageLookupByLibrary.simpleMessage("Language"),
+    "languageChanged": MessageLookupByLibrary.simpleMessage(
+      "Language changed. Restart the app?",
+    ),
     "launchError": MessageLookupByLibrary.simpleMessage(
       "Could not launch maps",
     ),
@@ -273,6 +276,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "save": MessageLookupByLibrary.simpleMessage("Save"),
     "saveChanges": MessageLookupByLibrary.simpleMessage("Save Changes"),
     "searchPosts": MessageLookupByLibrary.simpleMessage("Search posts"),
+    "selectLanguage": MessageLookupByLibrary.simpleMessage("Select Language"),
     "sent_email_to_update_paassword": MessageLookupByLibrary.simpleMessage(
       "we sent to your email url to use it to reset the password",
     ),

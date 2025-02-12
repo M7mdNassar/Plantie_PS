@@ -4,6 +4,8 @@ import 'package:plantie/shared/styles/colors.dart';
 import '../../generated/l10n.dart';
 import '../../layout/cubit/cubit.dart';
 
+enum FertilizerType { ssp, urea, mop }
+
 class PlantData {
   final String name;
   final String type; // 'tree' or 'crop'
@@ -37,7 +39,6 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
 
   List<String> get units => [S.of(context).dunam, S.of(context).acre];
 
-
   void calculateFertilizer() {
     final npkValues = widget.plant.npk.split('-').map(double.parse).toList();
 
@@ -49,7 +50,8 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
       baseCalculation = treeCount * ageFactor;
       newCalculationType = 'per tree';
     } else {
-      double areaInDunams = selectedUnit == 'Acre' ? landArea * 4.046 : landArea;
+      double areaInDunams =
+          selectedUnit == 'Acre' ? landArea * 4.046 : landArea;
       baseCalculation = areaInDunams;
       newCalculationType = 'per $selectedUnit';
     }
@@ -68,9 +70,9 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
 
     setState(() {
       fertilizerAmounts = {
-        'SSP': ssp,
-        'UREA': urea,
-        'MOP': mop,
+        FertilizerType.ssp.name: ssp,
+        FertilizerType.urea.name: urea,
+        FertilizerType.mop.name: mop,
       };
       calculationType = newCalculationType;
     });
@@ -86,10 +88,9 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(S.of(context).fertilizerCalculator(
-             widget.plant.emoji,
-             widget.plant.name
-        )),
+        title: Text(S
+            .of(context)
+            .fertilizerCalculator(widget.plant.emoji, widget.plant.name)),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
@@ -158,14 +159,16 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
         _buildCounterInput(
           label: S.of(context).numberOfTrees,
           value: treeCount,
-          onDecrement: () => setState(() => treeCount = treeCount > 1 ? treeCount - 1 : 1),
+          onDecrement: () =>
+              setState(() => treeCount = treeCount > 1 ? treeCount - 1 : 1),
           onIncrement: () => setState(() => treeCount++),
         ),
         const SizedBox(height: 20),
         _buildCounterInput(
           label: S.of(context).treeAge,
           value: treeAge,
-          onDecrement: () => setState(() => treeAge = treeAge > 1 ? treeAge - 1 : 1),
+          onDecrement: () =>
+              setState(() => treeAge = treeAge > 1 ? treeAge - 1 : 1),
           onIncrement: () => setState(() => treeAge++),
         ),
       ],
@@ -185,7 +188,7 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-            S.of(context).landArea(selectedUnit),
+              S.of(context).landArea(selectedUnit),
               style: const TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -211,7 +214,8 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.remove_circle, color: Colors.red, size: 32),
+                    icon: const Icon(Icons.remove_circle,
+                        color: Colors.red, size: 32),
                     onPressed: () => setState(() {
                       if (landArea > 0.5) landArea -= 0.5;
                     }),
@@ -224,7 +228,8 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.add_circle, color: Colors.green, size: 32),
+                    icon: const Icon(Icons.add_circle,
+                        color: Colors.green, size: 32),
                     onPressed: () => setState(() => landArea += 0.5),
                   ),
                 ],
@@ -290,20 +295,24 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
   Widget _buildUnitSelector() {
     return Row(
       children: [
-         Text(S.of(context).unit),
+        Text(S.of(context).unit),
         const SizedBox(width: 10),
         ...units.map((unit) => ChoiceChip(
-          label: Text(unit , style: Theme.of(context).textTheme.bodyMedium,),
-          selected: selectedUnit == unit,
-          onSelected: (selected) => setState(() => selectedUnit = unit),
-          backgroundColor: AppCubit.get(context).isDark
-              ? HexColor("1C1C1E")
-              : HexColor("FFFFFF"),
-          selectedColor: plantieColor,  // Your primary color
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-        )),
+              label: Text(
+                unit,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              selected: selectedUnit == unit,
+              onSelected: (selected) => setState(() => selectedUnit = unit),
+              backgroundColor: AppCubit.get(context).isDark
+                  ? HexColor("1C1C1E")
+                  : HexColor("FFFFFF"),
+              selectedColor: plantieColor,
+              // Your primary color
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            )),
       ],
     );
   }
@@ -318,7 +327,7 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-             Text(
+            Text(
               S.of(context).recommendedNpk,
               style: TextStyle(
                 fontSize: 16,
@@ -328,7 +337,8 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
             const SizedBox(height: 10),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: widget.plant.npk.split('-').asMap().entries.map((entry) {
+              children:
+                  widget.plant.npk.split('-').asMap().entries.map((entry) {
                 return Column(
                   children: [
                     Text(
@@ -340,7 +350,11 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
                       ),
                     ),
                     Text(
-                    [S.of(context).nitrogen, S.of(context).phosphorus, S.of(context).potassium][entry.key],
+                      [
+                        S.of(context).nitrogen,
+                        S.of(context).phosphorus,
+                        S.of(context).potassium
+                      ][entry.key],
                       style: const TextStyle(color: Colors.grey),
                     ),
                   ],
@@ -358,7 +372,7 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
       child: ElevatedButton.icon(
         icon: const Icon(Icons.calculate, color: Colors.white),
         label: Text(
-            S.of(context).calculateRequirements,
+          S.of(context).calculateRequirements,
           style: TextStyle(fontSize: 18),
         ),
         style: ElevatedButton.styleFrom(
@@ -387,11 +401,10 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
           children: [
             Text(
               S.of(context).requiredFertilizers(
-                  isTree
-                    ? S.of(context).numberOfTrees
-                    : calculationType ?? S.of(context).dunam,
-              ),
-
+                    isTree
+                        ? S.of(context).numberOfTrees
+                        : calculationType ?? S.of(context).dunam,
+                  ),
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -402,9 +415,15 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildFertilizerTile(S.of(context).ssp, fertilizerAmounts!['SSP']!),
-                _buildFertilizerTile(S.of(context).urea, fertilizerAmounts!['UREA']!),
-                _buildFertilizerTile(S.of(context).mop, fertilizerAmounts!['MOP']!),
+                if (fertilizerAmounts!.containsKey(FertilizerType.ssp.name))
+                  _buildFertilizerTile(FertilizerType.ssp,
+                      fertilizerAmounts![FertilizerType.ssp.name]!),
+                if (fertilizerAmounts!.containsKey(FertilizerType.urea.name))
+                  _buildFertilizerTile(FertilizerType.urea,
+                      fertilizerAmounts![FertilizerType.urea.name]!),
+                if (fertilizerAmounts!.containsKey(FertilizerType.mop.name))
+                  _buildFertilizerTile(FertilizerType.mop,
+                      fertilizerAmounts![FertilizerType.mop.name]!),
               ],
             ),
             const SizedBox(height: 20),
@@ -421,15 +440,13 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
     );
   }
 
-  Widget _buildFertilizerTile(String type, double amount) {
+  Widget _buildFertilizerTile(FertilizerType type, double amount) {
     return Column(
       children: [
-        if (type == "SSP")
-          Text('🌱', style: TextStyle(fontSize: 50)),
-        if (type == "UREA")
-          Text('🍃', style: TextStyle(fontSize: 50)),
-        if (type == "MOP")
-          Text('🌸', style: TextStyle(fontSize: 50)),
+        Text(
+          _getFertilizerEmoji(type),
+          style: const TextStyle(fontSize: 50),
+        ),
         const SizedBox(height: 8),
         Text(
           '${amount.toStringAsFixed(1)} kg',
@@ -439,10 +456,32 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
           ),
         ),
         Text(
-          type,
+          _getFertilizerName(type),
           style: const TextStyle(color: Colors.grey),
         ),
       ],
     );
+  }
+
+  String _getFertilizerEmoji(FertilizerType type) {
+    switch (type) {
+      case FertilizerType.ssp:
+        return '🌱';
+      case FertilizerType.urea:
+        return '🍃';
+      case FertilizerType.mop:
+        return '🌸';
+    }
+  }
+
+  String _getFertilizerName(FertilizerType type) {
+    switch (type) {
+      case FertilizerType.ssp:
+        return S.of(context).ssp;
+      case FertilizerType.urea:
+        return S.of(context).urea;
+      case FertilizerType.mop:
+        return S.of(context).mop;
+    }
   }
 }

@@ -27,3 +27,8 @@ class VerificationEmailErrorState extends AppStates {
 
   VerificationEmailErrorState(this.error);
 }
+
+class LanguageChangedState extends AppStates {
+  final String languageCode;
+  LanguageChangedState(this.languageCode);
+}

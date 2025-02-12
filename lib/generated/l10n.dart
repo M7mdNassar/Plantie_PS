@@ -1319,6 +1319,26 @@ class S {
   String get avoid {
     return Intl.message('Avoid', name: 'avoid', desc: '', args: []);
   }
+
+  /// `Select Language`
+  String get selectLanguage {
+    return Intl.message(
+      'Select Language',
+      name: 'selectLanguage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Language changed. Restart the app?`
+  String get languageChanged {
+    return Intl.message(
+      'Language changed. Restart the app?',
+      name: 'languageChanged',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

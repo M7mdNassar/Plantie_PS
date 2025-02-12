@@ -161,6 +161,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "iUnderstand": MessageLookupByLibrary.simpleMessage("فهمت - المتابعة"),
     "landArea": m3,
     "language": MessageLookupByLibrary.simpleMessage("اللغة"),
+    "languageChanged": MessageLookupByLibrary.simpleMessage(
+      "تم تغيير اللغة. أعد تشغيل التطبيق؟",
+    ),
     "launchError": MessageLookupByLibrary.simpleMessage("تعذر فتح الخرائط"),
     "locationError": m4,
     "locationRequired": MessageLookupByLibrary.simpleMessage("يطلب إذن الموقع"),
@@ -261,6 +264,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "save": MessageLookupByLibrary.simpleMessage("حفظ"),
     "saveChanges": MessageLookupByLibrary.simpleMessage("حفظ التغييرات"),
     "searchPosts": MessageLookupByLibrary.simpleMessage("البحث في المنشورات"),
+    "selectLanguage": MessageLookupByLibrary.simpleMessage("اختر اللغة"),
     "sent_email_to_update_paassword": MessageLookupByLibrary.simpleMessage(
       "تم ارسال رابط اعاده كلمه المرور علي الايميل",
     ),

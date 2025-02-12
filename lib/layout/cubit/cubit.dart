@@ -12,7 +12,9 @@ import '../../shared/network/local/cache_helper.dart';
 
 class AppCubit extends Cubit<AppStates>
 {
-  AppCubit() : super(AppInitialState());
+  AppCubit() : super(AppInitialState()){
+    _loadSavedLanguage();
+  }
 
   static AppCubit get(context) => BlocProvider.of(context);
 
@@ -68,6 +70,25 @@ class AppCubit extends Cubit<AppStates>
     }).catchError((error) {
       emit(VerificationEmailErrorState(error.toString()));
     });
+  }
+
+
+
+
+
+  String currentLanguage = 'en';
+  bool get isArabic => currentLanguage == 'ar';
+
+  Future<void> changeLanguage(String langCode) async {
+    currentLanguage = langCode;
+    await CacheHelper.saveData(key: 'language', value: langCode);
+    emit(LanguageChangedState(langCode));
+  }
+
+
+  void _loadSavedLanguage() async {
+    currentLanguage = CacheHelper.getData(key: 'language') ?? 'en';
+    emit(LanguageChangedState(currentLanguage));
   }
 
 }

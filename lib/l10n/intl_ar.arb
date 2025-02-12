@@ -255,7 +255,11 @@
   "diseaseNotDetected": "لم يتم التعرف على المرض",
 
   "good" : "جيد",
-  "avoid" : "تجنب"
+  "avoid" : "تجنب",
+
+
+  "selectLanguage": "اختر اللغة",
+  "languageChanged": "تم تغيير اللغة. أعد تشغيل التطبيق؟"
 
 
 

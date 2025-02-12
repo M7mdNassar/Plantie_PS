@@ -31,7 +31,7 @@ class ImagePickerHandler {
 
       // Rest of processing remains same...
       final permanentImage =
-      await ImageStorageHelper.saveImagePermanently(originalImage);
+          await ImageStorageHelper.saveImagePermanently(originalImage);
 
       showDialog(
         context: context,
@@ -44,23 +44,27 @@ class ImagePickerHandler {
 
       if (result != null) {
         final diseaseInfo = DiseaseInfo.data[result] ??
-             DiseaseData(S.of(context).unknownDisease, S.of(context).noDetails, S.of(context).diseaseNotDetected);
+            DiseaseData(S.of(context).unknownDisease, S.of(context).noDetails,
+                S.of(context).diseaseNotDetected);
         await cubit.addDetectionToHistory(permanentImage, result);
         cubit.setDetectionResult(permanentImage, diseaseInfo.name);
       }
     } catch (e) {
       Navigator.pop(context);
-      showToast(text: S.of(context).errorOccurred(e.toString()), state: ToastStates.error);
+      showToast(
+          text: S.of(context).errorOccurred(e.toString()),
+          state: ToastStates.error);
     }
   }
 
   static Future<bool> _showImageGuidance(BuildContext context) async {
     return await Navigator.push<bool>(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const _PreCaptureGuidanceScreen(),
-      ),
-    ) ?? false;
+          context,
+          MaterialPageRoute(
+            builder: (context) => const _PreCaptureGuidanceScreen(),
+          ),
+        ) ??
+        false;
   }
 
   static Future<ImageSource?> _showImageSourceSelector(BuildContext context) {
@@ -104,16 +108,28 @@ class _ImageSourceSelector extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         ListTile(
-          leading:  Icon(Icons.camera_alt , color: plantieColor,),
-          title: Text(S.of(context).takePhoto , style: Theme.of(context).textTheme.labelLarge,),
+          leading: Icon(
+            Icons.camera_alt,
+            color: plantieColor,
+          ),
+          title: Text(
+            S.of(context).takePhoto,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
           onTap: () => Navigator.pop(context, ImageSource.camera),
         ),
         SizedBox(
           height: 8,
         ),
         ListTile(
-          leading: Icon(Icons.photo_library ,color: plantieColor,),
-          title:  Text(S.of(context).chooseFromGallery , style: Theme.of(context).textTheme.labelLarge,),
+          leading: Icon(
+            Icons.photo_library,
+            color: plantieColor,
+          ),
+          title: Text(
+            S.of(context).chooseFromGallery,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
           onTap: () => Navigator.pop(context, ImageSource.gallery),
         ),
         SizedBox(
@@ -150,14 +166,22 @@ class _PreCaptureGuidanceScreen extends StatelessWidget {
             const SizedBox(height: 30),
             ElevatedButton.icon(
               icon: const Icon(Icons.check),
-              label: Text(S.of(context).iUnderstand ,style: Theme.of(context).textTheme.bodyMedium,),
+              label: Text(
+                S.of(context).iUnderstand,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.white,
+                    ),
+              ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: plantieColor,
-                padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
               ),
               onPressed: () => Navigator.pop(context, true),
             ),
-            SizedBox(height: 40,),
+            SizedBox(
+              height: 40,
+            ),
           ],
         ),
       ),
@@ -204,16 +228,16 @@ class _PreCaptureGuidanceScreen extends StatelessWidget {
       ],
     );
   }
-  Widget _buildInstructionItem({
-    required IconData icon,
-    required String title,
-    required List<String> points,
-    context
-  }) {
+
+  Widget _buildInstructionItem(
+      {required IconData icon,
+      required String title,
+      required List<String> points,
+      context}) {
     return Card(
-          color: AppCubit.get(context).isDark
-              ? HexColor("1C1C1E")
-              : HexColor("FFFFFF"),
+      color: AppCubit.get(context).isDark
+          ? HexColor("1C1C1E")
+          : HexColor("FFFFFF"),
       margin: const EdgeInsets.symmetric(vertical: 10),
       child: Padding(
         padding: const EdgeInsets.all(15),
@@ -235,15 +259,15 @@ class _PreCaptureGuidanceScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   ...points.map((point) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.fiber_manual_record, size: 8),
-                        const SizedBox(width: 8),
-                        Expanded(child: Text(point)),
-                      ],
-                    ),
-                  )),
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          children: [
+                            const Icon(Icons.fiber_manual_record, size: 8),
+                            const SizedBox(width: 8),
+                            Expanded(child: Text(point)),
+                          ],
+                        ),
+                      )),
                 ],
               ),
             ),
@@ -256,15 +280,17 @@ class _PreCaptureGuidanceScreen extends StatelessWidget {
   Widget _buildExampleComparison(context) {
     return Column(
       children: [
-         Text(
+        Text(
           isArabic() ? "الصح | الخطآ" : 'Good vs Bad Examples:',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         const SizedBox(height: 15),
         Row(
           children: [
-            _buildExampleImage('assets/images/good_leaf.heic', S.of(context).good),
-            _buildExampleImage('assets/images/bad_leaf.heic', S.of(context).avoid),
+            _buildExampleImage(
+                'assets/images/good_leaf.heic', S.of(context).good),
+            _buildExampleImage(
+                'assets/images/bad_leaf.heic', S.of(context).avoid),
           ],
         ),
       ],
