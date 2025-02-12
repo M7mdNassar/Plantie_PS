@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:plantie/models/post/post_model.dart';
+import '../../generated/l10n.dart';
 import '../../models/user/user_model.dart';
 import '../../shared/styles/colors.dart';
 import '../../shared/styles/icon_broken.dart';
@@ -19,7 +20,7 @@ class CommentScreen extends StatelessWidget {
     final currentUser = CurrentUser.user!;
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Comments")),
+      appBar: AppBar(title: Text(S.of(context).comments)),
       body: Column(
         children: [
           Expanded(
@@ -53,9 +54,8 @@ class CommentScreen extends StatelessWidget {
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       trailing: Text(
-                        DateFormat('MMM dd, HH:mm')
-                            .format(comment.timestamp),
-                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                          DateFormat.yMMMMd(Localizations.localeOf(context).toString()).add_Hm().format(comment.timestamp),
+                          style: Theme.of(context).textTheme.bodySmall!.copyWith(
                           height: 1.4,
                         ),
                       ),
@@ -74,8 +74,8 @@ class CommentScreen extends StatelessWidget {
                   child: TextField(
                     style: Theme.of(context).textTheme.titleMedium,
                     controller: _commentController,
-                    decoration: const InputDecoration(
-                      hintText: "Write a comment...",
+                    decoration:  InputDecoration(
+                      hintText: S.of(context).write_comment,
                       border: OutlineInputBorder(),
                     ),
                   ),

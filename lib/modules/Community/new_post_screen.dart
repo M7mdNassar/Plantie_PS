@@ -5,6 +5,7 @@ import 'package:plantie/modules/Community/cubit/cubit.dart';
 import 'package:plantie/modules/Community/cubit/states.dart';
 import 'package:plantie/shared/components/components.dart';
 import 'package:plantie/shared/styles/colors.dart';
+import '../../generated/l10n.dart';
 import '../../shared/styles/icon_broken.dart';
 
 class NewPostScreen extends StatelessWidget {
@@ -32,7 +33,7 @@ class NewPostScreen extends StatelessWidget {
               },
               icon: Icon(IconBroken.Arrow___Left_2),
             ),
-            title: Text("Create Post"),
+            title: Text(S.of(context).createPost),
             actions: [
               defaultTextButton(
                 function: () {
@@ -46,7 +47,7 @@ class NewPostScreen extends StatelessWidget {
                     );
                   }
                 },
-                text: "Post",
+                text:S.of(context).postButton,
               ),
               SizedBox(width: 8),
             ],
@@ -76,7 +77,7 @@ class NewPostScreen extends StatelessWidget {
                     maxLines: null,
                     keyboardType: TextInputType.multiline,
                     decoration: InputDecoration(
-                      hintText: "What is on your mind,",
+                      hintText: S.of(context).whatsOnMind,
                       border: UnderlineInputBorder(
                         borderSide: BorderSide(color: Colors.grey),
                       ),
@@ -127,7 +128,7 @@ class NewPostScreen extends StatelessWidget {
                     Expanded(
                       child: TextButton(
                         onPressed: () => cubit.pickPostImages(),
-                        child: const Row(
+                        child:  Row(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
@@ -136,7 +137,7 @@ class NewPostScreen extends StatelessWidget {
                             ),
                             SizedBox(width: 8),
                             Text(
-                              'Add Photos',
+                              S.of(context).addPhotos,
                             ),
                           ],
                         ),

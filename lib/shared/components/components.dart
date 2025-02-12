@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
+import 'package:plantie/shared/components/constants.dart';
 import 'package:plantie/shared/styles/colors.dart';
 import 'package:readmore/readmore.dart';
 import '../../layout/cubit/cubit.dart';
@@ -354,8 +355,9 @@ Widget buildPostItem(PostModel post, context, index) {
                       post.name,
                     ),
                     Text(
-                      DateFormat('d MMM h:mm a').format(post.dateTime),
-                      style: Theme.of(context).textTheme.bodySmall!.copyWith(
+                      // DateFormat('d MMM h:mm a').format(post.dateTime),
+                        DateFormat.yMMMMEEEEd(Localizations.localeOf(context).toString()).add_jm().format(post.dateTime),
+                        style: Theme.of(context).textTheme.bodySmall!.copyWith(
                             height: 1.4,
                           ),
                     ),
@@ -377,20 +379,20 @@ Widget buildPostItem(PostModel post, context, index) {
                     showDialog(
                       context: context,
                       builder: (context) => AlertDialog(
-                        title: const Text("Delete Post"),
-                        content: const Text(
-                            "Are you sure you want to delete this post?"),
+                        title:  Text( isArabic() ? "حذف المنشور": "Delete Post"),
+                        content:  Text(
+                            isArabic() ? "هل أنت متأكد من حذف المنشور ؟" : "Are you sure you want to delete this post?"),
                         actions: [
                           TextButton(
                             onPressed: () => Navigator.pop(context),
-                            child: const Text("Cancel"),
+                            child: Text(isArabic() ? "إلغاء" : "Cancel"),
                           ),
                           TextButton(
                             onPressed: () {
                               cubit.deletePost(post.postId);
                               Navigator.pop(context);
                             },
-                            child: const Text("Delete"),
+                            child:  Text(isArabic() ? "حذف" : "Delete"),
                           ),
                         ],
                       ),
@@ -399,19 +401,19 @@ Widget buildPostItem(PostModel post, context, index) {
                 },
                 itemBuilder: (context) => [
                   if (post.uId == CurrentUser.user!.uId)
-                    const PopupMenuItem<String>(
+                     PopupMenuItem<String>(
                       value: 'delete',
                       child: Text(
-                        'Delete Post',
+                        isArabic() ? "حذف المنشور": "Delete Post",
                         style: TextStyle(
                           fontSize: 18,
                         ),
                       ),
                     ),
-                  const PopupMenuItem<String>(
+                   PopupMenuItem<String>(
                     value: 'share',
                     child: Text(
-                      'Share Post',
+                      isArabic() ? "مشاركه المنشور": "Share Post",
                       style: TextStyle(
                         fontSize: 18,
                       ),
@@ -445,8 +447,8 @@ Widget buildPostItem(PostModel post, context, index) {
               trimMode: TrimMode.Line,
               trimLines: 2,
               colorClickableText: plantieColor,
-              trimCollapsedText: 'Show more',
-              trimExpandedText: 'Show less',
+              trimCollapsedText: isArabic() ? "أظهر المزيد":'Show more',
+              trimExpandedText: isArabic() ? "إخفاء المزيد":'Show less',
               style: Theme.of(context).textTheme.titleLarge,
               // moreStyle: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
             ),
@@ -530,7 +532,7 @@ Widget buildPostItem(PostModel post, context, index) {
                         width: 15.0,
                       ),
                       Text(
-                        'write a comment ...',
+                        isArabic() ? "آكتب تعليق ..." : 'write a comment ...',
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                     ],
@@ -559,7 +561,7 @@ Widget buildPostItem(PostModel post, context, index) {
                       width: 4.0,
                     ),
                     Text(
-                      'Like',
+                      isArabic() ? "إعجاب" : 'Like',
                       style: Theme.of(context).textTheme.titleLarge,
                     ),
                   ],

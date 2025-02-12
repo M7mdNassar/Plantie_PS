@@ -7,6 +7,7 @@ import 'package:plantie/modules/Community/new_post_screen.dart';
 import 'package:plantie/modules/Community/post_search.dart';
 import 'package:plantie/shared/components/components.dart';
 import 'package:plantie/shared/styles/colors.dart';
+import '../../generated/l10n.dart';
 import '../../shared/styles/icon_broken.dart';
 
 class CommunityScreen extends StatelessWidget {
@@ -21,7 +22,7 @@ class CommunityScreen extends StatelessWidget {
 
           return Scaffold(
             appBar: AppBar(
-              title: Text("Community"),
+              title: Text(S.of(context).community),
               actions: [
                 IconButton(
                     onPressed: () {},

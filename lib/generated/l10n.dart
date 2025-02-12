@@ -1064,6 +1064,261 @@ class S {
       args: [],
     );
   }
+
+  /// `Search posts`
+  String get searchPosts {
+    return Intl.message(
+      'Search posts',
+      name: 'searchPosts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New Post`
+  String get newPost {
+    return Intl.message('New Post', name: 'newPost', desc: '', args: []);
+  }
+
+  /// `Comments`
+  String get comments {
+    return Intl.message('Comments', name: 'comments', desc: '', args: []);
+  }
+
+  /// `Write a comment...`
+  String get write_comment {
+    return Intl.message(
+      'Write a comment...',
+      name: 'write_comment',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No posts`
+  String get no_posts {
+    return Intl.message('No posts', name: 'no_posts', desc: '', args: []);
+  }
+
+  /// `Create Post`
+  String get createPost {
+    return Intl.message('Create Post', name: 'createPost', desc: '', args: []);
+  }
+
+  /// `Post`
+  String get postButton {
+    return Intl.message('Post', name: 'postButton', desc: '', args: []);
+  }
+
+  /// `What's on your mind?`
+  String get whatsOnMind {
+    return Intl.message(
+      'What\'s on your mind?',
+      name: 'whatsOnMind',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Add Photos`
+  String get addPhotos {
+    return Intl.message('Add Photos', name: 'addPhotos', desc: '', args: []);
+  }
+
+  /// `Positioning Tips`
+  String get positioningTips {
+    return Intl.message(
+      'Positioning Tips',
+      name: 'positioningTips',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Capture in good natural lighting`
+  String get positioningTip1 {
+    return Intl.message(
+      'Capture in good natural lighting',
+      name: 'positioningTip1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fill frame with the leaf`
+  String get positioningTip2 {
+    return Intl.message(
+      'Fill frame with the leaf',
+      name: 'positioningTip2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Avoid shadows on the subject`
+  String get positioningTip3 {
+    return Intl.message(
+      'Avoid shadows on the subject',
+      name: 'positioningTip3',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Focus Requirements`
+  String get focusRequirements {
+    return Intl.message(
+      'Focus Requirements',
+      name: 'focusRequirements',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ensure leaf edges are clear`
+  String get focusTip1 {
+    return Intl.message(
+      'Ensure leaf edges are clear',
+      name: 'focusTip1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Focus on affected areas`
+  String get focusTip2 {
+    return Intl.message(
+      'Focus on affected areas',
+      name: 'focusTip2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Keep camera steady`
+  String get focusTip3 {
+    return Intl.message(
+      'Keep camera steady',
+      name: 'focusTip3',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Background Tips`
+  String get backgroundTips {
+    return Intl.message(
+      'Background Tips',
+      name: 'backgroundTips',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use plain background`
+  String get backgroundTip1 {
+    return Intl.message(
+      'Use plain background',
+      name: 'backgroundTip1',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `White/light colors preferred`
+  String get backgroundTip2 {
+    return Intl.message(
+      'White/light colors preferred',
+      name: 'backgroundTip2',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Avoid busy patterns`
+  String get backgroundTip3 {
+    return Intl.message(
+      'Avoid busy patterns',
+      name: 'backgroundTip3',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Capture Guidelines`
+  String get captureGuidelines {
+    return Intl.message(
+      'Capture Guidelines',
+      name: 'captureGuidelines',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `I Understand - Continue`
+  String get iUnderstand {
+    return Intl.message(
+      'I Understand - Continue',
+      name: 'iUnderstand',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Take Photo`
+  String get takePhoto {
+    return Intl.message('Take Photo', name: 'takePhoto', desc: '', args: []);
+  }
+
+  /// `Choose from Gallery`
+  String get chooseFromGallery {
+    return Intl.message(
+      'Choose from Gallery',
+      name: 'chooseFromGallery',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `An error occurred: {error}`
+  String errorOccurred(Object error) {
+    return Intl.message(
+      'An error occurred: $error',
+      name: 'errorOccurred',
+      desc: '',
+      args: [error],
+    );
+  }
+
+  /// `Unknown`
+  String get unknownDisease {
+    return Intl.message('Unknown', name: 'unknownDisease', desc: '', args: []);
+  }
+
+  /// ``
+  String get noDetails {
+    return Intl.message('', name: 'noDetails', desc: '', args: []);
+  }
+
+  /// `Disease not recognized`
+  String get diseaseNotDetected {
+    return Intl.message(
+      'Disease not recognized',
+      name: 'diseaseNotDetected',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Good`
+  String get good {
+    return Intl.message('Good', name: 'good', desc: '', args: []);
+  }
+
+  /// `Avoid`
+  String get avoid {
+    return Intl.message('Avoid', name: 'avoid', desc: '', args: []);
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

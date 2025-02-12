@@ -208,8 +208,54 @@
   "noStoresFound": "لم يتم العثور على مشاتل قريبة",
   "locationError": "خطأ: {error}",
   "launchError": "تعذر فتح الخرائط",
-  "tap_camera_to_scan": "اضغط على زر الكاميرا أدناه\nلبدء فحص نباتاتك"
+  "tap_camera_to_scan": "اضغط على زر الكاميرا أدناه\nلبدء فحص نباتاتك",
 
+
+
+
+  "searchPosts": "البحث في المنشورات",
+  "newPost": "منشور جديد",
+  "comments" : "التعليقات",
+  "write_comment": "أكتب تعليق ...",
+  "no_posts" : "لا يوجد منشورات",
+
+
+  "createPost": "إنشاء منشور",
+  "postButton": "نشر",
+  "whatsOnMind": "ما الذي يدور في ذهنك؟",
+  "addPhotos": "إضافة صور",
+
+
+  "positioningTips": "نصائح حول الوضعية",
+  "positioningTip1": "التقط الصورة في إضاءة طبيعية جيدة",
+  "positioningTip2": "املأ الإطار بالورقة",
+  "positioningTip3": "تجنب الظلال على الورقة",
+
+  "focusRequirements": "متطلبات التركيز",
+  "focusTip1": "تأكد من وضوح حواف الورقة",
+  "focusTip2": "ركز على المناطق المصابة",
+  "focusTip3": "حافظ على ثبات الكاميرا",
+
+  "backgroundTips": "نصائح حول الخلفية",
+  "backgroundTip1": "استخدم خلفية بسيطة",
+  "backgroundTip2": "يُفضل الألوان البيضاء أو الفاتحة",
+  "backgroundTip3": "تجنب الخلفيات المزخرفة",
+
+
+  "captureGuidelines": "إرشادات الالتقاط",
+  "iUnderstand": "فهمت - المتابعة",
+
+
+  "takePhoto": "التقاط صورة",
+  "chooseFromGallery": "اختر من المعرض",
+  "errorOccurred": "حدث خطأ: {error}",
+
+  "unknownDisease": "غير معروف",
+  "noDetails": "",
+  "diseaseNotDetected": "لم يتم التعرف على المرض",
+
+  "good" : "جيد",
+  "avoid" : "تجنب"
 
 
 

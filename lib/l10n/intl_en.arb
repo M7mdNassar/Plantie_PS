@@ -201,11 +201,56 @@
   "noStoresFound": "No nearby stores found",
   "locationError": "Error: {error}",
   "launchError": "Could not launch maps",
-  "tap_camera_to_scan": "Tap the camera button below\nto start scanning your plants"
+  "tap_camera_to_scan": "Tap the camera button below\nto start scanning your plants",
 
 
 
 
+  "searchPosts": "Search posts",
+  "newPost": "New Post",
+  "comments" : "Comments",
+  "write_comment": "Write a comment...",
+  "no_posts" : "No posts",
+
+  "createPost": "Create Post",
+  "postButton": "Post",
+  "whatsOnMind": "What's on your mind?",
+  "addPhotos": "Add Photos",
+
+
+
+  "positioningTips": "Positioning Tips",
+  "positioningTip1": "Capture in good natural lighting",
+  "positioningTip2": "Fill frame with the leaf",
+  "positioningTip3": "Avoid shadows on the subject",
+
+  "focusRequirements": "Focus Requirements",
+  "focusTip1": "Ensure leaf edges are clear",
+  "focusTip2": "Focus on affected areas",
+  "focusTip3": "Keep camera steady",
+
+  "backgroundTips": "Background Tips",
+  "backgroundTip1": "Use plain background",
+  "backgroundTip2": "White/light colors preferred",
+  "backgroundTip3": "Avoid busy patterns",
+
+
+
+  "captureGuidelines": "Capture Guidelines",
+  "iUnderstand": "I Understand - Continue",
+
+
+  "takePhoto": "Take Photo",
+  "chooseFromGallery": "Choose from Gallery",
+
+  "errorOccurred": "An error occurred: {error}",
+
+  "unknownDisease": "Unknown",
+  "noDetails": "",
+  "diseaseNotDetected": "Disease not recognized",
+
+  "good" : "Good",
+  "avoid" : "Avoid"
 
 }
 

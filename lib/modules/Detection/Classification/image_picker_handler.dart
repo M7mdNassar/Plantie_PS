@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:plantie/shared/components/constants.dart';
+import '../../../generated/l10n.dart';
 import '../../../layout/cubit/cubit.dart';
 import '../../../models/disease_info.dart';
 import '../../../shared/components/components.dart';
@@ -42,13 +44,13 @@ class ImagePickerHandler {
 
       if (result != null) {
         final diseaseInfo = DiseaseInfo.data[result] ??
-            const DiseaseData("غير معروف", "", "لم يتم التعرف على المرض");
+             DiseaseData(S.of(context).unknownDisease, S.of(context).noDetails, S.of(context).diseaseNotDetected);
         await cubit.addDetectionToHistory(permanentImage, result);
         cubit.setDetectionResult(permanentImage, diseaseInfo.name);
       }
     } catch (e) {
       Navigator.pop(context);
-      showToast(text: 'Error: ${e.toString()}', state: ToastStates.error);
+      showToast(text: S.of(context).errorOccurred(e.toString()), state: ToastStates.error);
     }
   }
 
@@ -103,7 +105,7 @@ class _ImageSourceSelector extends StatelessWidget {
       children: [
         ListTile(
           leading:  Icon(Icons.camera_alt , color: plantieColor,),
-          title: Text('Take Photo' , style: Theme.of(context).textTheme.labelLarge,),
+          title: Text(S.of(context).takePhoto , style: Theme.of(context).textTheme.labelLarge,),
           onTap: () => Navigator.pop(context, ImageSource.camera),
         ),
         SizedBox(
@@ -111,7 +113,7 @@ class _ImageSourceSelector extends StatelessWidget {
         ),
         ListTile(
           leading: Icon(Icons.photo_library ,color: plantieColor,),
-          title:  Text('Choose from Gallery' , style: Theme.of(context).textTheme.labelLarge,),
+          title:  Text(S.of(context).chooseFromGallery , style: Theme.of(context).textTheme.labelLarge,),
           onTap: () => Navigator.pop(context, ImageSource.gallery),
         ),
         SizedBox(
@@ -139,7 +141,7 @@ class _PreCaptureGuidanceScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Capture Guidelines')),
+      appBar: AppBar(title: Text(S.of(context).captureGuidelines)),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -148,7 +150,7 @@ class _PreCaptureGuidanceScreen extends StatelessWidget {
             const SizedBox(height: 30),
             ElevatedButton.icon(
               icon: const Icon(Icons.check),
-              label: Text('I Understand - Continue' ,style: Theme.of(context).textTheme.bodyMedium,),
+              label: Text(S.of(context).iUnderstand ,style: Theme.of(context).textTheme.bodyMedium,),
               style: ElevatedButton.styleFrom(
                 backgroundColor: plantieColor,
                 padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
@@ -163,44 +165,45 @@ class _PreCaptureGuidanceScreen extends StatelessWidget {
   }
 
   Widget _buildInstructionList(context) {
+    final localizations = S.of(context);
+
     return Column(
       children: [
         _buildInstructionItem(
           icon: Icons.photo_camera,
-          title: 'Positioning Tips',
+          title: localizations.positioningTips,
           points: [
-            'Capture in good natural lighting',
-            'Fill frame with the leaf',
-            'Avoid shadows on the subject'
+            localizations.positioningTip1,
+            localizations.positioningTip2,
+            localizations.positioningTip3,
           ],
           context: context,
         ),
         _buildInstructionItem(
           icon: Icons.zoom_in,
-          title: 'Focus Requirements',
+          title: localizations.focusRequirements,
           points: [
-            'Ensure leaf edges are clear',
-            'Focus on affected areas',
-            'Keep camera steady'
+            localizations.focusTip1,
+            localizations.focusTip2,
+            localizations.focusTip3,
           ],
-            context: context,
+          context: context,
         ),
         _buildInstructionItem(
           icon: Icons.palette,
-          title: 'Background Tips',
+          title: localizations.backgroundTips,
           points: [
-            'Use plain background',
-            'White/light colors preferred',
-            'Avoid busy patterns'
+            localizations.backgroundTip1,
+            localizations.backgroundTip2,
+            localizations.backgroundTip3,
           ],
-            context: context,
+          context: context,
         ),
         const SizedBox(height: 20),
-        _buildExampleComparison(),
+        _buildExampleComparison(context),
       ],
     );
   }
-
   Widget _buildInstructionItem({
     required IconData icon,
     required String title,
@@ -250,18 +253,18 @@ class _PreCaptureGuidanceScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildExampleComparison() {
+  Widget _buildExampleComparison(context) {
     return Column(
       children: [
-        const Text(
-          'Good vs Bad Examples:',
+         Text(
+          isArabic() ? "الصح | الخطآ" : 'Good vs Bad Examples:',
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
         ),
         const SizedBox(height: 15),
         Row(
           children: [
-            _buildExampleImage('assets/images/good_leaf.heic', 'Good'),
-            _buildExampleImage('assets/images/bad_leaf.heic', 'Avoid'),
+            _buildExampleImage('assets/images/good_leaf.heic', S.of(context).good),
+            _buildExampleImage('assets/images/bad_leaf.heic', S.of(context).avoid),
           ],
         ),
       ],

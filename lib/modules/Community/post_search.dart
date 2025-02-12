@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:plantie/shared/styles/colors.dart';
+import '../../generated/l10n.dart';
 import '../../shared/components/components.dart';
 import 'cubit/cubit.dart';
 import 'cubit/states.dart';
@@ -41,7 +42,7 @@ class PostSearchDelegate extends SearchDelegate {
             // Show "No posts" message if there are no results
             return Center(
               child: Text(
-                "No posts",
+                S.of(context).no_posts,
                 style: Theme.of(context).textTheme.titleLarge,
               ),
             );
