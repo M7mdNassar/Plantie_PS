@@ -28,7 +28,7 @@
 
 | Home Screen | Disease Detection | Community | Fertilizer Calculator |
 | ----------- | ----------------- | ------------ | --------------------- |
-| ![Home](https://i.ibb.co/8nCmy5Xr/Simulator-Screenshot-i-Phone-16-Pro-2025-02-17-at-22-55-27.png) | ![Detection](https://i.ibb.co/5xJjcFMp/Simulator-Screenshot-i-Phone-16-Pro-2025-02-17-at-22-56-28.png) | ![Community](https://i.ibb.co/5xJjcFMp/Simulator-Screenshot-i-Phone-16-Pro-2025-02-17-at-22-56-28.png) | ![Calculator](https://i.ibb.co/qF5BwySW/Simulator-Screenshot-i-Phone-16-Pro-2025-02-17-at-22-55-47.png) |
+| ![Home](https://i.ibb.co/8nCmy5Xr/Simulator-Screenshot-i-Phone-16-Pro-2025-02-17-at-22-55-27.png) | ![Detection](https://i.ibb.co/5WY73mMh/Simulator-Screenshot-i-Phone-16-Pro-2025-02-17-at-22-57-09.png) | ![Community](https://i.ibb.co/5xJjcFMp/Simulator-Screenshot-i-Phone-16-Pro-2025-02-17-at-22-56-28.png) | ![Calculator](https://i.ibb.co/qF5BwySW/Simulator-Screenshot-i-Phone-16-Pro-2025-02-17-at-22-55-47.png) |
 
 ---
 
