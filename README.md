@@ -28,7 +28,7 @@
 
 | Home Screen | Disease Detection | Weather Tips | Fertilizer Calculator |
 | ----------- | ----------------- | ------------ | --------------------- |
-| ![Home](https://via.placeholder.com/200x400) | ![Detection](https://via.placeholder.com/200x400) | ![Weather](https://via.placeholder.com/200x400) | ![Calculator](https://via.placeholder.com/200x400) |
+| ![Home](https://ibb.co/9mDpxTGb) | ![Detection](https://via.placeholder.com/200x400) | ![Weather](https://via.placeholder.com/200x400) | ![Calculator](https://via.placeholder.com/200x400) |
 
 ---
 
