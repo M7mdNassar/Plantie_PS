@@ -1,6 +1,6 @@
 # 🌱 Plantie - Smart Image Processing & Farmer Assistant
 
-![Plantie Banner](https://via.placeholder.com/800x300?text=Plantie+-+Smart+Farming+Assistant)
+![Plantie Banner](https://i.ibb.co/2Dn2NnM/Colored-Logo.png)
 
 **Plantie** is a mobile application designed to assist farmers by using **smart image processing** to detect plant diseases and provide **real-time weather updates**, **fertilizer calculations**, and **community support**.
 
