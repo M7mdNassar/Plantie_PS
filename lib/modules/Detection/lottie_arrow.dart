@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
-
 import '../../generated/l10n.dart';
 
 class LottieArrow extends StatefulWidget {

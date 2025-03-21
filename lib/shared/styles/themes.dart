@@ -26,6 +26,7 @@ ThemeData lightTheme = ThemeData(
   ),
   bottomNavigationBarTheme: BottomNavigationBarThemeData(
     backgroundColor: Colors.white,
+
   ),
   textTheme: TextTheme(
     bodyLarge: TextStyle(

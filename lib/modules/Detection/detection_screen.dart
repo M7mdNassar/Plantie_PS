@@ -47,7 +47,7 @@ class DetectionScreen extends StatelessWidget {
         _buildScrollContent(context, cubit),
 
         // Overlay elements
-        if (cubit.currentImage == null) const LottieArrow(),
+        if (cubit.currentImage == null && cubit.history.isEmpty) const LottieArrow(),
       ],
     );
   }
