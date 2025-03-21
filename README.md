@@ -1,6 +1,8 @@
 # 🌱 Plantie - Smart Image Processing & Farmer Assistant
 
-![Plantie Banner](https://via.placeholder.com/800x300?text=Plantie+-+Smart+Farming+Assistant)
+
+  <img src="https://i.ibb.co/2Dn2NnM/Colored-Logo.png" alt="Plantie Logo" width="200" style="border-radius: 20px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
+
 
 **Plantie** is a mobile application designed to assist farmers by using **smart image processing** to detect plant diseases and provide **real-time weather updates**, **fertilizer calculations**, and **community support**.
 
@@ -26,9 +28,9 @@
 
 ## 📱 Screenshots
 
-| Home Screen | Disease Detection | Weather Tips | Fertilizer Calculator |
+| Home Screen | Disease Detection | Community | Fertilizer Calculator |
 | ----------- | ----------------- | ------------ | --------------------- |
-| ![Home](https://via.placeholder.com/200x400) | ![Detection](https://via.placeholder.com/200x400) | ![Weather](https://via.placeholder.com/200x400) | ![Calculator](https://via.placeholder.com/200x400) |
+| ![Home](https://i.ibb.co/8nCmy5Xr/Simulator-Screenshot-i-Phone-16-Pro-2025-02-17-at-22-55-27.png) | ![Detection](https://i.ibb.co/5WY73mMh/Simulator-Screenshot-i-Phone-16-Pro-2025-02-17-at-22-57-09.png) | ![Community](https://i.ibb.co/5xJjcFMp/Simulator-Screenshot-i-Phone-16-Pro-2025-02-17-at-22-56-28.png) | ![Calculator](https://i.ibb.co/qF5BwySW/Simulator-Screenshot-i-Phone-16-Pro-2025-02-17-at-22-55-47.png) |
 
 ---
 
@@ -99,7 +101,7 @@
 
 ## 📄 License
 
-This project is licensed under the **MIT License**. See the [LICENSE](LICENSE) file for more details.
+This project is licensed under the **MIT License**. See the [LICENSE](https://github.com/M7mdNassar/Plantie_PS/blob/master/License) file for more details.
 
 ---
 
