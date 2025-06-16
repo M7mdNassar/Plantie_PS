@@ -22,7 +22,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'generated/l10n.dart';
 
 void main() async {
-  // بيتأكد ان كل اشي هون في الميثود خلصت و بعدين يتفح الابلكيشن
+  // ensure all things (methods done before move on ..)
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   await ModelHandler.initModel();
