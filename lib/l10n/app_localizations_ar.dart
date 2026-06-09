@@ -1172,4 +1172,7 @@ class SAr extends S {
 
   @override
   String get ok => 'حسنًا';
+
+  @override
+  String get commentFailed => 'لم يتم نشر التعليق. يرجى المحاولة مرة أخرى.';
 }

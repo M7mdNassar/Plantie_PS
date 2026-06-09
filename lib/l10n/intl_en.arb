@@ -508,7 +508,8 @@
 
   "noInternetConnection": "No Internet Connection",
   "offlinePostMessage": "You are currently offline. Your post will be saved and uploaded when you regain internet connection.",
-  "ok": "OK"
+  "ok": "OK",
+  "commentFailed": "Could not post comment. Please try again."
 
 
 
