@@ -1,0 +1,8 @@
+#include "Debug.xcconfig"
+
+// App Display Name for Dev
+APP_DISPLAY_NAME = Plantie Dev
+
+// Bundle Identifier for Dev
+PRODUCT_BUNDLE_IDENTIFIER = com.team.plantie.plantie.dev
+

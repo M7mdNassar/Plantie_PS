@@ -1,0 +1,521 @@
+{
+  "onboardingTitle1": "مرحبًا بكم في Plantie!",
+  "onboardingBody1": "ابق على اطلاع بآخر التحديثات حول الطقس ونصائح العناية بالنباتات المخصصة لاحتياجاتك، واحسب الكمية المناسبة من الأسمدة لنمو مثالي للنباتات.",
+  "onboardingTitle2": "اكتشف أمراض النباتات",
+  "onboardingBody2": "قم بتحميل صورة لنبتتك لتحديد الأمراض والحصول على حلول خبراء فورية.",
+  "onboardingTitle3": "ابحث عن متاجر النباتات القريبة",
+  "onboardingBody3": "ابحث بسهولة عن متاجر النباتات القريبة بلمسة واحدة لمساعدتك في العناية بنباتاتك بشكل أفضل.",
+  "onboardingTitle4": "انضم إلى مجتمع Plantie",
+  "onboardingBody4": "تواصل مع محبي النباتات الآخرين، شارك النصائح وتعلم من الآخرين لتنمية مساحتك الخضراء معًا.",
+  "skip": "تخطي",
+
+
+
+
+  "welcome_title": "بلانتي",
+  "welcome_subtitle": "احصل على المزيد من المحاصيل بمساعدة بلانتي!",
+  "login_button": "تسجيل الدخول",
+  "register_button": "إنشاء حساب",
+  "terms_and_conditions": "بتسجيل الدخول أو إنشاء حساب، فإنك توافق على شروط الخدمة وسياسة الخصوصية الخاصة بنا",
+
+
+
+
+  "welcome": "مرحباً",
+  "welcome_back": "مرحباً، أهلاً بك مجدداً في بلانتي!",
+  "email_address": "عنوان البريد الإلكتروني",
+  "enter_email": "يرجى إدخال عنوان البريد الإلكتروني",
+  "password": "كلمة المرور",
+  "enter_password": "كلمة المرور قصيرة جداً",
+  "forget_password": "هل نسيت كلمة المرور؟",
+  "login": "تسجيل الدخول",
+  "create_account": "إنشاء حساب؟",
+  "register": "تسجيل",
+  "or_login_by": "أو تسجيل الدخول بواسطة",
+  "reset_password": "إعادة تعيين كلمة المرور",
+  "sent_email_to_update_paassword" : "تم ارسال رابط اعاده كلمه المرور علي الايميل",
+  "submit": "إرسال",
+  "cancel": "إلغاء",
+
+
+
+  "name": "الإسم",
+  "creat_account2" : "إنشاء حساب",
+  "create_account3" : "أكمل معلوماتك للبدء",
+  "enter_name" : "الرجاء إدخال إسم المستخدم",
+  "email_valid" : "الرجاء إدخال بريد إلكتروني صالح",
+  "or_register_by" : "أو التسجيل بواسطة",
+  "have_account" : "هل لديك حساب ؟",
+
+
+
+
+
+
+
+  "weather": "الطقس",
+  "choosePlant": "اختر نبتة",
+  "calculateFertilizer": "حساب السماد",
+  "description": "الوصف",
+  "nutrition": "التغذية",
+  "storage": "التخزين",
+  "diseases": "الأمراض",
+  "plantingTime": "وقت الزراعة",
+  "npkFormula": "تركيبة NPK",
+  "temperature": "درجة الحرارة",
+  "humidity": "الرطوبة",
+  "prevention": "الوقاية",
+  "fetchingWeather": "جاري جلب بيانات الطقس...",
+  "locationRequired": "يطلب إذن الموقع",
+  "enableLocation": "تفعيل الموقع",
+  "permanentDenial": "تم رفض إذن الموقع بشكل دائم. يرجى التفعيل من الإعدادات.",
+  "openSettings": "فتح الإعدادات",
+  "gpsDisabled": "خدمة الموقع معطلة. يرجى تفعيل GPS.",
+  "enableGPS": "تفعيل GPS",
+  "weatherError": "خطأ في جلب بيانات الطقس: {error}",
+  "tryAgain": "حاول مرة أخرى",
+  "getWeather": "احصل على الطقس",
+  "feelsLike": "تشعر بـ {temp}°م",
+  "@feelsLike": {
+    "placeholders": {
+      "temp": {}
+    }
+  },
+
+
+
+
+
+  "weather_details": "تفاصيل الطقس",
+  "current_weather": "الطقس الحالي",
+  "feels_like": "الحرارة المحسوسة",
+  "wind_speed": "سرعة الرياح",
+  "pressure": "الضغط الجوي",
+  "sunrise": "شروق الشمس",
+  "sunset": "غروب الشمس",
+  "farming_insights": "نصائح زراعية",
+  "hourly_forecast": "توقعات الساعات القادمة",
+  "daily_forecast": "توقعات ٧ أيام",
+  "today": "اليوم",
+  "soil_temp": "درجة حرارة التربة",
+  "evapotranspiration": "التبخر والنتح",
+  "precipitation": "هطول الأمطار",
+  "humidity_level": "الرطوبة",
+  "no_insights": "لا توجد تنبيهات محددة اليوم.",
+  "good_for_farming": "الظروف جيدة للأنشطة الزراعية.",
+  "warning_farming": "يرجى توخي الحذر عند القيام ببعض الأنشطة الزراعية.",
+  "critical_farming": "خطر عالٍ! اتخذ إجراءات فورية لحماية المحاصيل.",
+  "recommendation": "توصية",
+
+
+
+
+
+
+
+  "weather_trends": "اتجاهات الطقس",
+  "temperature_chart": "درجة الحرارة",
+  "precipitation_chart": "هطول الأمطار",
+  "fertilizerCalculator": "{emoji} {name} سماد",
+  "@fertilizerCalculator": {
+    "placeholders": {
+      "emoji": {},
+      "name": {}
+    }
+  },
+
+  "plantType": "النوع: {type}",
+  "landArea": "المساحة ({unit}):",
+  "numberOfTrees": "عدد الأشجار",
+  "treeAge": "عمر الشجرة (سنوات)",
+  "recommendedNpk": "نسبة NPK الموصى بها:",
+  "calculateRequirements": "حساب المتطلبات",
+  "requiredFertilizers": "السماد المطلوب ({calculationContext}):",
+  "@requiredFertilizers": {
+    "placeholders": {
+      "calculationContext": {}
+    }
+  },  "treeNote": "ملاحظة: الحسابات تشمل عامل العمر لأشجار عمرها {age} سنوات",
+  "areaNote": "ملاحظة: 1 دونم = 1000 متر مربع (10,000 قدم مربع)",
+  "nitrogen": "النيتروجين",
+  "phosphorus": "الفوسفور",
+  "potassium": "البوتاسيوم",
+  "dunam": "دونم",
+  "acre": "فدان",
+  "unit": "الوحدة:",
+  "urea": "يوريا",
+  "ssp": "سوبر فوسفات",
+  "mop": "كلوريد البوتاسيوم",
+
+
+
+
+
+
+
+  "profile": "الملف الشخصي",
+  "darkMode": "الوضع الليلي",
+  "language": "اللغة",
+  "english": "الإنجليزية",
+  "logout": "تسجيل الخروج",
+  "confirmLogout": "تأكيد الخروج",
+  "logoutMessage": "هل أنت متأكد من رغبتك في تسجيل الخروج؟",
+
+
+
+
+
+
+
+
+   "editProfile": "تعديل الملف الشخصي",
+   "save": "حفظ",
+   "bio": "السيرة الذاتية",
+   "country": "الدولة",
+   "phone": "الهاتف",
+   "email": "البريد الإلكتروني",
+   "saveChanges": "حفظ التغييرات",
+   "nameRequired": "الاسم مطلوب",
+   "bioRequired": "السيرة الذاتية مطلوبة",
+   "countryRequired": "الدولة مطلوبة",
+   "phoneRequired": "الهاتف مطلوب",
+   "profileUpdated": "تم تحديث الملف الشخصي بنجاح",
+   "updateFailed": "فشل التحديث: {error}",
+   "namefield": "الاسم",
+   "phoneOptional": "الهاتف (اختياري)",
+   "bioOptional": "نبذة عني (اختياري)",
+   "countryOptional": "الدولة (اختياري)",
+   "bioHint": "أخبر المزارعين الآخرين عن نفسك...",
+   "bioCharCount": "{current}/{max}",
+   "@bioCharCount": {
+     "placeholders": {
+       "current": {},
+       "max": {}
+     }
+   },
+   "settings": "الإعدادات",
+   "logoutConfirm": "هل أنت متأكد من تسجيل الخروج؟",
+   "cancel": "إلغاء",
+
+
+
+
+
+
+
+  "home": "الرئيسية",
+  "community": "المجتمع",
+  "detection": "الكشف",
+  "profile2" : "ملفي",
+  "verificationSent": "تم إعادة إرسال البريد التأكيدي. يرجى فحص صندوق الوارد.",
+  "verificationError": "خطأ في إرسال التأكيد: {error}",
+
+
+
+
+
+
+  "detectionResults": "نتائج الكشف",
+  "detectionResult": "نتيجة الكشف",
+  "recommendedTreatment": "العلاج الموصى به",
+  "history": "السجل",
+  "noDetectionHistory": "لا يوجد سجل كشف",
+  "historyPlaceholder": "سيظهر هنا مسحات صحة النبات الخاصة بك",
+  "confirmDelete": "تأكيد الحذف",
+  "deleteConfirmation": "هل أنت متأكد من رغبتك في حذف هذا العنصر؟",
+  "delete": "حذف",
+  "treatmentLabel": "{treatment}",
+
+
+
+
+
+
+
+  "treatment": "العلاج",
+  "tips": "النصائح",
+  "date": "التاريخ",
+  "nearestNursery": "أقرب مشتل نباتات",
+  "noStoresFound": "لم يتم العثور على مشاتل قريبة",
+  "locationError": "خطأ: {error}",
+  "launchError": "تعذر فتح الخرائط",
+  "tap_camera_to_scan": "اضغط على زر الكاميرا أدناه\nلبدء فحص نباتاتك",
+
+
+
+
+  "searchPosts": "البحث في المنشورات",
+  "newPost": "منشور جديد",
+  "comments" : "التعليقات",
+  "write_comment": "أكتب تعليق ...",
+  "no_posts" : "لا يوجد منشورات",
+
+
+  "createPost": "إنشاء منشور",
+  "postButton": "نشر",
+  "whatsOnMind": "ما الذي يدور في ذهنك؟",
+  "addPhotos": "إضافة صور",
+
+
+  "positioningTips": "نصائح حول الوضعية",
+  "positioningTip1": "التقط الصورة في إضاءة طبيعية جيدة",
+  "positioningTip2": "املأ الإطار بالورقة",
+  "positioningTip3": "تجنب الظلال على الورقة",
+
+  "focusRequirements": "متطلبات التركيز",
+  "focusTip1": "تأكد من وضوح حواف الورقة",
+  "focusTip2": "ركز على المناطق المصابة",
+  "focusTip3": "حافظ على ثبات الكاميرا",
+
+  "backgroundTips": "نصائح حول الخلفية",
+  "backgroundTip1": "استخدم خلفية بسيطة",
+  "backgroundTip2": "يُفضل الألوان البيضاء أو الفاتحة",
+  "backgroundTip3": "تجنب الخلفيات المزخرفة",
+
+
+  "captureGuidelines": "إرشادات الالتقاط",
+  "iUnderstand": "فهمت - المتابعة",
+
+
+  "takePhoto": "التقاط صورة",
+  "chooseFromGallery": "اختر من المعرض",
+  "errorOccurred": "حدث خطأ: {error}",
+
+  "unknownDisease": "غير معروف",
+  "noDetails": "",
+  "diseaseNotDetected": "لم يتم التعرف على المرض",
+
+  "good" : "جيد",
+  "avoid" : "تجنب",
+
+
+  "selectLanguage": "اختر اللغة",
+  "languageChanged": "تم تغيير اللغة. أعد تشغيل التطبيق؟",
+
+  "irrigation_alert": "تنبيه الري",
+  "irrigation_message": "تم رصد أمطار غزيرة ({value} ملم). لا تقم بالري اليوم لتجنب تشبع التربة بالماء.",
+  "wind_warning": "تحذير الرياح",
+  "wind_message": "سرعة رياح عالية ({value} كم/ساعة). تجنب رش المبيدات لأنها قد تتطاير.",
+  "ideal_spraying": "رش مثالي",
+  "ideal_spraying_message": "الرياح هادئة. وقت جيد لرش المبيدات.",
+  "frost_risk": "خطر الصقيع",
+  "frost_message": "درجة الحرارة منخفضة ({value}°م). خطر كبير لحدوث الصقيع. قم بحماية المحاصيل الحساسة.",
+  "high_evaporation": "تبخر عالٍ",
+  "high_evaporation_message": "معدل التبخر والنتح مرتفع ({value} ملم). فكر في زيادة عدد مرات الري.",
+  "soil_condition": "حالة التربة",
+  "soil_condition_message": "درجة حرارة التربة {value}°م، مثالية لإنبات معظم البذور.",
+
+  "analyzingImage": "جاري تحليل الصورة...",
+  "pleaseWait": "يرجى الانتظار بينما يكتشف الذكاء الاصطناعي...",
+  "expertAdvice": "نصيحة الخبير",
+  "findNearestStore": "ابحث عن أقرب متجر",
+  "tipsForAccurateDetection": "نصائح للكشف الدقيق",
+  "healthy": "صحي",
+  "diseaseDetected": "تم اكتشاف مرض",
+  "goodLighting": "إضاءة جيدة",
+  "naturalSunlightWorks": "أشعة الشمس الطبيعية تعمل بشكل أفضل",
+  "closeFocus": "تركيز قريب",
+  "distanceFromLeaf": "احصل على 15-30 سم من الورقة",
+  "clearImage": "صورة واضحة",
+  "avoidBlurred": "تجنب الصور الضبابية أو المائلة",
+  "singleLeaf": "ورقة واحدة",
+  "focusOnDiseased": "ركز على ورقة مريضة واحدة",
+  "deletedSuccessfully": "تم الحذف بنجاح",
+  "itemDeleted": "تم إزالة المسح الخاص بك",
+  "startDetection": "ابدأ الكشف",
+  "tapCameraToDetect": "اضغط على زر الكاميرا لالتقاط صورة نبات وبدء التشخيص",
+   "tapCamera": "اضغط الكاميرا",
+   "followTheseSteps": "اتبع هذه النصائح للحصول على أفضل النتائج",
+   "gotIt": "فهمت",
+   "quickTipsForBestResults": "نصائح سريعة للحصول على أفضل النتائج",
+   "goodLightingCapture": "إضاءة جيدة",
+   "naturalLightWorks": "الضوء الطبيعي يعمل بشكل أفضل",
+   "closeAndClear": "قريب وواضح",
+   "distanceAndFocus": "15-30 سم من الورقة، تركيز حاد",
+   "singleLeafCapture": "ورقة واحدة",
+   "focusOnOneDiseased": "ركز على منطقة مريضة واحدة",
+   "continueButton": "متابعة",
+   "homeSubtitle": "اعتنِ بنباتاتك",
+   "grantLocationPermission": "يرجى منح إذن الموقع لعرض تفاصيل الطقس",
+   "locationDenied": "تم رفض إذن الموقع",
+   "allowAccess": "السماح بالوصول",
+   "weatherErrorTitle": "خطأ في تحميل الطقس",
+   "checkWeatherPrompt": "تحقق من حالة الطقس في منطقتك",
+   "clearSky": "سماء صافية",
+   "partlyCloudy": "غائم جزئياً",
+   "foggy": "ضبابي",
+   "drizzle": "رذاذ",
+   "rainy": "ممطر",
+   "snowy": "ثلجي",
+   "rainShowers": "زخات مطر",
+   "thunderstorm": "عاصفة رعدية",
+   "noDiseases": "لا توجد أمراض مسجلة",
+
+
+  "guestProfileTitle": "الملف الشخصي",
+  "guestJoinTitle": "انضم إلى Plantie",
+  "guestJoinSubtitle": "اكتشف تجربة Plantie الكاملة",
+  "guestBenefit1Title": "مزامنة سجلّك",
+  "guestBenefit1Desc": "الوصول إلى سجل الفحوصات من أي جهاز",
+  "guestBenefit2Title": "انضم إلى المجتمع",
+  "guestBenefit2Desc": "أعجب وعلّق وشارك مع محبي النباتات",
+  "guestBenefit3Title": "ساعد في تطوير Plantie",
+  "guestBenefit3Desc": "ملاحظاتك تُحسّن دقة اكتشاف الأمراض للجميع",
+  "guestCreateAccount": "إنشاء حساب",
+  "guestSignIn": "تسجيل الدخول",
+  "guestBrowsingNote": "تصفح كضيف • جميع الفحوصات محفوظة محلياً",
+
+  "guestPromptTitle": "سجّل للانضمام",
+  "guestPromptDescription": "أنشئ حسابًا للإعجاب والتعليق والمشاركة مع مجتمع Plantie",
+  "guestPromptSignUp": "إنشاء حساب",
+  "guestPromptMaybeLater": "ربما لاحقًا",
+
+  "guestCommunityTitle": "شارك مع المجتمع",
+  "guestCommunityDescription": "أنشئ حسابًا للنشر والإعجاب والتعليق مع محبي النباتات",
+
+  "noNewNotifications": "لا توجد إشعارات جديدة",
+  "notifications": "الإشعارات",
+  "createNewPost": "إنشاء منشور جديد",
+  "post": "منشور",
+  "latest": "الأحدث",
+  "popular": "الأكثر شهرة",
+  "trending": "الرائج",
+  "loadingMorePosts": "جاري تحميل المزيد...",
+  "beFirstToShare": "كن أول من يشارك شيئًا رائعًا!",
+  "searchByPostContent": "ابحث باستخدام محتوى المنشور",
+  "noPostsMatch": "لا توجد منشورات تطابق بحثك",
+  "clearSearch": "مسح البحث",
+  "welcomeToPlantie": "مرحباً بك في Plantie",
+  "discoverPlantCare": "اكتشف فن العناية بالنباتات",
+  "getOtpCode": "إرسال رمز التحقق",
+  "sendOtpSms": "سنرسل لك رمز التحقق عبر SMS",
+  "continueAsGuest": "المتابعة كضيف",
+  "phoneHint": "أدخل رقم الهاتف",
+  "invalidPhone": "رقم الهاتف غير صحيح",
+  "requiredField": "هذا الحقل مطلوب",
+  "selectCountry": "اختر الدولة",
+  "whatsYourName": "ما اسمك؟",
+  "nameHint": "اسمك",
+  "letsStart": "لنبدأ 🌱",
+  "nameRequired": "من فضلك أدخل اسمك",
+  "nameTooShort": "الاسم يجب أن يكون حرفين على الأقل",
+  "lettersAndSpacesOnly": "يسمح بالأحرف والمسافات فقط",
+  "noAccountNeeded": "لا حاجة لحساب أو كلمة مرور",
+  "offlineTitle": "لا يوجد اتصال بالإنترنت",
+  "offlineSubtitle": "يرجى التحقق من حالة الشبكة والمحاولة مرة أخرى.",
+  "retryButton": "إعادة المحاولة",
+
+  "editProfile": "تعديل الملف الشخصي",
+  "aboutMe": "نبذة عني",
+  "contactInfo": "تفاصيل الاتصال",
+  "bioPlaceholder": "أضف نبذة قصيرة ليعرفك الآخرون...",
+  "phonePlaceholder": "أضف رقم الهاتف",
+  "countryPlaceholder": "أضف بلد الإقامة",
+  "nameField": "الاسم الكامل",
+  "bioField": "النبذة الشخصية",
+  "phoneField": "رقم الهاتف",
+  "countryField": "البلد",
+  "saveChanges": "حفظ التغييرات",
+  "nameRequired": "لا يمكن ترك حقل الاسم فارغاً",
+  "gallerySource": "اختيار من معرض الصور",
+  "cameraSource": "التقاط صورة بالكاميرا",
+  "completeProfilePrompt": "أكمل ملفك الشخصي!",
+  "completeProfileSubtitle": "أضف نبذتك، موقعك، ورقم هاتفك ليصبح حسابك موثقاً.",
+  "unsavedChangesTitle": "تغييرات غير محفوظة",
+  "unsavedChangesMsg": "لقد قمت بتعديل البيانات. الخروج الآن سيؤدي إلى فقدان جميع التعديلات.",
+  "keepEditing": "متابعة التعديل",
+  "discard": "تجاهل التغييرات",
+  "successTitle": "تم بنجاح",
+  "profileUpdatedMsg": "تم تحديث بيانات ملفك الشخصي بأمان.",
+  "errorTitle": "حدث خطأ ما",
+  "confirmLogout": "تأكيد تسجيل الخروج",
+  "logoutMessage": "هل أنت متأكد من أنك تريد تسجيل الخروج من حسابك؟",
+  "cancel": "إلغاء",
+  "logout": "تسجيل الخروج",
+  "successTitle": "تم بنجاح",
+  "profileUpdatedSuccess": "تم تحديث الملف الشخصي بنجاح",
+  "errorTitle": "خطأ في التحديث",
+  "cancel": "إلغاء",
+  "saveAvatar": "حفظ الصورة",
+
+  "plantDiagnosis": "تشخيص النباتات",
+  "recentDiagnoses": "التشخيصات السابقة",
+  "scanPlantPrompt": "اكتشف أمراض النباتات",
+  "scanPlantSubPrompt": "التقط صورة لورقة النبتة للحصول على تشخيص فوري وخطة علاج.",
+  "startScan": "بدء الفحص",
+  "analyzing": "جاري تحليل الصورة...",
+  "notAPlant": "ليست نبتة",
+  "viewDetails": "عرض التفاصيل",
+  "scanAnother": "فحص نبتة أخرى",
+  "noHistoryYet": "لا يوجد سجل تشخيصات بعد",
+  "today": "اليوم",
+  "yesterday": "أمس",
+  "daysAgo": "أيام مضت",
+
+  "@@locale": "ar",
+  "postedBy": "منشور بواسطة",
+  "avatar": "الصورة الشخصية",
+  "showMore": "أظهر المزيد",
+  "showLess": "إخفاء",
+  "likes": "إعجاب",
+  "comments": "التعليقات",
+  "comment": "تعليق",
+  "like": "إعجاب",
+  "writeComment": "اكتب تعليقاً",
+  "likePost": "أعجبني المنشور",
+  "unlikePost": "إلغاء الإعجاب",
+  "postActions": "إجراءات المنشور",
+  "moreOptions": "خيارات إضافية",
+  "postOptions": "خيارات المنشور",
+  "deletePost": "حذف المنشور",
+  "deletePostQuestion": "حذف المنشور؟",
+  "deletePostConfirmation": "هل أنت متأكد من حذف هذا المنشور؟ لا يمكن التراجع عن هذا الإجراء.",
+  "cancel": "إلغاء",
+  "delete": "حذف",
+
+
+  "retry": "إعادة المحاولة",
+  "noInternet": "لا يوجد اتصال بالإنترنت",
+  "checkNetwork": "يرجى التحقق من حالة الشبكة والمحاولة مرة أخرى.",
+  "errorLoadingPosts": "خطأ في تحميل المنشورات",
+
+  "createPost": "إنشاء منشور",
+  "whatsOnMind": "ما الذي يخطر ببالك؟",
+  "addPhotos": "إضافة صور",
+  "postButton": "نشر",
+  "photos": "الصور",
+  "postCreatedSuccessfully": "تم إنشاء المنشور بنجاح!",
+  "userDataNotFound": "لم يتم العثور على بيانات المستخدم. يرجى تسجيل الدخول مرة أخرى.",
+
+
+  "noCommentsYet": "لا توجد تعليقات بعد",
+  "beFirstToComment": "كن أول من يعلق",
+  "postingComment": "جاري نشر التعليق...",
+
+  "offlineSaveError": "لا يوجد اتصال بالإنترنت. يرجى التحقق من الشبكة والمحاولة مرة أخرى.",
+  "offlineAvatarError": "لا يمكن تحديث الصورة الشخصية دون اتصال بالإنترنت. يرجى الاتصال بالإنترنت.",
+
+  "arShort": "ع",
+  "enShort": "إ",
+  "preferencesAndOptions": "التفضيلات والإعدادات",
+
+  "offlineLikeError": "لا يوجد اتصال بالإنترنت. سيتم حفظ الإعجاب عند عودة الاتصال.",
+  "offlineCommentError": "لا يوجد اتصال بالإنترنت. سيتم حفظ تعليقك عند عودة الاتصال.",
+  "offlineLoadMoreError": "لا يوجد اتصال بالإنترنت. لا يمكن تحميل المزيد من المنشورات.",
+
+
+  "detectionTimeoutError": "استغرق التحليل وقتًا طويلاً. يرجى المحاولة مرة أخرى بصورة أوضح.",
+  "invalidImageError": "لا يمكن قراءة الصورة. يرجى اختيار صورة صالحة.",
+  "outOfMemoryError": "الصورة كبيرة جدًا. يرجى استخدام صورة أصغر.",
+  "notAPlantError": "لا يبدو أن الصورة تحتوي على ورقة نبات.",
+  "detectionGenericError": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+
+
+  "noInternetConnection": "لا يوجد اتصال بالإنترنت",
+  "offlinePostMessage": "أنت غير متصل بالإنترنت حاليًا. سيتم حفظ مشاركتك وتحميلها عندما تستعيد الاتصال.",
+  "ok": "حسنًا"
+
+
+
+
+}

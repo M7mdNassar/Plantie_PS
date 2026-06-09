@@ -1,0 +1,520 @@
+{
+  "onboardingTitle1": "Welcome to Plantie!",
+  "onboardingBody1": "Stay updated with real-time weather and plant care advice tailored to your needs, and calculate the right amount of fertilizer for optimal plant growth.",
+  "onboardingTitle2": "Detect Plant Diseases",
+  "onboardingBody2": "Upload a photo of your plant to identify diseases and get expert solutions instantly.",
+  "onboardingTitle3": "Find Nearby Plant Stores",
+  "onboardingBody3": "Easily locate nearby plant stores with just a tap, helping you take better care of your plants.",
+  "onboardingTitle4": "Join the Plantie Community",
+  "onboardingBody4": "Connect with fellow plant lovers, share tips, and learn from each other to grow your green space together.",
+  "skip": "SKIP",
+
+
+
+  "welcome_title": "Plantie",
+  "welcome_subtitle": "Get more crops with Plantie's help!",
+  "login_button": "Login",
+  "register_button": "Register",
+  "terms_and_conditions": "By logging in or registering, you agree to our Terms of Service and Privacy Policy",
+
+
+
+  "welcome": "Welcome",
+  "welcome_back": "Hello, Welcome back to Plantie!",
+  "email_address": "Email Address",
+  "enter_email": "Please enter your email address",
+  "password": "Password",
+  "enter_password": "Password is too short",
+  "forget_password": "Forget Password?",
+  "login": "Login",
+  "create_account": "Create account?",
+  "register": "Register",
+  "or_login_by": "or login by",
+  "reset_password" : "Reset Password",
+  "sent_email_to_update_paassword" : "we sent to your email url to use it to reset the password",
+  "submit"  : "Submit",
+  "cancel" : "Cancel",
+
+
+
+  "name": "Name",
+  "creat_account2" : "Create Account",
+  "create_account3" : "Complete your information to get started!",
+  "enter_name" : "please enter a user name",
+  "email_valid" : "please enter a valid email",
+  "or_register_by" : "or register by",
+  "have_account" : "Already have an account? ",
+
+
+
+
+
+
+  "weather": "Weather",
+  "choosePlant": "Choose a Plant",
+  "calculateFertilizer": "Calculate Fertilizer",
+  "description": "Description",
+  "nutrition": "Nutrition",
+  "storage": "Storage",
+  "diseases": "Diseases",
+  "plantingTime": "Planting Time",
+  "npkFormula": "NPK Formula",
+  "temperature": "Temperature",
+  "humidity": "Humidity",
+  "prevention": "Prevention",
+  "fetchingWeather": "Fetching weather...",
+  "locationRequired": "Location permission required",
+  "enableLocation": "Enable Location",
+  "permanentDenial": "Location permissions permanently denied. Please enable in settings.",
+  "openSettings": "Open Settings",
+  "gpsDisabled": "Location services disabled. Please enable GPS.",
+  "enableGPS": "Enable GPS",
+  "weatherError": "Error fetching weather: {error}",
+  "tryAgain": "Try Again",
+  "getWeather": "Get Weather",
+  "feelsLike": "Feels like {temp}°C",
+  "@feelsLike": {
+    "placeholders": {
+      "temp": {}
+    }
+  },
+
+
+
+
+  "weather_details": "Weather Details",
+  "current_weather": "Current Weather",
+  "feels_like": "Feels Like",
+  "wind_speed": "Wind Speed",
+  "pressure": "Pressure",
+  "sunrise": "Sunrise",
+  "sunset": "Sunset",
+  "farming_insights": "Farming Insights",
+  "hourly_forecast": "Hourly Forecast",
+  "daily_forecast": "7-Day Forecast",
+  "today": "Today",
+  "soil_temp": "Soil Temperature",
+  "evapotranspiration": "Evapotranspiration",
+  "precipitation": "Precipitation",
+  "humidity_level": "Humidity",
+  "no_insights": "No specific alerts for today.",
+  "good_for_farming": "Good conditions for farming activities.",
+  "warning_farming": "Use caution with some farming activities.",
+  "critical_farming": "High risk! Take immediate action to protect crops.",
+  "recommendation": "Recommendation",
+
+
+
+
+
+
+  "weather_trends": "Weather Trends",
+  "temperature_chart": "Temperature",
+  "precipitation_chart": "Precipitation",
+  "fertilizerCalculator": "{emoji} {name} Fertilizer",
+  "@fertilizerCalculator": {
+    "placeholders": {
+      "emoji": {},
+      "name": {}
+    }
+  },
+
+  "plantType": "Type: {type}",
+  "landArea": "Land Area ({unit}):",
+  "numberOfTrees": "Number of Trees",
+  "treeAge": "Tree Age (Years)",
+  "recommendedNpk": "Recommended NPK Ratio:",
+  "calculateRequirements": "Calculate Requirements",
+  "requiredFertilizers": "Required Fertilizers ({calculationContext}):",
+  "@requiredFertilizers": {
+    "placeholders": {
+      "calculationContext": {}
+    }
+  },
+  "treeNote": "Note: Calculations include age factor for {age} year old trees",
+  "areaNote": "Note: 1 Dunam = 1000 m² (10,000 sq ft)",
+  "nitrogen": "Nitrogen",
+  "phosphorus": "Phosphorus",
+  "potassium": "Potassium",
+  "dunam": "Dunam",
+  "acre": "Acre",
+  "unit": "Unit:",
+  "urea": "UREA",
+  "ssp": "SSP",
+  "mop": "MOP",
+
+
+
+
+
+
+
+
+  "profile": "Profile",
+  "darkMode": "Dark Mode",
+  "language": "Language",
+  "english": "English",
+  "logout": "Logout",
+  "confirmLogout": "Confirm Logout",
+  "logoutMessage": "Are you sure you want to log out?",
+
+
+
+
+
+
+
+
+
+   "editProfile": "Edit Profile",
+   "save": "Save",
+   "bio": "Bio",
+   "country": "Country",
+   "phone": "Phone",
+   "email": "Email",
+   "saveChanges": "Save Changes",
+   "nameRequired": "Name must not be empty",
+   "bioRequired": "Bio must not be empty",
+   "countryRequired": "Country must not be empty",
+   "phoneRequired": "Phone must not be empty",
+   "profileUpdated": "Profile updated successfully",
+   "updateFailed": "Update failed: {error}",
+   "namefield": "Name",
+   "phoneOptional": "Phone (optional)",
+   "bioOptional": "Bio (optional)",
+   "countryOptional": "Country (optional)",
+   "bioHint": "Tell other farmers about yourself...",
+   "bioCharCount": "{current}/{max}",
+   "@bioCharCount": {
+     "placeholders": {
+       "current": {},
+       "max": {}
+     }
+   },
+   "settings": "Settings",
+   "logoutConfirm": "Are you sure you want to logout?",
+   "cancel": "Cancel",
+
+
+
+
+  "home": "Home",
+  "community": "Community",
+  "detection": "Detection",
+  "profile2" : "Profile",
+  "verificationSent": "Verification email resent. Please check your inbox.",
+  "verificationError": "Error sending verification: {error}",
+
+
+
+
+  "detectionResults": "Detection Results",
+  "detectionResult": "Detection Result",
+  "recommendedTreatment": "Recommended Treatment",
+  "history": "History",
+  "noDetectionHistory": "No Detection History",
+  "historyPlaceholder": "Your plant health scans will appear here",
+  "confirmDelete": "Confirm Delete",
+  "deleteConfirmation": "Are you sure you want to delete this item?",
+  "delete": "Delete",
+  "treatmentLabel": "{treatment}",
+
+
+
+
+
+
+
+  "treatment": "Treatment",
+  "tips": "Tips",
+  "date": "Date",
+  "nearestNursery": "Nearest Plant Nursery",
+  "noStoresFound": "No nearby stores found",
+  "locationError": "Error: {error}",
+  "launchError": "Could not launch maps",
+  "tap_camera_to_scan": "Tap the camera button below\nto start scanning your plants",
+
+
+
+
+  "searchPosts": "Search posts",
+  "newPost": "New Post",
+  "comments" : "Comments",
+  "write_comment": "Write a comment...",
+  "no_posts" : "No posts",
+
+  "createPost": "Create Post",
+  "postButton": "Post",
+  "whatsOnMind": "What's on your mind?",
+  "addPhotos": "Add Photos",
+
+
+
+  "positioningTips": "Positioning Tips",
+  "positioningTip1": "Capture in good natural lighting",
+  "positioningTip2": "Fill frame with the leaf",
+  "positioningTip3": "Avoid shadows on the subject",
+
+  "focusRequirements": "Focus Requirements",
+  "focusTip1": "Ensure leaf edges are clear",
+  "focusTip2": "Focus on affected areas",
+  "focusTip3": "Keep camera steady",
+
+  "backgroundTips": "Background Tips",
+  "backgroundTip1": "Use plain background",
+  "backgroundTip2": "White/light colors preferred",
+  "backgroundTip3": "Avoid busy patterns",
+
+
+
+  "captureGuidelines": "Capture Guidelines",
+  "iUnderstand": "I Understand - Continue",
+
+
+  "takePhoto": "Take Photo",
+  "chooseFromGallery": "Choose from Gallery",
+
+  "errorOccurred": "An error occurred: {error}",
+
+  "unknownDisease": "Unknown",
+  "noDetails": "",
+  "diseaseNotDetected": "Disease not recognized",
+
+  "good" : "Good",
+  "avoid" : "Avoid",
+
+
+  "selectLanguage": "Select Language",
+  "languageChanged": "Language changed. Restart the app?",
+
+  "irrigation_alert": "Irrigation Alert",
+  "irrigation_message": "Significant rain detected ({value} mm). Do not irrigate today to prevent waterlogging.",
+  "wind_warning": "Wind Warning",
+  "wind_message": "High wind speeds ({value} km/h). Avoid spraying pesticides as they may drift.",
+  "ideal_spraying": "Ideal Spraying",
+  "ideal_spraying_message": "Wind conditions are calm. Good time for pest control application.",
+  "frost_risk": "Frost Risk",
+  "frost_message": "Temperature is low ({value}°C). High risk of frost damage. Protect sensitive crops.",
+  "high_evaporation": "High Evaporation",
+  "high_evaporation_message": "High evapotranspiration rate ({value} mm). Consider increasing irrigation frequency.",
+  "soil_condition": "Soil Condition",
+  "soil_condition_message": "Soil temperature is {value}°C, ideal for most seed germination.",
+
+  "analyzingImage": "Analyzing Image...",
+  "pleaseWait": "Please wait while AI detects...",
+  "expertAdvice": "Expert Advice",
+  "findNearestStore": "Find Nearest Store",
+  "tipsForAccurateDetection": "Tips for Accurate Detection",
+  "healthy": "Healthy",
+  "diseaseDetected": "Disease Detected",
+  "goodLighting": "Good lighting",
+  "naturalSunlightWorks": "Natural sunlight works best",
+  "closeFocus": "Close focus",
+  "distanceFromLeaf": "Get 15-30cm from the leaf",
+  "clearImage": "Clear image",
+   "avoidBlurred": "Avoid blurred or tilted photos",
+   "singleLeaf": "Single leaf",
+   "focusOnDiseased": "Focus on one diseased leaf",
+   "deletedSuccessfully": "Item deleted successfully",
+   "itemDeleted": "Your scan has been removed",
+   "startDetection": "Start Detection",
+   "tapCameraToDetect": "Tap the camera button to capture a plant image and start the diagnosis",
+    "tapCamera": "Tap Camera",
+    "followTheseSteps": "Follow these tips for best results",
+    "gotIt": "Got It",
+    "quickTipsForBestResults": "Quick tips for best results",
+    "goodLightingCapture": "Good Lighting",
+    "naturalLightWorks": "Natural light works best",
+    "closeAndClear": "Close & Clear",
+    "distanceAndFocus": "15-30cm from leaf, sharp focus",
+    "singleLeafCapture": "Single Leaf",
+    "focusOnOneDiseased": "Focus on one diseased area",
+    "continueButton": "Continue",
+   "homeSubtitle": "Take care of your plants",
+   "grantLocationPermission": "Grant location permission to view weather details",
+   "locationDenied": "Location permission denied",
+   "allowAccess": "Allow Access",
+   "weatherErrorTitle": "Error loading weather",
+   "checkWeatherPrompt": "Check the weather in your area",
+   "clearSky": "Clear Sky",
+   "partlyCloudy": "Partly Cloudy",
+   "foggy": "Foggy",
+   "drizzle": "Drizzle",
+   "rainy": "Rainy",
+   "snowy": "Snowy",
+   "rainShowers": "Rain Showers",
+   "thunderstorm": "Thunderstorm",
+   "noDiseases": "No diseases recorded",
+
+  "guestProfileTitle": "Profile",
+  "guestJoinTitle": "Join Plantie",
+  "guestJoinSubtitle": "Unlock the full Plantie experience",
+  "guestBenefit1Title": "Sync Your History",
+  "guestBenefit1Desc": "Access your detection history across devices",
+  "guestBenefit2Title": "Join the Community",
+  "guestBenefit2Desc": "Like, comment, and share with other plant lovers",
+  "guestBenefit3Title": "Help Improve Plantie",
+  "guestBenefit3Desc": "Your feedback trains better disease detection for everyone",
+  "guestCreateAccount": "Create Account",
+  "guestSignIn": "Sign In",
+  "guestBrowsingNote": "Browsing as Guest • All detections are stored locally",
+
+  "guestPromptTitle": "Sign up to join",
+  "guestPromptDescription": "Create an account to like, comment, and share with the Plantie community",
+  "guestPromptSignUp": "Sign Up",
+  "guestPromptMaybeLater": "Maybe Later",
+
+  "guestCommunityTitle": "Share with the community",
+  "guestCommunityDescription": "Create an account to post, like, and comment with other plant lovers",
+
+  "noNewNotifications": "No new notifications",
+  "notifications": "Notifications",
+  "createNewPost": "Create new post",
+  "post": "Post",
+  "latest": "Latest",
+  "popular": "Popular",
+  "trending": "Trending",
+  "loadingMorePosts": "Loading more posts...",
+  "beFirstToShare": "Be the first to share something amazing!",
+  "searchByPostContent": "Search by post content",
+  "noPostsMatch": "No posts match your search",
+  "clearSearch": "Clear search",
+
+  "welcomeToPlantie": "Welcome to Plantie",
+  "discoverPlantCare": "Discover the art of plant care",
+  "getOtpCode": "Get OTP Code",
+  "sendOtpSms": "We'll send you a verification code via SMS",
+  "continueAsGuest": "Continue as Guest",
+  "phoneHint": "Enter phone number",
+  "invalidPhone": "Invalid phone number",
+  "requiredField": "This field is required",
+  "selectCountry": "Select country",
+  "whatsYourName": "What should we call you?",
+  "nameHint": "Your name",
+  "letsStart": "Let's Start 🌱",
+  "nameRequired": "Please enter your name",
+  "nameTooShort": "Name must be at least 2 characters",
+  "lettersAndSpacesOnly": "Letters and spaces only",
+  "noAccountNeeded": "No account or password needed",
+  "welcomeToPlantie": "Welcome to Plantie!",
+  "discoverPlantCare": "Discover expert plant care tips and join a community of plant lovers",
+  "offlineTitle": "No Internet Connection",
+  "offlineSubtitle": "Please check your network status and try refreshing.",
+  "retryButton": "Retry",
+  "editProfile": "Edit Profile",
+  "aboutMe": "About Me",
+  "contactInfo": "Contact Details",
+  "bioPlaceholder": "Add a short bio to let people know you...",
+  "phonePlaceholder": "Add phone number",
+  "countryPlaceholder": "Add your country",
+  "nameField": "Full Name",
+  "bioField": "Bio",
+  "phoneField": "Phone Number",
+  "countryField": "Country",
+  "saveChanges": "Save Changes",
+  "nameRequired": "Name cannot be left empty",
+  "gallerySource": "Choose from Gallery",
+  "cameraSource": "Take a Photo",
+  "completeProfilePrompt": "Complete Your Profile!",
+  "completeProfileSubtitle": "Fill in your bio, location, and phone details to look official.",
+  "unsavedChangesTitle": "Unsaved Changes",
+  "unsavedChangesMsg": "You have modified details. Leaving now will discard all edits.",
+  "keepEditing": "Keep Editing",
+  "discard": "Discard",
+  "successTitle": "Success",
+  "profileUpdatedMsg": "Your profile information has been securely updated.",
+  "errorTitle": "Error Occurred",
+  "confirmLogout": "Confirm Sign Out",
+  "logoutMessage": "Are you sure you want to log out of your account?",
+  "cancel": "Cancel",
+  "logout": "Log Out",
+  "successTitle": "Success",
+  "profileUpdatedSuccess": "Profile updated successfully",
+  "errorTitle": "Error",
+  "cancel": "Cancel",
+  "saveAvatar": "Save Avatar",
+
+
+  "plantDiagnosis": "Plant Diagnosis",
+  "recentDiagnoses": "Recent Diagnoses",
+  "scanPlantPrompt": "Identify Plant Diseases",
+  "scanPlantSubPrompt": "Take a photo of a leaf to get an instant diagnosis and treatment plan.",
+  "startScan": "Start Scan",
+  "analyzing": "Analyzing Image...",
+  "notAPlant": "Not a Plant",
+  "viewDetails": "View Details",
+  "scanAnother": "Scan Another",
+  "noHistoryYet": "No history yet",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "daysAgo": "days ago",
+
+  "@@locale": "en",
+  "postedBy": "Post by",
+  "avatar": "avatar",
+  "showMore": "Show more",
+  "showLess": "Show less",
+  "likes": "likes",
+  "comments": "Comments",
+  "comment": "Comment",
+  "like": "Like",
+  "writeComment": "Write comment",
+  "likePost": "Like post",
+  "unlikePost": "Unlike post",
+  "postActions": "Post actions",
+  "moreOptions": "More options",
+  "postOptions": "Post options",
+  "deletePost": "Delete Post",
+  "deletePostQuestion": "Delete Post?",
+  "deletePostConfirmation": "Are you sure you want to delete this post? This action cannot be undone.",
+  "cancel": "Cancel",
+  "delete": "Delete",
+
+  "retry": "Retry",
+  "noInternet": "No Internet Connection",
+  "checkNetwork": "Please check your network status and try refreshing.",
+  "errorLoadingPosts": "Error loading posts",
+
+  "createPost": "Create Post",
+  "whatsOnMind": "What's on your mind?",
+  "addPhotos": "Add Photos",
+  "postButton": "Post",
+  "photos": "Photos",
+  "postCreatedSuccessfully": "Post created successfully!",
+  "userDataNotFound": "User data not found. Please log in again.",
+
+  "noCommentsYet": "No comments yet",
+  "beFirstToComment": "Be the first to comment",
+  "postingComment": "Posting comment...",
+
+
+  "offlineSaveError": "No internet connection. Please check your network and try again.",
+  "offlineAvatarError": "Cannot update avatar while offline. Please connect to the internet.",
+
+
+  "arShort": "AR",
+  "enShort": "EN",
+  "preferencesAndOptions": "PREFERENCES & OPTIONS",
+
+  "offlineLikeError": "No internet connection. Like will be saved when you're back online.",
+  "offlineCommentError": "No internet connection. Your comment will be saved when you're back online.",
+  "offlineLoadMoreError": "No internet connection. Cannot load more posts.",
+
+  "detectionTimeoutError": "Analysis took too long. Please try again with a clearer image.",
+  "invalidImageError": "Could not read the image. Please select a valid photo.",
+  "outOfMemoryError": "Image is too large. Please use a smaller photo.",
+  "notAPlantError": "The image does not appear to contain a plant leaf.",
+  "detectionGenericError": "Something went wrong. Please try again.",
+
+  "noInternetConnection": "No Internet Connection",
+  "offlinePostMessage": "You are currently offline. Your post will be saved and uploaded when you regain internet connection.",
+  "ok": "OK"
+
+
+
+
+}
+
+
+
+

@@ -1,0 +1,9 @@
+
+
+<resources>
+    <string name="app_name">Plantie</string>
+    <string name="facebook_app_id">1518734908806146</string>
+    <string name="fb_login_protocol_scheme">fb1518734908806146</string>
+    <string name="facebook_client_token">d72d76662c24247f25301e632eda4a3a</string>
+
+</resources>
