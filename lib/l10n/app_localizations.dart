@@ -2298,6 +2298,12 @@ abstract class S {
   /// In en, this message translates to:
   /// **'OK'**
   String get ok;
+
+  /// No description provided for @commentFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not post comment. Please try again.'**
+  String get commentFailed;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

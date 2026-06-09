@@ -138,6 +138,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "closeAndClear": MessageLookupByLibrary.simpleMessage("Close & Clear"),
     "closeFocus": MessageLookupByLibrary.simpleMessage("Close focus"),
     "comment": MessageLookupByLibrary.simpleMessage("Comment"),
+    "commentFailed": MessageLookupByLibrary.simpleMessage(
+      "Could not post comment. Please try again.",
+    ),
     "comments": MessageLookupByLibrary.simpleMessage("Comments"),
     "community": MessageLookupByLibrary.simpleMessage("Community"),
     "completeProfilePrompt": MessageLookupByLibrary.simpleMessage(

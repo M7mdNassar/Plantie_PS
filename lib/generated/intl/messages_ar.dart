@@ -134,6 +134,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "closeAndClear": MessageLookupByLibrary.simpleMessage("قريب وواضح"),
     "closeFocus": MessageLookupByLibrary.simpleMessage("تركيز قريب"),
     "comment": MessageLookupByLibrary.simpleMessage("تعليق"),
+    "commentFailed": MessageLookupByLibrary.simpleMessage(
+      "لم يتم نشر التعليق. يرجى المحاولة مرة أخرى.",
+    ),
     "comments": MessageLookupByLibrary.simpleMessage("التعليقات"),
     "community": MessageLookupByLibrary.simpleMessage("المجتمع"),
     "completeProfilePrompt": MessageLookupByLibrary.simpleMessage(

@@ -54,16 +54,18 @@ class CommunityCubit extends Cubit<CommunityStates> {
   Future<void> setSortFilter(String sortType) async {
     if (_feedSort == sortType) return;
 
-    // 1. Update instantly (UI will show selected chip)
+    // Quick offline check
+    final authService = SupabaseAuthService();
+    final hasInternet = await authService.isConnectedFast();
+    if (!hasInternet) {
+      emit(CommunityErrorState('offline_filter'));
+      return;
+    }
+
     _feedSort = sortType;
     debugPrint('📊 Feed sort changed to: $sortType');
-
-    // 2. Reset pagination but don't clear posts yet
     _currentPage = 0;
     _hasMore = true;
-
-    // 3. Show loading indicator in the filter bar? We'll emit a state to show a progress indicator
-    //    But we can also just fetch in background and replace.
     await getPosts(refresh: true);
   }
 
@@ -358,6 +360,14 @@ class CommunityCubit extends Cubit<CommunityStates> {
     final userId = CurrentUser.user.id;
     if (userId.isEmpty) return;
 
+    // Quick offline check before optimistic update
+    final authService = SupabaseAuthService();
+    final hasInternet = await authService.isConnectedFast();
+    if (!hasInternet) {
+      emit(CommunityErrorState('offline_like'));
+      return;
+    }
+
     if (_likesInFlight.contains(postId)) return;
     _likesInFlight.add(postId);
 
@@ -371,7 +381,6 @@ class CommunityCubit extends Cubit<CommunityStates> {
     final willLike = !currentPost.userLiked;
     final newLikeCount = currentPost.likeCount + (willLike ? 1 : -1);
 
-    // Optimistic update
     final updatedPost = currentPost.copyWith(
       userLiked: willLike,
       likeCount: newLikeCount,
@@ -399,7 +408,6 @@ class CommunityCubit extends Cubit<CommunityStates> {
             .eq('user_id', userId);
       }
     } catch (e) {
-      // Rollback optimistic update
       final rollbackPost = currentPost.copyWith(
         userLiked: !willLike,
         likeCount: currentPost.likeCount,
@@ -412,13 +420,11 @@ class CommunityCubit extends Cubit<CommunityStates> {
       } else {
         emit(CommunityPostsLoadedState(_posts));
       }
-
-      // ✅ Emit user‑friendly error (will be shown as SnackBar in UI)
       final errorStr = e.toString().toLowerCase();
       if (errorStr.contains('socketexception') ||
           errorStr.contains('failed host lookup') ||
           errorStr.contains('network is unreachable')) {
-        emit(CommunityErrorState('offline_like_error'));
+        emit(CommunityErrorState('offline_like'));
       } else {
         emit(CommunityErrorState(e.toString()));
       }
@@ -437,11 +443,17 @@ class CommunityCubit extends Cubit<CommunityStates> {
     required String userName,
     required String? userImage,
   }) async {
-    // ✅ Check internet and sync user before any optimistic update
+    // Quick offline check
     final authService = SupabaseAuthService();
+    final hasInternet = await authService.isConnectedFast();
+    if (!hasInternet) {
+      emit(CommunityErrorState('offline_comment'));
+      return;
+    }
+
     final online = await authService.syncUserIfNeeded(userId);
     if (!online) {
-      emit(CommunityErrorState("No internet connection. Please try again later."));
+      emit(CommunityErrorState('offline_comment'));
       return;
     }
 
@@ -488,12 +500,11 @@ class CommunityCubit extends Cubit<CommunityStates> {
           emit(CommunityPostsLoadedState(_posts));
         }
       }
-      // Emit user‑friendly error
       final errorStr = e.toString().toLowerCase();
       if (errorStr.contains('socketexception') ||
           errorStr.contains('failed host lookup') ||
           errorStr.contains('network is unreachable')) {
-        emit(CommunityErrorState('offline_comment_error'));
+        emit(CommunityErrorState('offline_comment'));
       } else {
         emit(CommunityErrorState("Failed to post comment: ${e.toString()}"));
       }
@@ -511,18 +522,7 @@ class CommunityCubit extends Cubit<CommunityStates> {
       return;
     }
 
-    final authService = SupabaseAuthService();
-    final hasInternet = await authService.isConnectedFast();
-    if (!hasInternet) {
-      emit(CommunityErrorState("No internet connection. Please try again later."));
-      return;
-    }
-    final online = await authService.syncUserIfNeeded(user.id);
-    if (!online) {
-      emit(CommunityErrorState("No internet connection. Please try again later."));
-      return;
-    }
-
+    // Show loading immediately
     isCreatingPost = true;
     emit(CreatePostLoadingState());
 
@@ -536,11 +536,31 @@ class CommunityCubit extends Cubit<CommunityStates> {
       commentCount: 0,
       likeCount: 0,
       userLiked: false,
-      postImage: null, // ✅ Fixed: No invalid URLs
+      postImage: null,
     );
 
     _posts.insert(0, pendingPost);
-    // Keep loading state – do NOT emit CommunityPostsLoadedState yet
+    emit(CommunityPostsLoadedState(List.from(_posts)));
+
+    final authService = SupabaseAuthService();
+    final hasInternet = await authService.isConnectedFast();
+    if (!hasInternet) {
+      // Rollback and show offline dialog
+      _posts.removeWhere((p) => p.postId == pendingId);
+      emit(CommunityPostsLoadedState(List.from(_posts)));
+      emit(CommunityErrorState('offline_post_create'));
+      isCreatingPost = false;
+      return;
+    }
+
+    final online = await authService.syncUserIfNeeded(user.id);
+    if (!online) {
+      _posts.removeWhere((p) => p.postId == pendingId);
+      emit(CommunityPostsLoadedState(List.from(_posts)));
+      emit(CommunityErrorState('offline_post_create'));
+      isCreatingPost = false;
+      return;
+    }
 
     try {
       List<String> uploadedUrls = [];
@@ -550,10 +570,7 @@ class CommunityCubit extends Cubit<CommunityStates> {
 
       final postResponse = await supabaseService.client
           .from('posts')
-          .insert({
-        'user_id': user.id,
-        'text': text.trim(),
-      })
+          .insert({'user_id': user.id, 'text': text.trim()})
           .select('*, users(*)')
           .single();
 
@@ -582,12 +599,13 @@ class CommunityCubit extends Cubit<CommunityStates> {
     } catch (e, stack) {
       debugPrint('❌ Create post error: $e\n$stack');
       _posts.removeWhere((p) => p.postId == pendingId);
-      emit(CommunityErrorState("Failed to create post: ${e.toString()}"));
+      emit(CommunityErrorState(e.toString()));
       emit(CommunityPostsLoadedState(List.from(_posts)));
     } finally {
       isCreatingPost = false;
     }
   }
+
 
   Future<List<String>> _uploadPostImages(String tempId) async {
     final bucket = supabaseService.client.storage.from('post-images');
@@ -681,6 +699,13 @@ class CommunityCubit extends Cubit<CommunityStates> {
   // DELETE POST
   // --------------------------------------------------------------------------
   Future<void> deletePost(PostModel post) async {
+    final authService = SupabaseAuthService();
+    final hasInternet = await authService.isConnectedFast();
+    if (!hasInternet) {
+      emit(CommunityErrorState('offline_delete'));
+      return;
+    }
+
     try {
       if (post.postImage != null && post.postImage!.isNotEmpty) {
         final Map<String, List<String>> bucketToPaths = {};
@@ -705,6 +730,10 @@ class CommunityCubit extends Cubit<CommunityStates> {
         }
       }
       await supabaseService.client.from('posts').delete().eq('id', post.postId);
+      // Remove from local list
+      _posts.removeWhere((p) => p.postId == post.postId);
+      filteredPosts.removeWhere((p) => p.postId == post.postId);
+      emit(CommunityPostsLoadedState(List.from(_posts)));
     } catch (e) {
       debugPrint('❌ Delete error: $e');
       emit(CommunityErrorState(e.toString()));

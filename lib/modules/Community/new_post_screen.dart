@@ -57,18 +57,22 @@ class _NewPostScreenState extends State<NewPostScreen> {
       );
     }
 
-    return BlocConsumer<CommunityCubit, CommunityStates>(listener: (context, state) {
-      if (state is CreatePostSuccessState) {
-        showToast(text: S.of(context).postCreatedSuccessfully, state: ToastStates.success);
-        Navigator.pop(context);
-      } else if (state is CommunityErrorState) {
-        if (state.error == "No internet connection. Please try again later.") {
-          _showOfflineDialog(context);
-        } else {
-          showToast(text: state.error, state: ToastStates.error);
+    return BlocConsumer<CommunityCubit, CommunityStates>(
+      listener: (context, state) {
+        if (state is CreatePostSuccessState) {
+          showToast(text: S.of(context).postCreatedSuccessfully, state: ToastStates.success);
+          Navigator.pop(context);
+        } else if (state is CommunityErrorState) {
+          if (state.error == 'offline_post_create') {
+            showOfflineRetry(context, () {
+              final text = _textController.text;
+              cubit.createPost(text: text);
+            });
+          } else {
+            showToast(text: state.error, state: ToastStates.error);
+          }
         }
-      }
-    },
+      },
       builder: (context, state) {
         final isLoading = state is CreatePostLoadingState;
         final isDark = Theme.of(context).brightness == Brightness.dark;

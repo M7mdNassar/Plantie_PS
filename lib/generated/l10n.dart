@@ -3123,6 +3123,16 @@ class S {
   String get ok {
     return Intl.message('OK', name: 'ok', desc: '', args: []);
   }
+
+  /// `Could not post comment. Please try again.`
+  String get commentFailed {
+    return Intl.message(
+      'Could not post comment. Please try again.',
+      name: 'commentFailed',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

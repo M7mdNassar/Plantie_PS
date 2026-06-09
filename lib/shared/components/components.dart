@@ -12,6 +12,7 @@ import '../../models/user/user_model.dart';
 import '../../modules/Community/comment_screen.dart';
 import '../../modules/Community/cubit/cubit.dart';
 import '../../modules/Community/image_carousel.dart';
+import '../styles/app_colors.dart';
 import '../styles/icon_broken.dart';
 import '../services/notification_service.dart';
 
@@ -758,4 +759,38 @@ void _showDeleteConfirmation(
     ),
   );
 
+}
+
+void showOfflineRetry(BuildContext context, VoidCallback onRetry) {
+  final isDark = Theme.of(context).brightness == Brightness.dark;
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (ctx) => AlertDialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
+      title: Row(
+        children: [
+          Icon(Icons.wifi_off_rounded, color: Colors.grey[600]),
+          const SizedBox(width: 12),
+          Text(S.of(ctx).noInternetConnection),
+        ],
+      ),
+      content: Text(S.of(ctx).offlinePostMessage),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(ctx),
+          child: Text(S.of(ctx).cancel),
+        ),
+        ElevatedButton(
+          onPressed: () {
+            Navigator.pop(ctx);
+            onRetry();
+          },
+          style: ElevatedButton.styleFrom(backgroundColor: plantieColor),
+          child: Text(S.of(ctx).retry),
+        ),
+      ],
+    ),
+  );
 }

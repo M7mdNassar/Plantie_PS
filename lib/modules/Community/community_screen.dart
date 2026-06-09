@@ -186,31 +186,22 @@ class _CommunityScreenState extends State<CommunityScreen> {
           _prefetchUpcomingImages(context, CommunityCubit.get(context));
         }
 
-
         if (state is CommunityErrorState) {
           final cubit = CommunityCubit.get(context);
-          // If we already have posts, don't replace the screen – just show a toast
-          if (cubit.posts.isNotEmpty) {
-            String message;
-            switch (state.error) {
-              case 'offline_like_error':
-                message = S.of(context).offlineLikeError;
-                break;
-              case 'offline_comment_error':
-                message = S.of(context).offlineCommentError;
-                break;
-              case 'offline_load_more_error':
-                message = S.of(context).offlineLoadMoreError;
-                break;
-              default:
-                message = state.error;
-            }
+          // If we already have posts, don't replace the screen – but show dialog for offline actions
+          if (state.error == 'offline_like' ||
+              state.error == 'offline_comment' ||
+              state.error == 'offline_delete' ||
+              state.error == 'offline_filter') {
+              showOfflineRetry(context, () {
+              // Retry the last action based on state.error
+              // We need to pass the context of the action – complex. Instead we can just refresh the screen or show a generic retry.
+              // For simplicity, we'll refresh the feed.
+              cubit.getPosts(refresh: true);
+            });
+          } else if (cubit.posts.isNotEmpty) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(message),
-                backgroundColor: Colors.red,
-                duration: const Duration(seconds: 3),
-              ),
+              SnackBar(content: Text(state.error), backgroundColor: Colors.red),
             );
           }
         }

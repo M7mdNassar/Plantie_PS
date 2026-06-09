@@ -1182,4 +1182,7 @@ class SEn extends S {
 
   @override
   String get ok => 'OK';
+
+  @override
+  String get commentFailed => 'Could not post comment. Please try again.';
 }
