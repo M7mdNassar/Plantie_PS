@@ -13,6 +13,7 @@ import 'package:plantie/shared/components/components.dart';
 import 'package:plantie/shared/styles/colors.dart';
 import 'package:plantie/shared/styles/responsive_text.dart';
 import '../../generated/l10n.dart';
+import '../../shared/styles/app_colors.dart';
 import '../../shared/styles/icon_broken.dart';
 
 class CommunityScreen extends StatefulWidget {
@@ -25,7 +26,7 @@ class CommunityScreen extends StatefulWidget {
 class _CommunityScreenState extends State<CommunityScreen> {
   final ValueNotifier<bool> _showCreatePostButton = ValueNotifier<bool>(true);
   int _lastPrefetchedPostCount = 0;
-  // No need for local _isRequestingMore – use cubit.isFetchingMore
+  bool _isFiltering = false;          // Show shimmer while filtering
 
   @override
   void initState() {
@@ -100,6 +101,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
                     selected: isSelected,
                     onSelected: (selected) {
                       if (selected) {
+                        // Instant UI feedback – show shimmer immediately
+                        setState(() => _isFiltering = true);
                         cubit.setSortFilter(entry.key);
                       }
                     },
@@ -157,7 +160,6 @@ class _CommunityScreenState extends State<CommunityScreen> {
     for (final post in newPosts.take(3)) {
       final images = post.postImage ?? const <String>[];
       for (final url in images) {
-        // Skip invalid URLs: empty, null, or not starting with http:// or https://
         if (url.isNotEmpty && (url.startsWith('http://') || url.startsWith('https://'))) {
           urls.add(url);
         }
@@ -178,26 +180,60 @@ class _CommunityScreenState extends State<CommunityScreen> {
     });
   }
 
+  void _showOfflineRetryDialog(BuildContext context, VoidCallback onRetry) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
+        title: Row(
+          children: [
+            Icon(Icons.wifi_off_rounded, color: Colors.grey[600]),
+            const SizedBox(width: 12),
+            Text(S.of(ctx).noInternetConnection),
+          ],
+        ),
+        content: Text(S.of(ctx).offlinePostMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(S.of(ctx).cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              onRetry();
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: plantieColor),
+            child: Text(S.of(ctx).retry),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<CommunityCubit, CommunityStates>(
       listener: (context, state) {
-        if (state is CommunityPostsLoadedState || state is CommunityLoadingMoreState) {
+        if (state is CommunityPostsLoadedState) {
+          // New posts arrived – hide shimmer
+          setState(() => _isFiltering = false);
+          _prefetchUpcomingImages(context, CommunityCubit.get(context));
+        }
+        if (state is CommunityLoadingMoreState) {
           _prefetchUpcomingImages(context, CommunityCubit.get(context));
         }
 
         if (state is CommunityErrorState) {
           final cubit = CommunityCubit.get(context);
-          // If we already have posts, don't replace the screen – but show dialog for offline actions
-          if (state.error == 'offline_like' ||
-              state.error == 'offline_comment' ||
-              state.error == 'offline_delete' ||
-              state.error == 'offline_filter') {
-              showOfflineRetry(context, () {
-              // Retry the last action based on state.error
-              // We need to pass the context of the action – complex. Instead we can just refresh the screen or show a generic retry.
-              // For simplicity, we'll refresh the feed.
-              cubit.getPosts(refresh: true);
+          setState(() => _isFiltering = false); // stop shimmer on error
+
+          if (state.error == 'offline_filter') {
+            _showOfflineRetryDialog(context, () {
+              cubit.setSortFilter(cubit.feedSort); // retry filter
             });
           } else if (cubit.posts.isNotEmpty) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -242,70 +278,59 @@ class _CommunityScreenState extends State<CommunityScreen> {
               child: Stack(
                 children: [
                   CustomScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(
-                      parent: BouncingScrollPhysics(),
-                    ),
+                    physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
                     slivers: [
                       _buildSliverAppBar(context, cubit, isDark),
 
-                      // Loading state (initial)
-                      if ((state is CommunityLoadingState || state is CommunityInitialState) && cubit.posts.isEmpty)
+                      // Show shimmer during filter, or initial load, or error/offline/empty states
+                      if (_isFiltering)
                         const SliverFillRemaining(
                           hasScrollBody: false,
                           child: ShimmerPostSkeleton(),
                         )
-
-                      // Offline state (no posts)
-                      else if (state is CommunityOfflineState && cubit.posts.isEmpty)
-                        SliverFillRemaining(
+                      else if ((state is CommunityLoadingState || state is CommunityInitialState) && cubit.posts.isEmpty)
+                        const SliverFillRemaining(
                           hasScrollBody: false,
-                          child: _buildOfflineState(context),
+                          child: ShimmerPostSkeleton(),
                         )
-
-                      // Error state (no posts)
-                      else if (state is CommunityErrorState && cubit.posts.isEmpty)
+                      else if (state is CommunityOfflineState && cubit.posts.isEmpty)
                           SliverFillRemaining(
                             hasScrollBody: false,
-                            child: _buildErrorState(context, state, cubit),
+                            child: _buildOfflineState(context),
                           )
-
-                        // Empty state (no posts)
-                        else if (state is CommunityEmptyState || (cubit.posts.isEmpty && state is! CommunityLoadingState && state is! CommunityInitialState && state is! CommunityOfflineState && state is! CommunityErrorState))
+                        else if (state is CommunityErrorState && cubit.posts.isEmpty)
                             SliverFillRemaining(
                               hasScrollBody: false,
-                              child: _buildEmptyState(context),
+                              child: _buildErrorState(context, state, cubit),
                             )
-
-                          // Posts list
-                          else ...[
-                              SliverPadding(
-                                padding: EdgeInsets.symmetric(
-                                  horizontal: ResponsiveText.padding(context, 12),
-                                  vertical: ResponsiveText.padding(context, 14),
-                                ),
-                                sliver: SliverList(
-                                  delegate: SliverChildBuilderDelegate(
-                                        (context, index) {
-                                      return Padding(
-                                        padding: EdgeInsets.only(
-                                          bottom: ResponsiveText.padding(context, 14),
-                                        ),
-                                        child: buildPostItem(cubit.posts[index], context, index),
-                                      );
-                                    },
-                                    childCount: cubit.posts.length,
+                          else if (state is CommunityEmptyState || (cubit.posts.isEmpty && state is! CommunityLoadingState && state is! CommunityInitialState && state is! CommunityOfflineState && state is! CommunityErrorState))
+                              SliverFillRemaining(
+                                hasScrollBody: false,
+                                child: _buildEmptyState(context),
+                              )
+                            else ...[
+                                SliverPadding(
+                                  padding: EdgeInsets.symmetric(
+                                    horizontal: ResponsiveText.padding(context, 12),
+                                    vertical: ResponsiveText.padding(context, 14),
+                                  ),
+                                  sliver: SliverList(
+                                    delegate: SliverChildBuilderDelegate(
+                                          (context, index) {
+                                        return Padding(
+                                          padding: EdgeInsets.only(bottom: ResponsiveText.padding(context, 14)),
+                                          child: buildPostItem(cubit.posts[index], context, index),
+                                        );
+                                      },
+                                      childCount: cubit.posts.length,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              SliverPadding(
-                                padding: EdgeInsets.only(
-                                  bottom: ResponsiveText.padding(context, 110),
+                                SliverPadding(
+                                  padding: EdgeInsets.only(bottom: ResponsiveText.padding(context, 110)),
+                                  sliver: const SliverToBoxAdapter(child: SizedBox.shrink()),
                                 ),
-                                sliver: const SliverToBoxAdapter(
-                                  child: SizedBox.shrink(),
-                                ),
-                              ),
-                            ],
+                              ],
                     ],
                   ),
                   if (state is CommunityLoadingMoreState)
@@ -530,9 +555,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
     return Center(
       child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: ResponsiveText.padding(context, 32),
-        ),
+        padding: EdgeInsets.symmetric(horizontal: ResponsiveText.padding(context, 32)),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -548,11 +571,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                   ],
                 ),
               ),
-              child: Icon(
-                Icons.inbox_rounded,
-                size: 52,
-                color: plantieColor,
-              ),
+              child: Icon(Icons.inbox_rounded, size: 52, color: plantieColor),
             ),
             SizedBox(height: ResponsiveText.padding(context, 24)),
             Text(
@@ -586,9 +605,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
     return Center(
       child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: ResponsiveText.padding(context, 32),
-        ),
+        padding: EdgeInsets.symmetric(horizontal: ResponsiveText.padding(context, 32)),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -599,11 +616,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                 shape: BoxShape.circle,
                 color: isDark ? HexColor("272729") : Colors.grey[100],
               ),
-              child: Icon(
-                Icons.wifi_off_rounded,
-                size: 48,
-                color: Colors.grey[500],
-              ),
+              child: Icon(Icons.wifi_off_rounded, size: 48, color: Colors.grey[500]),
             ),
             SizedBox(height: ResponsiveText.padding(context, 24)),
             Text(
@@ -649,9 +662,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
     return Center(
       child: Padding(
-        padding: EdgeInsets.symmetric(
-          horizontal: ResponsiveText.padding(context, 32),
-        ),
+        padding: EdgeInsets.symmetric(horizontal: ResponsiveText.padding(context, 32)),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -662,11 +673,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                 shape: BoxShape.circle,
                 color: isDark ? HexColor("272729") : Colors.grey[100],
               ),
-              child: Icon(
-                Icons.error_outline,
-                size: 48,
-                color: Colors.red,
-              ),
+              child: Icon(Icons.error_outline, size: 48, color: Colors.red),
             ),
             SizedBox(height: ResponsiveText.padding(context, 24)),
             Text(

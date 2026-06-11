@@ -64,7 +64,7 @@ class _NewPostScreenState extends State<NewPostScreen> {
           Navigator.pop(context);
         } else if (state is CommunityErrorState) {
           if (state.error == 'offline_post_create') {
-            showOfflineRetry(context, () {
+            _showOfflineRetryDialog(context, () {
               final text = _textController.text;
               cubit.createPost(text: text);
             });
@@ -74,7 +74,8 @@ class _NewPostScreenState extends State<NewPostScreen> {
         }
       },
       builder: (context, state) {
-        final isLoading = state is CreatePostLoadingState;
+        // ✅ Use the boolean flag for instant loading feedback
+        final isLoading = cubit.isCreatingPost;
         final isDark = Theme.of(context).brightness == Brightness.dark;
 
         return Scaffold(
@@ -376,37 +377,39 @@ class _NewPostScreenState extends State<NewPostScreen> {
       ),
     );
   }
-}
 
-
-void _showOfflineDialog(BuildContext context) {
-  final isDark = Theme.of(context).brightness == Brightness.dark;
-  showDialog(
-    context: context,
-    builder: (ctx) => AlertDialog(
-      title: Row(
-        children: [
-          Icon(Icons.wifi_off_rounded, color: Colors.grey[600]),
-          const SizedBox(width: 12),
-          Text(S.of(ctx).noInternetConnection),
+  // ✅ Consistent offline retry dialog (matches the one in community_screen)
+  void _showOfflineRetryDialog(BuildContext context, VoidCallback onRetry) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
+        title: Row(
+          children: [
+            Icon(Icons.wifi_off_rounded, color: Colors.grey[600]),
+            const SizedBox(width: 12),
+            Text(S.of(ctx).noInternetConnection),
+          ],
+        ),
+        content: Text(S.of(ctx).offlinePostMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(S.of(ctx).cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              onRetry();
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: plantieColor),
+            child: Text(S.of(ctx).retry),
+          ),
         ],
       ),
-      content: Text(S.of(ctx).offlinePostMessage),
-      backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(ctx),
-          child: Text(S.of(ctx).cancel),
-        ),
-        ElevatedButton(
-          onPressed: () {
-            Navigator.pop(ctx);
-            // Optionally retry? Or just close.
-          },
-          child: Text(S.of(ctx).ok),
-        ),
-      ],
-    ),
-  );
+    );
+  }
 }

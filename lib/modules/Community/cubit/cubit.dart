@@ -26,8 +26,7 @@ class CommunityCubit extends Cubit<CommunityStates> {
   bool _hasMore = true;
   bool isFetchingMore = false;
   final Set<String> _likesInFlight = {};
-  bool _realtimeSubscribed = false;
-  bool _realtimeInitiated = false; // to avoid multiple calls
+  bool _realtimeInitiated = false;
   RealtimeChannel? _postsChannel;
   RealtimeChannel? _postImagesChannel;
   RealtimeChannel? _commentsChannel;
@@ -54,18 +53,31 @@ class CommunityCubit extends Cubit<CommunityStates> {
   Future<void> setSortFilter(String sortType) async {
     if (_feedSort == sortType) return;
 
-    // Quick offline check
+    // 1. Store the previous value in case we need to roll back
+    final previousSort = _feedSort;
+
+    // 2. ✅ Update immediately (chip will show as selected instantly)
+    _feedSort = sortType;
+    debugPrint('📊 Feed sort changed to: $sortType');
+
+    // 3. Show loading UI (the screen will listen to _isFiltering flag)
+    //    (No need to emit anything here – the UI uses its own state)
+
+    // 4. Quick offline check
     final authService = SupabaseAuthService();
     final hasInternet = await authService.isConnectedFast();
     if (!hasInternet) {
+      // Revert the sort
+      _feedSort = previousSort;
       emit(CommunityErrorState('offline_filter'));
       return;
     }
 
-    _feedSort = sortType;
-    debugPrint('📊 Feed sort changed to: $sortType');
+    // 5. Reset pagination
     _currentPage = 0;
     _hasMore = true;
+
+    // 6. Fetch new posts (this will emit the loaded state when done)
     await getPosts(refresh: true);
   }
 

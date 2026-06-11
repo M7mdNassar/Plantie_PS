@@ -44,7 +44,7 @@ class DetectionScreen extends StatelessWidget {
                   pinned: true,
                   centerTitle: false,
                   title: Text(
-                    S.of(context).plantDiagnosis ?? "Plant Diagnosis",
+                    S.of(context).plantDiagnosis,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                       fontWeight: FontWeight.w800,
                       fontSize: 24 * textScale,
@@ -67,7 +67,7 @@ class DetectionScreen extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(24, 24, 24, 12),
                     child: Text(
-                      S.of(context).recentDiagnoses ?? "Recent Diagnoses",
+                      S.of(context).recentDiagnoses,
                       style: TextStyle(
                         fontSize: 16 * textScale,
                         fontWeight: FontWeight.w800,
@@ -109,7 +109,7 @@ class DetectionScreen extends StatelessWidget {
     );
   }
 
-  /// Builds the hero section with an AnimatedSwitcher to force UI rebuild on state change.
+  /// Builds the hero section with an AnimatedSwitcher – key based on content, not state.
   Widget _buildDynamicHeroSection(
       BuildContext context,
       DetectionStates state,
@@ -117,13 +117,14 @@ class DetectionScreen extends StatelessWidget {
       bool isDark,
       double textScale,
       ) {
+    // ✅ Key changes only when the actual hero content changes (image or result)
+    final heroKey = ValueKey('hero_${cubit.currentImage?.path}_${cubit.currentResult}');
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
       switchInCurve: Curves.easeOutCubic,
       switchOutCurve: Curves.easeInCubic,
       child: _HeroContent(
-        // Key changes whenever the state or result changes → forces rebuild
-        key: ValueKey('${state.runtimeType}_${cubit.currentResult}_${cubit.currentImage?.path}'),
+        key: heroKey,
         state: state,
         cubit: cubit,
         isDark: isDark,
@@ -141,7 +142,7 @@ class DetectionScreen extends StatelessWidget {
             Icon(Icons.history_rounded, size: 64, color: isDark ? Colors.grey[800] : Colors.grey[300]),
             const SizedBox(height: 16),
             Text(
-              S.of(context).noHistoryYet ?? "No history yet",
+              S.of(context).noHistoryYet ,
               style: TextStyle(
                 fontSize: 16 * textScale,
                 fontWeight: FontWeight.w600,
@@ -183,7 +184,7 @@ class _HeroContent extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────
-//  Hero Scan Prompt (CTA)
+//  Hero Scan Prompt (CTA) – unchanged
 // ─────────────────────────────────────────────
 class _HeroScanPrompt extends StatelessWidget {
   final bool isDark;
@@ -232,7 +233,7 @@ class _HeroScanPrompt extends StatelessWidget {
                   ),
                   const SizedBox(height: 24),
                   Text(
-                    S.of(context).scanPlantPrompt ?? "Identify Plant Diseases",
+                    S.of(context).scanPlantPrompt ,
                     style: TextStyle(
                       fontSize: 22 * textScale,
                       fontWeight: FontWeight.bold,
@@ -242,7 +243,7 @@ class _HeroScanPrompt extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    S.of(context).scanPlantSubPrompt ?? "Take a photo of a leaf to get an instant diagnosis and treatment plan.",
+                    S.of(context).scanPlantSubPrompt ,
                     style: TextStyle(
                       fontSize: 14 * textScale,
                       color: Colors.white.withValues(alpha: 0.85),
@@ -260,7 +261,7 @@ class _HeroScanPrompt extends StatelessWidget {
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     ),
                     child: Text(
-                      S.of(context).startScan ?? "Start Scan",
+                      S.of(context).startScan ,
                       style: TextStyle(fontSize: 16 * textScale, fontWeight: FontWeight.bold),
                     ),
                   ),
@@ -275,7 +276,7 @@ class _HeroScanPrompt extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────
-//  Loading / Scanning Card
+//  Loading / Scanning Card – unchanged
 // ─────────────────────────────────────────────
 class _ScanningAnimationCard extends StatelessWidget {
   final File image;
@@ -312,7 +313,7 @@ class _ScanningAnimationCard extends StatelessWidget {
                   const CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
                   const SizedBox(height: 20),
                   Text(
-                    S.of(context).analyzing ?? "Analyzing Image...",
+                    S.of(context).analyzing,
                     style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600, letterSpacing: 0.5),
                   ),
                 ],
@@ -326,7 +327,7 @@ class _ScanningAnimationCard extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────
-//  Active Result Card (Healthy / Diseased / Not a Plant)
+//  Active Result Card – unchanged
 // ─────────────────────────────────────────────
 class _ActiveResultCard extends StatelessWidget {
   final DetectionCubit cubit;
@@ -394,8 +395,8 @@ class _ActiveResultCard extends StatelessWidget {
                         const SizedBox(width: 8),
                         Text(
                           isRejected
-                              ? (S.of(context).notAPlant ?? "Not a Plant")
-                              : (isHealthy ? (S.of(context).healthy ?? "Healthy") : (S.of(context).diseaseDetected ?? "Disease Detected")),
+                              ? (S.of(context).notAPlant)
+                              : (isHealthy ? (S.of(context).healthy ) : (S.of(context).diseaseDetected )),
                           style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16 * textScale),
                         ),
                       ],
@@ -447,7 +448,7 @@ class _ActiveResultCard extends StatelessWidget {
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                           ),
                           child: Text(
-                            S.of(context).viewDetails ?? "Details",
+                            S.of(context).viewDetails ,
                             style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16 * textScale),
                           ),
                         ),
@@ -457,7 +458,7 @@ class _ActiveResultCard extends StatelessWidget {
                         onPressed: () => ImagePickerHandler.processImage(context),
                         icon: const Icon(Icons.qr_code_scanner_rounded, size: 18),
                         label: Text(
-                          S.of(context).scanAnother ?? "Scan Again",
+                          S.of(context).scanAnother ,
                           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15 * textScale),
                         ),
                         style: OutlinedButton.styleFrom(
@@ -482,7 +483,7 @@ class _ActiveResultCard extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────
-//  History Item Card
+//  History Item Card – unchanged
 // ─────────────────────────────────────────────
 class _HistoryItemCard extends StatelessWidget {
   final HistoryItem item;
@@ -547,7 +548,7 @@ class _HistoryItemCard extends StatelessWidget {
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            isHealthy ? (S.of(context).healthy ?? "Healthy") : (S.of(context).diseaseDetected ?? "Diseased"),
+                            isHealthy ? (S.of(context).healthy) : (S.of(context).diseaseDetected),
                             style: TextStyle(
                               fontSize: 11 * textScale,
                               fontWeight: FontWeight.bold,
@@ -591,8 +592,8 @@ class _HistoryItemCard extends StatelessWidget {
 
   String _formatDateRelative(DateTime date, BuildContext context) {
     final difference = DateTime.now().difference(date);
-    if (difference.inDays == 0) return S.of(context).today ?? "Today";
-    if (difference.inDays == 1) return S.of(context).yesterday ?? "Yesterday";
-    return "${difference.inDays} ${S.of(context).daysAgo ?? "days ago"}";
+    if (difference.inDays == 0) return S.of(context).today ;
+    if (difference.inDays == 1) return S.of(context).yesterday ;
+    return "${difference.inDays} ${S.of(context).daysAgo }";
   }
 }
