@@ -7,7 +7,7 @@ import '../../../layout/cubit/cubit.dart';
 import '../../../models/disease_info.dart';
 import '../../../shared/components/components.dart';
 import '../../../shared/network/local/image_storage_helper.dart';
-import '../../../shared/styles/colors.dart';
+import '../../../shared/styles/app_colors.dart';
 import '../cubit/cubit.dart';
 import 'plant_disease_pipeline.dart';
 
@@ -187,13 +187,13 @@ class _ImageSourceSelector extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         ListTile(
-          leading: Icon(Icons.camera_alt, color: plantieColor),
+          leading: Icon(Icons.camera_alt, color: AppColors.primary),
           title: Text(S.of(context).takePhoto, style: Theme.of(context).textTheme.labelLarge),
           onTap: () => Navigator.pop(context, ImageSource.camera),
         ),
         const SizedBox(height: 8),
         ListTile(
-          leading: Icon(Icons.photo_library, color: plantieColor),
+          leading: Icon(Icons.photo_library, color: AppColors.primary),
           title: Text(S.of(context).chooseFromGallery, style: Theme.of(context).textTheme.labelLarge),
           onTap: () => Navigator.pop(context, ImageSource.gallery),
         ),
@@ -243,7 +243,7 @@ class _ConciseCaptureGuideModal extends StatelessWidget {
                     height: 48,
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [plantieColor, plantieColor.withOpacity(0.7)],
+                        colors: [AppColors.primary, AppColors.primary.withOpacity(0.7)],
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),
@@ -275,7 +275,7 @@ class _ConciseCaptureGuideModal extends StatelessWidget {
                 Icons.wb_sunny_outlined,
                 S.of(context).goodLightingCapture,
                 S.of(context).naturalLightWorks,
-                plantieColor,
+                AppColors.primary,
                 isDark,
               ),
               const SizedBox(height: 12),
@@ -335,11 +335,11 @@ class _ConciseCaptureGuideModal extends StatelessWidget {
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(12),
                             gradient: LinearGradient(
-                              colors: [plantieColor, plantieColor.withOpacity(0.8)],
+                              colors: [AppColors.primary, AppColors.primary.withOpacity(0.8)],
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color: plantieColor.withOpacity(0.3),
+                                color: AppColors.primary.withOpacity(0.3),
                                 blurRadius: 8,
                                 spreadRadius: 1,
                               )

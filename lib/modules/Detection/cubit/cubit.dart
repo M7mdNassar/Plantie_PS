@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:plantie/modules/Detection/cubit/states.dart';
 import 'package:plantie/models/user/user_model.dart';
-import 'package:plantie/shared/services/upload_queue_service.dart';
+import 'package:plantie/shared/network/local/upload_queue_service.dart';
 import '../../../models/disease_info.dart';
 import '../../../models/history_item.dart';
 import '../../../shared/utils/disease_label_parser.dart';
@@ -13,7 +13,7 @@ import '../../../shared/network/local/image_storage_helper.dart';
 
 class DetectionCubit extends Cubit<DetectionStates> {
   DetectionCubit() : super(DetectionInitialState()) {
-    _loadHistory(); // Load once when cubit is created
+    _loadHistory();
   }
 
   static DetectionCubit get(context) => BlocProvider.of(context);
@@ -22,7 +22,7 @@ class DetectionCubit extends Cubit<DetectionStates> {
   String? _currentResult;
   String? _orginalResult;
   List<HistoryItem> history = [];
-  int? _currentQueueId; // Track the queue ID for the current detection
+  int? _currentQueueId;
 
   File? get currentImage => _currentImage;
 
@@ -36,7 +36,6 @@ class DetectionCubit extends Cubit<DetectionStates> {
   String? currentPlantName;
 
   bool _isProcessing = false;
-
 
   void clearDetectionFlags() {
     detectionConfidence = null;
@@ -53,17 +52,6 @@ class DetectionCubit extends Cubit<DetectionStates> {
     emit(DetectionResultState());
   }
 
-  // void setNonPlantResult(File image, String displayTitle, double confidence) {
-  //   _isProcessing = false;
-  //   _currentImage = image;
-  //   _currentResult = displayTitle;
-  //   _orginalResult = null;
-  //   detectionRejected = true;
-  //   detectionConfidence = confidence;
-  //   detectionUncertain = false;
-  //   emit(DetectionResultState());
-  // }
-
   void setNonPlantResult(File image, String displayTitle, double confidence) {
     print('🟢 [Cubit] setNonPlantResult called');
     print('   - image: ${image.path}');
@@ -71,7 +59,7 @@ class DetectionCubit extends Cubit<DetectionStates> {
     print('   - confidence: $confidence');
     print('   - _isProcessing before: $_isProcessing');
 
-    _isProcessing = false;  // ✅ Critical: reset processing flag
+    _isProcessing = false;
     _currentImage = image;
     _currentResult = displayTitle;
     _orginalResult = null;
@@ -83,15 +71,6 @@ class DetectionCubit extends Cubit<DetectionStates> {
     emit(DetectionResultState());
     print('🟢 [Cubit] DetectionResultState emitted');
   }
-
-
-  // void startDetectionLoading(File image) {
-  //   if (_isProcessing) return;
-  //   _isProcessing = true;
-  //   _currentImage = image;
-  //   clearDetectionFlags();
-  //   emit(DetectionLoadingState());
-  // }
 
   void startDetectionLoading(File image) {
     print('🔵 [Cubit] startDetectionLoading called');
@@ -108,7 +87,6 @@ class DetectionCubit extends Cubit<DetectionStates> {
     emit(DetectionLoadingState());
   }
 
-
   void addToHistory(HistoryItem item) {
     history.insert(0, item);
     emit(HistoryUpdatedState());
@@ -120,7 +98,6 @@ class DetectionCubit extends Cubit<DetectionStates> {
       final dbHistory = await HistoryDBHelper().getHistory();
       final loadedItems = <HistoryItem>[];
 
-      // Verify images exist and only add valid history items
       for (final item in dbHistory) {
         final historyItem = HistoryItem(
           id: item['id'],
@@ -147,25 +124,30 @@ class DetectionCubit extends Cubit<DetectionStates> {
 
   Future<void> addDetectionToHistory(File image, String result) async {
     try {
-      // Ensure image is saved permanently
-      File permanentImage = image;
+      // ✅ Null safety: ensure user exists before queueing
+      final user = CurrentUser.user;
+      if (user == null) {
+        log('⚠️ CurrentUser is null, cannot queue detection');
+        // Still save locally? We can save without user ID, but then upload won't work.
+        // For safety, we store with 'unknown' but that will fail RLS.
+        // Better to show error.
+        emit(HistoryErrorState('User not logged in. Cannot save detection.'));
+        return;
+      }
 
-      // Check if file exists, if not try to save it
+      File permanentImage = image;
       if (!await image.exists()) {
         throw Exception('Original image file not found at ${image.path}');
       }
 
-      // If the image is not in the documents directory, save it permanently
       final documentsDir = await getApplicationDocumentsDirectory();
       if (!image.path.startsWith(documentsDir.path)) {
         log('Image not in permanent storage, copying now...');
         final savedImage = await ImageStorageHelper.saveImagePermanently(image);
         permanentImage = savedImage;
       } else {
-        // Verify the permanent image still exists
         if (!await permanentImage.exists()) {
-          throw Exception(
-              'Permanent image file not found at ${permanentImage.path}');
+          throw Exception('Permanent image file not found at ${permanentImage.path}');
         }
       }
 
@@ -173,14 +155,13 @@ class DetectionCubit extends Cubit<DetectionStates> {
 
       final newItem = HistoryItem(
         id: 0,
-        diseaseKey: result, // Store disease key instead of title
+        diseaseKey: result,
         imagePath: finalImagePath,
         date: DateTime.now(),
       );
 
-      // Insert to database
       final id = await HistoryDBHelper().insertHistory({
-        'diseaseKey': result, // Changed from title
+        'diseaseKey': result,
         'imagePath': finalImagePath,
         'date': DateTime.now().toIso8601String(),
       });
@@ -196,12 +177,9 @@ class DetectionCubit extends Cubit<DetectionStates> {
       final diseaseName = DiseaseInfo.data[result]?.name ?? result;
       setDetectionResult(permanentImage, diseaseName);
 
-      // ==================== ADD TO UPLOAD QUEUE ====================
-      // Queue the detection for uploading to cloud
-      // Extract confidence from result if available (NEEDS_MANUAL: confidence extraction logic)
       final confidence = detectionConfidence ?? 0.95;
       final plantTypeKey = plantKey ?? 'unknown';
-      final userId = CurrentUser.user?.id ?? 'unknown';
+      final userId = user.id; // now non-null
 
       final queueId = await uploadQueueService.addDetectionToQueue(
         imagePath: finalImagePath,
@@ -211,7 +189,6 @@ class DetectionCubit extends Cubit<DetectionStates> {
         supabaseUserId: userId,
       );
 
-      // Store queue ID for feedback widget to link corrections
       _currentQueueId = queueId;
 
       log('✅ Detection queued for upload with user ID: $userId (Queue ID: $queueId)');
@@ -222,18 +199,13 @@ class DetectionCubit extends Cubit<DetectionStates> {
 
   Future<void> deleteHistoryItem(int id, String imagePath) async {
     try {
-      // Delete from database
       final db = await HistoryDBHelper().database;
       await db.delete(
         'history',
         where: 'id = ?',
         whereArgs: [id],
       );
-
-      // Delete image file from permanent storage
       await ImageStorageHelper.deleteImageFile(imagePath);
-
-      // Update local list
       history.removeWhere((item) => item.id == id);
       emit(HistoryUpdatedState());
     } catch (e) {

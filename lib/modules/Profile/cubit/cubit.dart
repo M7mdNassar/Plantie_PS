@@ -4,7 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:plantie/shared/network/local/local_user_storage.dart';
 import 'package:plantie/shared/network/remote/supabase_service.dart';
 import '../../../models/user/user_model.dart';
-import '../../../shared/services/supabase_auth_service.dart';
+import '../../../shared/network/remote/supabase_auth_service.dart';
 import 'states.dart';
 
 class ProfileCubit extends Cubit<ProfileStates> {
@@ -87,7 +87,6 @@ class ProfileCubit extends Cubit<ProfileStates> {
     final user = CurrentUser.getUser();
     if (user == null || pickedImageFile == null) return;
 
-    // Check online session
     final authService = SupabaseAuthService();
     final isReady = await authService.syncUserIfNeeded(user.id);
     if (!isReady) {
@@ -103,13 +102,12 @@ class ProfileCubit extends Cubit<ProfileStates> {
       final fileName = 'avatar_${DateTime.now().millisecondsSinceEpoch}.$fileExtension';
       final fileBytes = await pickedImageFile!.readAsBytes();
 
-      // Use the authenticated user's ID as folder name (or local user ID, but must match RLS)
       final authUserId = authService.getCurrentAuthUserId() ?? user.id;
       final filePath = '$authUserId/$fileName';
 
       final imageUrl = await supabaseService.uploadFile(
         bucket: 'user-avatars',
-        path: authUserId,  // folder name = auth user ID
+        path: authUserId,
         fileBytes: fileBytes,
         fileName: fileName,
       );
@@ -149,7 +147,6 @@ class ProfileCubit extends Cubit<ProfileStates> {
       return;
     }
 
-    // Ensure online session
     final authService = SupabaseAuthService();
     final isReady = await authService.syncUserIfNeeded(user.id);
     if (!isReady) {

@@ -6,7 +6,7 @@ import 'package:plantie/modules/Home/cubit/cubit.dart';
 import 'package:plantie/modules/Home/domain/farming_insight.dart';
 import '../../generated/l10n.dart';
 import '../../models/weather_model.dart';
-import '../../shared/styles/colors.dart';
+import '../../shared/styles/app_colors.dart';
 
 class WeatherDetailsScreen extends StatelessWidget {
   final WeatherData weatherData;
@@ -58,14 +58,14 @@ class WeatherDetailsScreen extends StatelessWidget {
         gradient: LinearGradient(
           colors: isDark 
             ? [HexColor("1E1E1E"), HexColor("2C2C2C")]
-            : [plantieColor, plantieColor.withValues(alpha: 0.8)],
+            : [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.circular(30),
         boxShadow: [
           BoxShadow(
-            color: plantieColor.withValues(alpha: 0.3),
+            color: AppColors.primary.withValues(alpha: 0.3),
             blurRadius: 20,
             offset: const Offset(0, 10),
           )
@@ -298,7 +298,7 @@ class WeatherDetailsScreen extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       '${weatherData.hourly.precipitation[index]}mm',
-                      style: TextStyle(fontSize: 10, color: plantieColor),
+                      style: TextStyle(fontSize: 10, color: AppColors.primary),
                     ),
                   ],
                 ),

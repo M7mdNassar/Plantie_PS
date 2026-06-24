@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 
-/// Modern Color Palette System
-/// Inspired by: iOS, Instagram, TikTok, Modern Apps (2024)
 
 class AppColors {
   // PRIMARY COLORS - Green gradient for plant theme

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'package:plantie/shared/styles/colors.dart';
 import '../../generated/l10n.dart';
 import '../../layout/cubit/cubit.dart';
+import '../../shared/styles/app_colors.dart';
 
 enum FertilizerType { ssp, urea, mop }
 
@@ -307,7 +307,7 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
               backgroundColor: AppCubit.get(context).isDark
                   ? HexColor("1C1C1E")
                   : HexColor("FFFFFF"),
-              selectedColor: plantieColor,
+              selectedColor: AppColors.primary,
               // Your primary color
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8),
@@ -377,7 +377,7 @@ class _FertilizerScreenState extends State<FertilizerScreen> {
         ),
         style: ElevatedButton.styleFrom(
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-          backgroundColor: plantieColor,
+          backgroundColor: AppColors.primary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),

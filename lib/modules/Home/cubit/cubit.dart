@@ -12,6 +12,28 @@ import 'package:plantie/modules/Home/domain/farming_service.dart';
 import '../../../models/plant.dart';
 import '../../../models/weather_model.dart';
 
+// =====================================================================
+// WEATHER CACHE CLASS (private, inside cubit file)
+// =====================================================================
+class _WeatherCache {
+  WeatherData? data;
+  DateTime? timestamp;
+  static const Duration ttl = Duration(minutes: 30);
+
+  bool get isValid => data != null && timestamp != null &&
+      DateTime.now().difference(timestamp!) < ttl;
+
+  void set(WeatherData weather) {
+    data = weather;
+    timestamp = DateTime.now();
+  }
+
+  void clear() {
+    data = null;
+    timestamp = null;
+  }
+}
+
 class HomeCubit extends Cubit<HomeStates> {
   HomeCubit() : super(HomeInitialState());
 
@@ -20,17 +42,15 @@ class HomeCubit extends Cubit<HomeStates> {
   final WeatherRepository _weatherRepository = WeatherRepository();
   List<FarmingInsight> insights = [];
 
-  int selectedIndex = 0; // Track selected plant index
+  int selectedIndex = 0;
 
   void changeSelectedIndex(int index) {
-    // Bounds checking - ensure index is within valid range
     if (index >= 0 && index < plants.length) {
       selectedIndex = index;
       emit(HomeChangeSelectedIndexState());
     }
   }
 
-  /// Note : this emojis mapping the same order in plant data file (JSON file)
   List<String> plantEmojis = [
     '🍎', // apple
     '🫘', // bean
@@ -51,7 +71,7 @@ class HomeCubit extends Cubit<HomeStates> {
 
     try {
       final String response =
-          await rootBundle.loadString('assets/plants_data.json');
+      await rootBundle.loadString('assets/plants_data.json');
       final List<dynamic> data = jsonDecode(response);
 
       plants = data.map((plant) => Plant.fromJson(plant)).toList();
@@ -63,12 +83,23 @@ class HomeCubit extends Cubit<HomeStates> {
     }
   }
 
+  // ------------------------------------------------------------------
+  // Weather caching (Issue 12)
+  // ------------------------------------------------------------------
+  final _WeatherCache _cache = _WeatherCache();
+
   WeatherData? weatherData;
-  bool _isRequestingLocation = false; // Prevent duplicate requests
+  bool _isRequestingLocation = false;
 
   Future<void> getWeatherData() async {
-    // Prevent concurrent requests
     if (_isRequestingLocation) return;
+
+    // 1. Check cache first
+    if (_cache.isValid) {
+      weatherData = _cache.data;
+      emit(WeatherLoadedState());
+      return;
+    }
 
     emit(WeatherLoadingState());
 
@@ -95,18 +126,21 @@ class HomeCubit extends Cubit<HomeStates> {
         return;
       }
 
-       final position = await Geolocator.getCurrentPosition(
-         locationSettings: const LocationSettings(
-           accuracy: LocationAccuracy.high,
-           distanceFilter: 100,
-         ),
-       );
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 100,
+        ),
+      );
+
       weatherData = await _weatherRepository.getWeatherData(
         position.latitude,
         position.longitude,
       );
 
-      // Generate insights immediately after loading weather data
+      // Cache the result
+      _cache.set(weatherData!);
+
       emit(WeatherLoadedState());
     } catch (e) {
       log("Weather Error: $e");
@@ -116,6 +150,12 @@ class HomeCubit extends Cubit<HomeStates> {
     }
   }
 
+  // Force refresh (bypass cache)
+  Future<void> refreshWeather() async {
+    _cache.clear();
+    await getWeatherData();
+  }
+
   void generateInsights(BuildContext context) {
     if (weatherData != null) {
       insights = FarmingService.getInsights(weatherData!, context);
@@ -123,22 +163,20 @@ class HomeCubit extends Cubit<HomeStates> {
   }
 
   Future<void> requestLocationPermission() async {
-    if (_isRequestingLocation) return; // Prevent duplicate requests
+    if (_isRequestingLocation) return;
     await getWeatherData();
   }
 
   Future<void> openAppSettings() async {
-    if (_isRequestingLocation) return; // Prevent duplicate requests
+    if (_isRequestingLocation) return;
     await Geolocator.openAppSettings();
-    // Wait a moment for user to grant permissions in settings
     await Future.delayed(const Duration(milliseconds: 500));
     await getWeatherData();
   }
 
   Future<void> openLocationSettings() async {
-    if (_isRequestingLocation) return; // Prevent duplicate requests
+    if (_isRequestingLocation) return;
     await Geolocator.openLocationSettings();
-    // Wait a moment for user to enable location services
     await Future.delayed(const Duration(milliseconds: 500));
     await getWeatherData();
   }

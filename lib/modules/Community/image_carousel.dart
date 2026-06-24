@@ -1,6 +1,6 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import '../../shared/styles/colors.dart';
+import '../../shared/styles/app_colors.dart';
 import 'image_view_screen.dart';
 
 class ImageCarousel extends StatefulWidget {
@@ -73,7 +73,7 @@ class _ImageCarouselState extends State<ImageCarousel> {
                       imageUrl: widget.imageUrls[index],
                       fit: BoxFit.cover,
                       placeholder: (context, url) => Container(
-                        color: plantieColor.withValues(alpha: 0.08),
+                        color: AppColors.primary.withValues(alpha: 0.08),
                         child: const Center(
                           child: SizedBox(
                             width: 22,
@@ -104,7 +104,7 @@ class _ImageCarouselState extends State<ImageCarousel> {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: _currentPage == index
-                    ? plantieColor
+                    ? AppColors.primary
                     : Colors.grey.withValues(alpha: 0.5),
               ),
             ),

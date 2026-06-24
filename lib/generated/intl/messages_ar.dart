@@ -239,6 +239,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "errorTitle": MessageLookupByLibrary.simpleMessage("خطأ في التحديث"),
     "evapotranspiration": MessageLookupByLibrary.simpleMessage("التبخر والنتح"),
     "expertAdvice": MessageLookupByLibrary.simpleMessage("نصيحة الخبير"),
+    "failedToLoadPlants": MessageLookupByLibrary.simpleMessage(
+      "فشل تحميل النباتات",
+    ),
+    "failedToLoadPlantsMessage": MessageLookupByLibrary.simpleMessage(
+      "تعذر تحميل بيانات النباتات. يرجى التحقق من اتصال الإنترنت والمحاولة مرة أخرى.",
+    ),
     "farming_insights": MessageLookupByLibrary.simpleMessage("نصائح زراعية"),
     "feelsLike": m2,
     "feels_like": MessageLookupByLibrary.simpleMessage("الحرارة المحسوسة"),

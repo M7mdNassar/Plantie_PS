@@ -251,6 +251,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "Evapotranspiration",
     ),
     "expertAdvice": MessageLookupByLibrary.simpleMessage("Expert Advice"),
+    "failedToLoadPlants": MessageLookupByLibrary.simpleMessage(
+      "Failed to load plants",
+    ),
+    "failedToLoadPlantsMessage": MessageLookupByLibrary.simpleMessage(
+      "Unable to load plant data. Please check your internet connection and try again.",
+    ),
     "farming_insights": MessageLookupByLibrary.simpleMessage(
       "Farming Insights",
     ),

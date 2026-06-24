@@ -2,10 +2,10 @@ import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.da
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'package:plantie/shared/services/upload_queue_service.dart';
+import 'package:plantie/shared/network/local/upload_queue_service.dart';
 import 'package:plantie/shared/styles/icon_broken.dart';
 import '../generated/l10n.dart';
-import '../shared/styles/colors.dart';
+import '../shared/styles/app_colors.dart';
 import 'cubit/cubit.dart';
 import 'cubit/states.dart';
 
@@ -68,7 +68,7 @@ class _AppLayoutState extends State<AppLayout> with WidgetsBindingObserver {
     return FloatingActionButton(
       shape: const CircleBorder(),
       onPressed: () => AppCubit.get(context).startClassification(context),
-      backgroundColor: plantieColor,
+      backgroundColor: AppColors.primary,
       child: const Icon(
         size: 34,
         IconBroken.Camera,
@@ -92,7 +92,7 @@ class _AppLayoutState extends State<AppLayout> with WidgetsBindingObserver {
         itemCount: cubit.iconList.length,
         tabBuilder: (int index, bool isActive) {
           final color = isActive
-              ? plantieColor
+              ? AppColors.primary
               : (cubit.isDark ? Colors.white54 : Colors.black54);
 
           return MediaQuery(

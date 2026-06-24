@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../exceptions/app_exception.dart';
+
 
 /// Notification types with different visual styles
 enum NotificationType {
@@ -112,27 +112,7 @@ class NotificationService {
   }
 
   /// Show exception notification with auto-parsing
-  static void showException(
-    AppException exception, {
-    VoidCallback? onRetry,
-    Duration duration = const Duration(seconds: 5),
-  }) {
-    final type = _getTypeForException(exception);
-    _show(
-      title: exception is NetworkException &&
-          exception.code == 'TIMEOUT'
-          ? 'Request Timeout'
-          : exception is NetworkException &&
-          exception.code == 'NO_INTERNET'
-          ? 'No Connection'
-          : 'Error',
-      message: exception.message,
-      type: type,
-      duration: duration,
-      onAction: onRetry,
-      actionLabel: onRetry != null ? 'RETRY' : null,
-    );
-  }
+
 
   /// Internal show implementation
   static void _show({
@@ -258,18 +238,5 @@ class NotificationService {
     }
   }
 
-  /// Determine notification type from exception
-  static NotificationType _getTypeForException(AppException exception) {
-    if (exception is AuthException) {
-      return NotificationType.error;
-    } else if (exception is ValidationException) {
-      return NotificationType.warning;
-    } else if (exception is PermissionException) {
-      return NotificationType.info;
-    } else if (exception is NetworkException) {
-      return NotificationType.error;
-    }
-    return NotificationType.error;
-  }
 }
 

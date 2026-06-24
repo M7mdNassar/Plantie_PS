@@ -23,6 +23,18 @@ class PostModel {
     this.userLiked = false,
   });
 
+  // In post_model.dart
+  Map<String, dynamic> toJson() => {
+    'id': postId,
+    'user_id': uId,
+    'text': text,
+    'post_images': postImage,
+    'created_at': dateTime.toIso8601String(),
+    'comment_count': commentCount,
+    'like_count': likeCount,
+    'users': author?.toJson(),
+  };
+
   factory PostModel.fromJson(Map<String, dynamic> json) {
     UserModel? author;
     if (json['users'] != null) {

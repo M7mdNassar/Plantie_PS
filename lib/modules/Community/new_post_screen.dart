@@ -5,7 +5,6 @@ import 'package:plantie/modules/Community/cubit/cubit.dart';
 import 'package:plantie/modules/Community/cubit/states.dart';
 import 'package:plantie/shared/components/components.dart';
 import 'package:plantie/shared/styles/app_colors.dart';
-import 'package:plantie/shared/styles/colors.dart';
 import '../../generated/l10n.dart';
 import '../../shared/styles/icon_broken.dart';
 
@@ -155,7 +154,7 @@ class _NewPostScreenState extends State<NewPostScreen> {
             children: [
               CircleAvatar(
                 radius: 22,
-                backgroundColor: plantieColor.withValues(alpha: 0.14),
+                backgroundColor: AppColors.primary.withValues(alpha: 0.14),
                 backgroundImage:
                 (currentUser.image != null && currentUser.image!.isNotEmpty)
                     ? NetworkImage(currentUser.image!)
@@ -208,7 +207,7 @@ class _NewPostScreenState extends State<NewPostScreen> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(22),
-                borderSide: BorderSide(color: plantieColor, width: 1.3),
+                borderSide: BorderSide(color: AppColors.primary, width: 1.3),
               ),
             ),
           ),
@@ -234,7 +233,7 @@ class _NewPostScreenState extends State<NewPostScreen> {
         children: [
           Row(
             children: [
-              Icon(Icons.photo_library_outlined, size: 18, color: plantieColor),
+              Icon(Icons.photo_library_outlined, size: 18, color: AppColors.primary),
               const SizedBox(width: 8),
               Text(
                 S.of(context).photos,
@@ -338,8 +337,8 @@ class _NewPostScreenState extends State<NewPostScreen> {
                 icon: const Icon(Icons.photo_library_outlined, size: 20),
                 label: Text(S.of(context).addPhotos),
                 style: OutlinedButton.styleFrom(
-                  foregroundColor: plantieColor,
-                  side: BorderSide(color: plantieColor.withOpacity(0.5)),
+                  foregroundColor: AppColors.primary,
+                  side: BorderSide(color: AppColors.primary.withOpacity(0.5)),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(40),
                   ),
@@ -363,7 +362,7 @@ class _NewPostScreenState extends State<NewPostScreen> {
                     : const Icon(Icons.send_rounded, size: 18),
                 label: Text(S.of(context).postButton),
                 style: FilledButton.styleFrom(
-                  backgroundColor: plantieColor,
+                  backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(40),
@@ -405,7 +404,7 @@ class _NewPostScreenState extends State<NewPostScreen> {
               Navigator.pop(ctx);
               onRetry();
             },
-            style: ElevatedButton.styleFrom(backgroundColor: plantieColor),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
             child: Text(S.of(ctx).retry),
           ),
         ],

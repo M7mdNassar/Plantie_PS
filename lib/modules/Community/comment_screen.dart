@@ -6,7 +6,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../generated/l10n.dart';
 import '../../models/user/user_model.dart';
 import '../../shared/styles/app_colors.dart';
-import '../../shared/styles/colors.dart';
 import '../../shared/styles/icon_broken.dart';
 import 'cubit/cubit.dart';
 
@@ -192,7 +191,7 @@ class _CommentScreenState extends State<CommentScreen> {
               Navigator.pop(ctx);
               onRetry();
             },
-            style: ElevatedButton.styleFrom(backgroundColor: plantieColor),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
             child: Text(S.of(ctx).retry),
           ),
         ],
@@ -252,7 +251,7 @@ class _CommentScreenState extends State<CommentScreen> {
                 onPressed: _loadInitialComments,
                 icon: const Icon(Icons.refresh_rounded),
                 label: Text(S.of(context).retry),
-                style: ElevatedButton.styleFrom(backgroundColor: plantieColor),
+                style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
               ),
             ],
           ),
@@ -313,13 +312,13 @@ class _CommentScreenState extends State<CommentScreen> {
                     height: 16,
                     child: CircularProgressIndicator(
                       strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation(plantieColor),
+                      valueColor: AlwaysStoppedAnimation(AppColors.primary),
                     ),
                   ),
                   const SizedBox(width: 8),
                   Text(S.of(context).postingComment,
                       style: Theme.of(context).textTheme.labelSmall
-                          ?.copyWith(color: plantieColor)),
+                          ?.copyWith(color: AppColors.primary)),
                 ],
               ),
             ),
@@ -327,7 +326,7 @@ class _CommentScreenState extends State<CommentScreen> {
             children: [
               CircleAvatar(
                 radius: 18,
-                backgroundColor: plantieColor.withOpacity(0.2),
+                backgroundColor: AppColors.primary.withOpacity(0.2),
                 backgroundImage: (currentUser.image?.isNotEmpty ?? false)
                     ? NetworkImage(currentUser.image!)
                     : const AssetImage('assets/images/default_avatar.png')
@@ -357,7 +356,7 @@ class _CommentScreenState extends State<CommentScreen> {
                     focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
                         borderSide:
-                        BorderSide(color: plantieColor, width: 1.5)),
+                        BorderSide(color: AppColors.primary, width: 1.5)),
                     disabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(20),
                         borderSide:
@@ -384,9 +383,9 @@ class _CommentScreenState extends State<CommentScreen> {
                       height: 24,
                       child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          valueColor: AlwaysStoppedAnimation(plantieColor)),
+                          valueColor: AlwaysStoppedAnimation(AppColors.primary)),
                     )
-                        : Icon(IconBroken.Send, color: plantieColor, size: 24),
+                        : Icon(IconBroken.Send, color: AppColors.primary, size: 24),
                   ),
                 ),
               ),
@@ -406,7 +405,7 @@ class _CommentScreenState extends State<CommentScreen> {
         children: [
           CircleAvatar(
             radius: 20,
-            backgroundColor: plantieColor.withOpacity(0.2),
+            backgroundColor: AppColors.primary.withOpacity(0.2),
             backgroundImage: (comment.userImage?.isNotEmpty ?? false)
                 ? NetworkImage(comment.userImage!)
                 : const AssetImage('assets/images/default_avatar.png') as ImageProvider,

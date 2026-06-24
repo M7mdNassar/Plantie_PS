@@ -509,7 +509,10 @@
   "noInternetConnection": "No Internet Connection",
   "offlinePostMessage": "You are currently offline. Your post will be saved and uploaded when you regain internet connection.",
   "ok": "OK",
-  "commentFailed": "Could not post comment. Please try again."
+  "commentFailed": "Could not post comment. Please try again.",
+
+  "failedToLoadPlants": "Failed to load plants",
+  "failedToLoadPlantsMessage": "Unable to load plant data. Please check your internet connection and try again."
 
 
 

@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 import '../../../models/user/user_model.dart';
 import '../../../shared/network/local/local_user_storage.dart';
-import '../../../shared/services/supabase_auth_service.dart';
+import '../../../shared/network/remote/supabase_auth_service.dart';
 import 'registration_state.dart';
 
 class RegistrationCubit extends Cubit<RegistrationState> {
