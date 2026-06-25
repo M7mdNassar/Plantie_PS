@@ -9,8 +9,8 @@ import '../../shared/network/local/cache_helper.dart';
 import '../../shared/network/local/history_db.dart';
 import '../../shared/network/local/local_user_storage.dart';
 import '../../shared/network/remote/supabase_service.dart';
-import '../../shared/services/supabase_auth_service.dart';
-import '../../shared/services/upload_queue_service.dart';
+import '../../shared/network/remote/supabase_auth_service.dart';
+import '../../shared/network/local/upload_queue_service.dart';
 import '../Detection/Classification/plant_disease_pipeline.dart';
 import '../OnBoarding/on_boarding_screen.dart';
 import '../Registration/registration_screen.dart';
@@ -39,8 +39,6 @@ class _LottieLoadingScreenState extends State<LottieLoadingScreen> {
         anonKey: Environment.supabaseAnonKey,
       );
       supabaseService.initialize(Supabase.instance.client);
-
-      await PlantDiseasePipeline.init();
 
       // Fire these in parallel – they are independent
       await Future.wait([

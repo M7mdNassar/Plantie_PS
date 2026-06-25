@@ -1,4 +1,3 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hexcolor/hexcolor.dart';
@@ -10,7 +9,6 @@ import 'package:plantie/modules/Community/new_post_screen.dart';
 import 'package:plantie/modules/Community/post_search.dart';
 import 'package:plantie/modules/Community/shimmer_post_skeleton.dart';
 import 'package:plantie/shared/components/components.dart';
-import 'package:plantie/shared/styles/colors.dart';
 import 'package:plantie/shared/styles/responsive_text.dart';
 import '../../generated/l10n.dart';
 import '../../shared/styles/app_colors.dart';
@@ -107,11 +105,11 @@ class _CommunityScreenState extends State<CommunityScreen> {
                       }
                     },
                     backgroundColor: isDark ? HexColor("272729") : Colors.grey[50],
-                    selectedColor: plantieColor.withOpacity(0.12),
+                    selectedColor: AppColors.primary.withOpacity(0.12),
                     labelStyle: TextStyle(
                       fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
                       color: isSelected
-                          ? plantieColor
+                          ? AppColors.primary
                           : (isDark ? Colors.white60 : Colors.grey[700]),
                       fontSize: 13,
                       letterSpacing: -0.1,
@@ -120,7 +118,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                       borderRadius: BorderRadius.circular(100),
                     ),
                     side: BorderSide(
-                      color: isSelected ? plantieColor.withOpacity(0.5) : Colors.transparent,
+                      color: isSelected ? AppColors.primary.withOpacity(0.5) : Colors.transparent,
                       width: 1,
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -206,7 +204,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
               Navigator.pop(ctx);
               onRetry();
             },
-            style: ElevatedButton.styleFrom(backgroundColor: plantieColor),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
             child: Text(S.of(ctx).retry),
           ),
         ],
@@ -272,7 +270,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
             },
             child: RefreshIndicator(
               onRefresh: _refreshPosts,
-              color: plantieColor,
+              color: AppColors.primary,
               backgroundColor: isDark ? HexColor('1C1C1E') : Colors.white,
               edgeOffset: 120,
               child: Stack(
@@ -360,7 +358,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                                 height: 14,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation(plantieColor),
+                                  valueColor: AlwaysStoppedAnimation(AppColors.primary),
                                 ),
                               ),
                               const SizedBox(width: 10),
@@ -407,8 +405,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  plantieColor.withOpacity(1.0),
-                  plantieColor.withOpacity(0.6),
+                  AppColors.primary.withOpacity(1.0),
+                  AppColors.primary.withOpacity(0.6),
                 ],
               ),
             ),
@@ -497,9 +495,9 @@ class _CommunityScreenState extends State<CommunityScreen> {
         onTap: () => _navigateToNewPost(context, cubit),
         child: FloatingActionButton.extended(
           heroTag: "addPost",
-          backgroundColor: plantieColor,
+          backgroundColor: AppColors.primary,
           elevation: 6,
-          splashColor: plantieColor.withOpacity(0.4),
+          splashColor: AppColors.primary.withOpacity(0.4),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
           ),
@@ -566,12 +564,12 @@ class _CommunityScreenState extends State<CommunityScreen> {
                 shape: BoxShape.circle,
                 gradient: LinearGradient(
                   colors: [
-                    plantieColor.withOpacity(0.14),
-                    plantieColor.withOpacity(0.02),
+                    AppColors.primary.withOpacity(0.14),
+                    AppColors.primary.withOpacity(0.02),
                   ],
                 ),
               ),
-              child: Icon(Icons.inbox_rounded, size: 52, color: plantieColor),
+              child: Icon(Icons.inbox_rounded, size: 52, color: AppColors.primary),
             ),
             SizedBox(height: ResponsiveText.padding(context, 24)),
             Text(
@@ -644,7 +642,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
               icon: const Icon(Icons.refresh_rounded, size: 18),
               label: Text(s.retry),
               style: ElevatedButton.styleFrom(
-                backgroundColor: plantieColor,
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
@@ -701,7 +699,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
               icon: const Icon(Icons.refresh_rounded, size: 18),
               label: Text(s.retry),
               style: ElevatedButton.styleFrom(
-                backgroundColor: plantieColor,
+                backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),

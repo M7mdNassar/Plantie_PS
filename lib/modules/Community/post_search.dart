@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:plantie/shared/styles/colors.dart';
 import '../../generated/l10n.dart';
 import '../../shared/components/components.dart';
+import '../../shared/styles/app_colors.dart';
 import 'cubit/cubit.dart';
 import 'cubit/states.dart';
 
@@ -31,7 +31,7 @@ class PostSearchDelegate extends SearchDelegate {
     return theme.copyWith(
       appBarTheme: AppBarTheme(
         iconTheme: theme.iconTheme.copyWith(
-          color: plantieColor,
+          color: AppColors.primary,
         ),
         titleSpacing: 5,
         backgroundColor: theme.appBarTheme.backgroundColor,
@@ -113,7 +113,7 @@ class PostSearchDelegate extends SearchDelegate {
                     Icon(
                       Icons.inbox_outlined,
                       size: 64,
-                      color: plantieColor.withValues(alpha: 0.5),
+                      color: AppColors.primary.withValues(alpha: 0.5),
                     ),
                     const SizedBox(height: 16),
                     Text(

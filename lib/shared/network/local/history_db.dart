@@ -27,6 +27,19 @@ class HistoryDBHelper {
   final String uploadQueueColumnUploaded = 'uploaded';
   final String uploadQueueColumnUploadAttempts = 'upload_attempts';
 
+
+
+  // New table name and columns
+  static const String offlineTableName = 'offline_actions';
+  static const String offlineColumnId = 'id';
+  static const String offlineColumnType = 'action_type'; // 'post', 'comment'
+  static const String offlineColumnData = 'data'; // JSON string
+  static const String offlineColumnUserId = 'user_id';
+  static const String offlineColumnStatus = 'status'; // 'pending', 'uploading', 'done', 'failed'
+  static const String offlineColumnAttempts = 'attempts';
+  static const String offlineColumnCreatedAt = 'created_at';
+
+
   HistoryDBHelper._internal();
 
   Future<Database> get database async {
@@ -66,6 +79,27 @@ class HistoryDBHelper {
             $uploadQueueColumnUploadAttempts INTEGER NOT NULL DEFAULT 0
           )
         ''');
+
+        await db.execute('''
+          CREATE TABLE $offlineTableName (
+            $offlineColumnId INTEGER PRIMARY KEY AUTOINCREMENT,
+            $offlineColumnType TEXT NOT NULL,
+            $offlineColumnData TEXT NOT NULL,
+            $offlineColumnUserId TEXT NOT NULL,
+            $offlineColumnStatus TEXT NOT NULL DEFAULT 'pending',
+            $offlineColumnAttempts INTEGER DEFAULT 0,
+            $offlineColumnCreatedAt TEXT NOT NULL
+             )
+         ''');
+
+        await db.execute('''
+          CREATE TABLE cached_posts (
+          post_id TEXT PRIMARY KEY,
+          post_data TEXT NOT NULL,
+          cached_at TEXT NOT NULL
+             )
+        ''');
+
       },
       onUpgrade: (db, oldVersion, newVersion) async {
         if (oldVersion < 2) {
@@ -94,6 +128,28 @@ class HistoryDBHelper {
               $uploadQueueColumnUploadAttempts INTEGER NOT NULL DEFAULT 0
             )
           ''');
+        }
+
+        if (oldVersion < 4) {
+          await db.execute('''
+    CREATE TABLE $offlineTableName (
+      $offlineColumnId INTEGER PRIMARY KEY AUTOINCREMENT,
+      $offlineColumnType TEXT NOT NULL,
+      $offlineColumnData TEXT NOT NULL,
+      $offlineColumnUserId TEXT NOT NULL,
+      $offlineColumnStatus TEXT NOT NULL DEFAULT 'pending',
+      $offlineColumnAttempts INTEGER DEFAULT 0,
+      $offlineColumnCreatedAt TEXT NOT NULL
+    )
+  ''');
+
+          await db.execute('''
+    CREATE TABLE cached_posts (
+      post_id TEXT PRIMARY KEY,
+      post_data TEXT NOT NULL,
+      cached_at TEXT NOT NULL
+    )
+  ''');
         }
       },
     );
@@ -199,6 +255,34 @@ class HistoryDBHelper {
       {uploadQueueColumnSupabaseUserId: newUserId},
       where: '$uploadQueueColumnSupabaseUserId = ?',
       whereArgs: [oldUserId],
+    );
+  }
+
+
+  Future<int> insertOfflineAction(Map<String, dynamic> data) async {
+    final db = await database;
+    return await db.insert(offlineTableName, data);
+  }
+
+  Future<List<Map<String, dynamic>>> getPendingOfflineActions() async {
+    final db = await database;
+    return await db.query(
+      offlineTableName,
+      where: '$offlineColumnStatus = ? AND $offlineColumnAttempts < 3',
+      whereArgs: ['pending'],
+      orderBy: '$offlineColumnCreatedAt ASC',
+    );
+  }
+
+  Future<void> updateOfflineActionStatus(int id, String status, {int? attempts}) async {
+    final db = await database;
+    final updates = <String, dynamic>{offlineColumnStatus: status};
+    if (attempts != null) updates[offlineColumnAttempts] = attempts;
+    await db.update(
+      offlineTableName,
+      updates,
+      where: '$offlineColumnId = ?',
+      whereArgs: [id],
     );
   }
 }

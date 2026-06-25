@@ -1,8 +1,9 @@
 import 'dart:io';
-import '../network/local/local_user_storage.dart';
-import '../network/remote/dio.dart';
-import '../network/remote/supabase_service.dart';
-import '../../../models/user/user_model.dart';
+import 'package:flutter/cupertino.dart';
+
+import '../local/local_user_storage.dart';
+import 'supabase_service.dart';
+import '../../../../models/user/user_model.dart';
 
 class SupabaseAuthService {
   static final SupabaseAuthService _instance = SupabaseAuthService._internal();

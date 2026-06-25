@@ -3,7 +3,7 @@ import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../../generated/l10n.dart';
 import '../../shared/components/components.dart';
 import '../../shared/network/local/cache_helper.dart';
-import '../../shared/styles/colors.dart';
+import '../../shared/styles/app_colors.dart';
 import '../Registration/registration_screen.dart';
 
 class BoardingModel {
@@ -112,7 +112,7 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
                   controller: boardController,
                   effect: ExpandingDotsEffect(
                     dotColor: Colors.grey,
-                    activeDotColor: plantieColor,
+                    activeDotColor: AppColors.primary,
                     dotHeight: 10,
                     expansionFactor: 4,
                     dotWidth: 10,
@@ -122,7 +122,7 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
                 ),
                 const Spacer(),
                 FloatingActionButton(
-                  backgroundColor: plantieColor,
+                  backgroundColor: AppColors.primary,
                   shape: const CircleBorder(),
                   onPressed: () {
                     if (isLast) {

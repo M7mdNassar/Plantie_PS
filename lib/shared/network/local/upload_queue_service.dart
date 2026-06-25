@@ -1,10 +1,12 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:path_provider/path_provider.dart';
-import '../network/local/history_db.dart';
-import '../network/remote/supabase_service.dart';
+import '../remote/supabase_auth_service.dart';
+import 'history_db.dart';
+import '../remote/supabase_service.dart';
 
 class UploadQueueService {
   static final UploadQueueService _instance = UploadQueueService._internal();
@@ -21,12 +23,11 @@ class UploadQueueService {
   final Connectivity _connectivity = Connectivity();
   bool _isUploading = false;
 
-  // Connectivity listener
   late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
 
   void _initConnectivityListener() {
     _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
-      (result) {
+          (result) {
         if (result.contains(ConnectivityResult.none)) {
           debugPrint('📡 Connection lost');
         } else {
@@ -37,8 +38,23 @@ class UploadQueueService {
     );
   }
 
-  /// Main method to attempt uploading all pending queue items
-  /// Safe to call multiple times concurrently (uses _isUploading flag)
+  /// Add an offline action (post or comment) to the queue
+  Future<void> addOfflineAction({
+    required String type,
+    required String userId,
+    required Map<String, dynamic> data,
+  }) async {
+    final id = await _db.insertOfflineAction({
+      'action_type': type,
+      'data': jsonEncode(data),
+      'user_id': userId,
+      'created_at': DateTime.now().toIso8601String(),
+    });
+    debugPrint('✅ Offline action queued: $type (ID: $id)');
+    attemptPendingUploads(); // trigger if online
+  }
+
+  /// Main method to attempt uploading all pending items (detections + offline actions)
   Future<void> attemptPendingUploads() async {
     if (_isUploading) {
       debugPrint('⏳ Upload already in progress, skipping...');
@@ -50,7 +66,6 @@ class UploadQueueService {
     try {
       debugPrint('🚀 Starting pending uploads...');
 
-      // Check internet connectivity first
       final connectivityResult = await _connectivity.checkConnectivity();
       if (connectivityResult.contains(ConnectivityResult.none)) {
         debugPrint('📡 No internet connection, skipping uploads');
@@ -58,20 +73,22 @@ class UploadQueueService {
         return;
       }
 
-      // Get all pending items
-      final pendingItems = await _db.getPendingUploadQueueItems();
-
-      if (pendingItems.isEmpty) {
-        debugPrint('✅ No pending items to upload');
-        _isUploading = false;
-        return;
+      // 1. Upload pending detections
+      final pendingDetections = await _db.getPendingUploadQueueItems();
+      if (pendingDetections.isNotEmpty) {
+        debugPrint('📦 Found ${pendingDetections.length} pending detections');
+        for (final item in pendingDetections) {
+          await _uploadSingleItem(item);
+        }
       }
 
-      debugPrint('📦 Found ${pendingItems.length} pending items to upload');
-
-      // Upload each item
-      for (final item in pendingItems) {
-        await _uploadSingleItem(item);
+      // 2. Upload pending offline actions (posts/comments)
+      final pendingActions = await _db.getPendingOfflineActions();
+      if (pendingActions.isNotEmpty) {
+        debugPrint('📦 Found ${pendingActions.length} pending offline actions');
+        for (final action in pendingActions) {
+          await _uploadOfflineAction(action);
+        }
       }
 
       debugPrint('✅ Pending uploads completed');
@@ -81,6 +98,8 @@ class UploadQueueService {
       _isUploading = false;
     }
   }
+
+
 
   /// Upload a single detection result to Supabase
   Future<void> _uploadSingleItem(Map<String, dynamic> item) async {
@@ -92,77 +111,57 @@ class UploadQueueService {
       final userCorrectedLabel = item['user_corrected_label'];
       final plantType = item['plant_type'] as String;
       final detectedAt = item['detected_at'] as String;
-      // Local UUID (used for offline storage, not for Supabase)
-      final _ = item['supabase_user_id'] as String;
 
       debugPrint('📤 Uploading detection: $itemId');
 
-      // ⚠️ CRITICAL: Before uploading, ensure Supabase session exists
-      // This is where we handle the auth.uid() mapping
       String? supabaseUserId;
       try {
         final supabaseUser = supabaseService.getCurrentUser();
         if (supabaseUser != null) {
-          supabaseUserId = supabaseUser.id; // Real auth.uid() for RLS policy
-          debugPrint('✅ Using Supabase auth.uid(): $supabaseUserId');
+          supabaseUserId = supabaseUser.id;
         } else {
-          // Try to create anonymous session (internet must be available at this point)
           debugPrint('⚠️ No active Supabase session, attempting anonymous login...');
-          try {
-            final authResponse =
-                await supabaseService.client.auth.signInAnonymously();
-            if (authResponse.user != null) {
-              supabaseUserId = authResponse.user!.id;
-              debugPrint('✅ Created Supabase anonymous session: $supabaseUserId');
-            } else {
-              throw Exception('Anonymous auth returned no user');
-            }
-          } catch (e) {
-            debugPrint('❌ Cannot create Supabase session: $e');
-            debugPrint(
-                '⚠️ Upload requires internet for authentication - will retry later');
-            await _db.incrementUploadAttempts(itemId);
-            return; // Will retry when internet and auth available
+          final authResponse = await supabaseService.client.auth.signInAnonymously();
+          if (authResponse.user != null) {
+            supabaseUserId = authResponse.user!.id;
+          } else {
+            throw Exception('Anonymous auth returned no user');
           }
         }
       } catch (e) {
         debugPrint('❌ Session check failed: $e');
         await _db.incrementUploadAttempts(itemId);
-        return; // Will retry
+        return;
       }
 
-      // 1. Upload image to Supabase Storage
       final imageFile = File(imagePath);
       if (!await imageFile.exists()) {
-        debugPrint('⚠️  Image file not found: $imagePath, marking as uploaded');
+        debugPrint('⚠️ Image file not found: $imagePath, marking as uploaded');
         await _db.markUploadQueueItemAsUploaded(itemId);
         return;
       }
 
       final imageBytes = await imageFile.readAsBytes();
-      final fileName =
-          DateTime.now().millisecondsSinceEpoch.toString() + '_detection.jpg';
+      final fileName = DateTime.now().millisecondsSinceEpoch.toString() + '_detection.jpg';
 
       String imageUrl;
       try {
         imageUrl = await supabaseService.uploadFile(
           bucket: 'detection-images',
-          path: supabaseUserId, // Use Supabase auth.uid(), not local UUID
+          path: supabaseUserId,
           fileBytes: imageBytes,
           fileName: fileName,
         );
-        debugPrint('✅ Image uploaded to: $imageUrl');
       } catch (e) {
         debugPrint('❌ Image upload failed: $e');
         await _db.incrementUploadAttempts(itemId);
         return;
       }
 
-      // 2. Insert metadata to Supabase detection_results table
       try {
         final final_predicted_class = userCorrectedLabel ?? predictedClass;
         await supabaseService.insertDetectionResult(
-          userId: supabaseUserId, // Use Supabase auth.uid() for RLS ✅
+          userId: supabaseUserId,
           plantType: plantType,
           predictedClass: final_predicted_class,
           confidenceScore: confidenceScore,
@@ -170,9 +169,6 @@ class UploadQueueService {
           imageUrl: imageUrl,
           detectedAt: DateTime.parse(detectedAt),
         );
-        debugPrint('✅ Metadata inserted to detection_results');
-
-        // 3. Mark as uploaded
         await _db.markUploadQueueItemAsUploaded(itemId);
         debugPrint('✅ Queue item $itemId marked as uploaded');
       } catch (e) {
@@ -261,9 +257,106 @@ class UploadQueueService {
     }
   }
 
+
+  Future<void> _uploadOfflineAction(Map<String, dynamic> action) async {
+    final id = action['id'] as int;
+    final type = action['action_type'] as String;
+    final data = jsonDecode(action['data'] as String);
+    final userId = action['user_id'] as String;
+
+    // Ensure user has a Supabase session
+    final authService = SupabaseAuthService(); // import it if needed
+    final ready = await authService.syncUserIfNeeded(userId);
+    if (!ready) {
+      debugPrint('⚠️ Cannot sync user for action $id, retrying later');
+      await _db.updateOfflineActionStatus(id, 'pending', attempts: (action['attempts'] as int) + 1);
+      return;
+    }
+
+    try {
+      if (type == 'post') {
+        await _uploadPost(data);
+      } else if (type == 'comment') {
+        await _uploadComment(data);
+      } else {
+        debugPrint('⚠️ Unknown action type: $type');
+        await _db.updateOfflineActionStatus(id, 'failed');
+        return;
+      }
+      await _db.updateOfflineActionStatus(id, 'done');
+      debugPrint('✅ Offline action $id uploaded');
+    } catch (e) {
+      debugPrint('❌ Offline action $id failed: $e');
+      final attempts = (action['attempts'] as int) + 1;
+      final status = attempts >= 3 ? 'failed' : 'pending';
+      await _db.updateOfflineActionStatus(id, status, attempts: attempts);
+    }
+  }
+
+  Future<void> _uploadPost(Map<String, dynamic> data) async {
+    final userId = data['user_id'];
+    final text = data['text'];
+    final images = data['images'] as List<dynamic>? ?? [];
+
+    // Upload images (if any)
+    List<String> uploadedUrls = [];
+    for (final imagePath in images) {
+      final file = File(imagePath);
+      if (await file.exists()) {
+        final bytes = await file.readAsBytes();
+        final fileName = 'post_${DateTime.now().millisecondsSinceEpoch}.jpg';
+        try {
+          final url = await supabaseService.uploadFile(
+            bucket: 'post-images',
+            path: 'posts',
+            fileBytes: bytes,
+            fileName: fileName,
+          );
+          uploadedUrls.add(url);
+        } catch (e) {
+          debugPrint('❌ Failed to upload image: $e');
+          // Continue with other images; if all fail, we still proceed with text-only post.
+        }
+      }
+    }
+
+    // Insert post
+    final response = await supabaseService.client
+        .from('posts')
+        .insert({'user_id': userId, 'text': text})
+        .select('*, users(*)')
+        .single();
+
+    final postId = response['id'] as String;
+
+    // Insert image records
+    if (uploadedUrls.isNotEmpty) {
+      final imageInserts = uploadedUrls.map((url) => {
+        'post_id': postId,
+        'image_url': url,
+        'created_at': DateTime.now().toIso8601String(),
+      }).toList();
+      await supabaseService.client.from('post_images').insert(imageInserts);
+    }
+  }
+
+  Future<void> _uploadComment(Map<String, dynamic> data) async {
+    final postId = data['post_id'];
+    final userId = data['user_id'];
+    final text = data['text'];
+    await supabaseService.client
+        .from('comments')
+        .insert({'post_id': postId, 'user_id': userId, 'text': text});
+  }
+
+
+
   void dispose() {
     _connectivitySubscription.cancel();
   }
+
+
+
 }
 
 final uploadQueueService = UploadQueueService();

@@ -5,7 +5,6 @@ import 'package:plantie/modules/Home/cubit/states.dart';
 import 'package:plantie/modules/Home/fertilizer_screen.dart';
 import 'package:plantie/modules/Home/weather_details_screen.dart';
 import 'package:plantie/shared/components/components.dart';
-import 'package:plantie/shared/styles/colors.dart';
 import 'package:plantie/shared/styles/app_colors.dart';
 import 'package:plantie/shared/styles/responsive_text.dart';
 import 'package:plantie/shared/utils/animations.dart';
@@ -16,7 +15,7 @@ import '../../models/plant.dart';
 import '../../models/weather_model.dart';
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key}); // PERF_FIX: const constructor for lazy initialization
+  const HomeScreen({super.key});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();
@@ -26,16 +25,13 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    // Load plants and weather data when screen is created
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final cubit = HomeCubit.get(context);
 
-      // Load plants only if not already loaded
       if (cubit.plants.isEmpty) {
         cubit.loadPlants();
       }
 
-      // Request weather data only once when screen is created
       if (cubit.weatherData == null) {
         cubit.getWeatherData();
       }
@@ -44,12 +40,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-
     return BlocBuilder<HomeCubit, HomeStates>(
-      // PERF_FIX: Add buildWhen to prevent unnecessary rebuilds
-      // Only rebuild when plants or weather data changes, not on every state
       buildWhen: (previous, current) =>
-          current is HomeGetPlantsSuccessState ||
+      current is HomeGetPlantsSuccessState ||
           current is HomeGetPlantsErrorState ||
           current is HomeLoadingPlantsState ||
           current is WeatherSuccessState ||
@@ -62,6 +55,62 @@ class _HomeScreenState extends State<HomeScreen> {
         final cubit = HomeCubit.get(context);
         final plants = cubit.plants;
         final hasPlants = plants.isNotEmpty;
+
+        // ✅ Show error state if plants failed to load (Issue 13)
+        if (state is HomeGetPlantsErrorState && plants.isEmpty) {
+          return Scaffold(
+            body: SafeArea(
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32.0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        size: 64,
+                        color: AppColors.error,
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        S.of(context).failedToLoadPlants,
+                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                          fontWeight: FontWeight.w700,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        S.of(context).failedToLoadPlantsMessage,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          color: Colors.grey[600],
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 24),
+                      ElevatedButton.icon(
+                        onPressed: () => cubit.loadPlants(),
+                        icon: const Icon(Icons.refresh_rounded),
+                        label: Text(S.of(context).retry),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 32,
+                            vertical: 14,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          );
+        }
 
         return Scaffold(
           body: SingleChildScrollView(
@@ -77,33 +126,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Header - Always visible
                     _buildHeader(context),
-
                     SizedBox(height: ResponsiveText.padding(context, 20)),
-
-                    // Weather Card - Shows content/loading/error state
                     _buildWeatherCard(context, state, cubit),
-
                     SizedBox(height: ResponsiveText.padding(context, 24)),
-
-                    // Weather Insights - Only if data available
                     if (cubit.weatherData != null)
                       _buildWeatherDescription(context, cubit),
-
                     SizedBox(height: ResponsiveText.padding(context, 24)),
-
-                    // Choose Plant Section - Always visible
                     _buildChoosePlantHeader(context),
-
                     SizedBox(height: ResponsiveText.padding(context, 12)),
-
-                    // Plant Carousel - Always visible
                     _buildPlantCarousel(context, cubit),
-
                     SizedBox(height: ResponsiveText.padding(context, 20)),
-
-                    // Plant Details - Shows if plants exist
                     if (hasPlants) ...[
                       _buildPlantNameHeader(
                         context,
@@ -123,7 +156,6 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ] else
                       _buildLoadingShimmer(),
-
                     SizedBox(height: ResponsiveText.padding(context, 20)),
                   ],
                 ),
@@ -135,6 +167,10 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  // =====================================================================
+  // All other methods (unchanged from original)
+  // =====================================================================
+
   Widget _buildHeader(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Column(
@@ -143,17 +179,17 @@ class _HomeScreenState extends State<HomeScreen> {
         Text(
           S.of(context).home,
           style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                fontSize: ResponsiveText.headline(context),
-                fontWeight: FontWeight.bold,
-              ),
+            fontSize: ResponsiveText.headline(context),
+            fontWeight: FontWeight.bold,
+          ),
         ),
         SizedBox(height: ResponsiveText.padding(context, 4)),
         Text(
           S.of(context).homeSubtitle,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontSize: ResponsiveText.bodySmall(context),
-                color: isDark ? Colors.grey[400] : Colors.grey[600],
-              ),
+            fontSize: ResponsiveText.bodySmall(context),
+            color: isDark ? Colors.grey[400] : Colors.grey[600],
+          ),
         ),
       ],
     );
@@ -167,8 +203,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final Color levelColor = topInsight.level == InsightLevel.critical
         ? AppColors.error
         : (topInsight.level == InsightLevel.warning
-            ? AppColors.warning
-            : AppColors.success);
+        ? AppColors.warning
+        : AppColors.success);
 
     return Container(
       padding: EdgeInsets.all(ResponsiveText.padding(context, 12)),
@@ -209,8 +245,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontSize: ResponsiveText.bodySmall(context),
-                      ),
+                    fontSize: ResponsiveText.bodySmall(context),
+                  ),
                 ),
               ],
             ),
@@ -224,9 +260,9 @@ class _HomeScreenState extends State<HomeScreen> {
     return Text(
       S.of(context).choosePlant,
       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontSize: ResponsiveText.title(context),
-            fontWeight: FontWeight.w600,
-          ),
+        fontSize: ResponsiveText.title(context),
+        fontWeight: FontWeight.w600,
+      ),
     );
   }
 
@@ -236,9 +272,9 @@ class _HomeScreenState extends State<HomeScreen> {
       maxLines: 1,
       overflow: TextOverflow.ellipsis,
       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-            fontSize: ResponsiveText.title(context),
-            fontWeight: FontWeight.w600,
-          ),
+        fontSize: ResponsiveText.title(context),
+        fontWeight: FontWeight.w600,
+      ),
     );
   }
 
@@ -249,7 +285,7 @@ class _HomeScreenState extends State<HomeScreen> {
       height: (48 * ResponsiveText.getScale(context)).clamp(44.0, 56.0),
       child: ElevatedButton.icon(
         style: ElevatedButton.styleFrom(
-          backgroundColor: plantieColor,
+          backgroundColor: AppColors.primary,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -283,7 +319,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-   Widget _buildPlantCarousel(BuildContext context, HomeCubit cubit) {
+  Widget _buildPlantCarousel(BuildContext context, HomeCubit cubit) {
     final emojiSize = ResponsiveText.emojiSmall(context);
     final carouselHeight = (emojiSize + 32).clamp(110.0, 160.0);
     final padding = ResponsiveText.padding(context, 12);
@@ -333,11 +369,11 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           decoration: BoxDecoration(
             color: isSelected
-                ? plantieColor.withValues(alpha: 0.15)
+                ? AppColors.primary.withValues(alpha: 0.15)
                 : Colors.transparent,
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: isSelected ? plantieColor : Colors.transparent,
+              color: isSelected ? AppColors.primary : Colors.transparent,
               width: 2,
             ),
           ),
@@ -356,7 +392,7 @@ class _HomeScreenState extends State<HomeScreen> {
               width: (emojiSize * 0.6).clamp(20.0, 40.0),
               height: 3,
               decoration: BoxDecoration(
-                color: plantieColor,
+                color: AppColors.primary,
                 borderRadius: BorderRadius.circular(1.5),
               ),
             ),
@@ -369,20 +405,20 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       children: List.generate(
           3,
-          (index) => Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: Shimmer.fromColors(
-                  baseColor: Colors.grey[300]!,
-                  highlightColor: Colors.grey[100]!,
-                  child: Container(
-                    height: 120,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                  ),
+              (index) => Padding(
+            padding: const EdgeInsets.only(bottom: 16),
+            child: Shimmer.fromColors(
+              baseColor: Colors.grey[300]!,
+              highlightColor: Colors.grey[100]!,
+              child: Container(
+                height: 120,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
                 ),
-              )),
+              ),
+            ),
+          )),
     );
   }
 
@@ -397,7 +433,7 @@ class _HomeScreenState extends State<HomeScreen> {
         boxShadow: [
           BoxShadow(
             color:
-                isDark ? AppColors.shadowColorDark : AppColors.shadowColorLight,
+            isDark ? AppColors.shadowColorDark : AppColors.shadowColorLight,
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -420,7 +456,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         vertical: ResponsiveText.padding(context, 4),
                       ),
                       decoration: BoxDecoration(
-                        color: plantieColor.withValues(alpha: 0.1),
+                        color: AppColors.primary.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -428,10 +464,10 @@ class _HomeScreenState extends State<HomeScreen> {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: plantieColor,
-                              fontWeight: FontWeight.bold,
-                              fontSize: ResponsiveText.labelSmall(context),
-                            ),
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: ResponsiveText.labelSmall(context),
+                        ),
                       ),
                     ),
                     SizedBox(height: ResponsiveText.padding(context, 8)),
@@ -440,9 +476,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontSize: ResponsiveText.title(context),
-                            fontWeight: FontWeight.w600,
-                          ),
+                        fontSize: ResponsiveText.title(context),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ],
                 ),
@@ -450,11 +486,11 @@ class _HomeScreenState extends State<HomeScreen> {
               SizedBox(width: ResponsiveText.padding(context, 12)),
               Container(
                 width:
-                    (70 * ResponsiveText.getScale(context)).clamp(60.0, 80.0),
+                (70 * ResponsiveText.getScale(context)).clamp(60.0, 80.0),
                 height:
-                    (70 * ResponsiveText.getScale(context)).clamp(60.0, 80.0),
+                (70 * ResponsiveText.getScale(context)).clamp(60.0, 80.0),
                 decoration: BoxDecoration(
-                  color: plantieColor.withValues(alpha: 0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 alignment: Alignment.center,
@@ -473,7 +509,7 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Icon(Icons.calendar_today,
-                  color: plantieColor,
+                  color: AppColors.primary,
                   size: ResponsiveText.iconSizeSmall(context)),
               SizedBox(width: ResponsiveText.padding(context, 8)),
               Expanded(
@@ -483,15 +519,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       TextSpan(
                         text: '${S.of(context).plantingTime}: ',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontSize: ResponsiveText.label(context),
-                              fontWeight: FontWeight.w500,
-                            ),
+                          fontSize: ResponsiveText.label(context),
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                       TextSpan(
                         text: plant.plantingTime,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontSize: ResponsiveText.label(context),
-                            ),
+                          fontSize: ResponsiveText.label(context),
+                        ),
                       ),
                     ],
                   ),
@@ -506,7 +542,7 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Icon(Icons.eco,
-                  color: plantieColor,
+                  color: AppColors.primary,
                   size: ResponsiveText.iconSizeSmall(context)),
               SizedBox(width: ResponsiveText.padding(context, 8)),
               Expanded(
@@ -516,15 +552,15 @@ class _HomeScreenState extends State<HomeScreen> {
                       TextSpan(
                         text: '${S.of(context).npkFormula}: ',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontSize: ResponsiveText.label(context),
-                              fontWeight: FontWeight.w500,
-                            ),
+                          fontSize: ResponsiveText.label(context),
+                          fontWeight: FontWeight.w500,
+                        ),
                       ),
                       TextSpan(
                         text: plant.npk,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              fontSize: ResponsiveText.label(context),
-                            ),
+                          fontSize: ResponsiveText.label(context),
+                        ),
                       ),
                     ],
                   ),
@@ -540,16 +576,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildWeatherCard(
-    BuildContext context,
-    HomeStates state,
-    HomeCubit cubit,
-  ) {
+      BuildContext context,
+      HomeStates state,
+      HomeCubit cubit,
+      ) {
     final scale = ResponsiveText.getScale(context);
     final minHeight = (140 * scale).clamp(120.0, 180.0);
 
     return GestureDetector(
       onTap: () {
-        // If weather data is available, navigate to details with insights
         if (cubit.weatherData != null) {
           cubit.generateInsights(context);
           navigateTo(
@@ -557,7 +592,6 @@ class _HomeScreenState extends State<HomeScreen> {
             WeatherDetailsScreen(weatherData: cubit.weatherData!),
           );
         } else {
-          // Show message if location/weather not available
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(S.of(context).grantLocationPermission),
@@ -574,7 +608,7 @@ class _HomeScreenState extends State<HomeScreen> {
           gradient: _getWeatherGradient(cubit.weatherData),
           boxShadow: [
             BoxShadow(
-              color: plantieColor.withValues(alpha: 0.15),
+              color: AppColors.primary.withValues(alpha: 0.15),
               blurRadius: 12,
               offset: const Offset(0, 6),
             ),
@@ -689,12 +723,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildWeatherError(
-    BuildContext context, {
-    required IconData icon,
-    required String message,
-    required String buttonText,
-    required VoidCallback onPressed,
-  }) {
+      BuildContext context, {
+        required IconData icon,
+        required String message,
+        required String buttonText,
+        required VoidCallback onPressed,
+      }) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
@@ -737,14 +771,13 @@ class _HomeScreenState extends State<HomeScreen> {
     final statusColor = insights.isEmpty
         ? AppColors.success
         : (insights.any((i) => i.level == InsightLevel.critical)
-            ? AppColors.error
-            : AppColors.warning);
+        ? AppColors.error
+        : AppColors.warning);
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Temperature - Responsive and no overflow
         Flexible(
           child: Text(
             '${weather.current.temperature.round()}°',
@@ -756,8 +789,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         SizedBox(height: ResponsiveText.padding(context, 4)),
-
-        // Weather description - Flexible
         Flexible(
           child: Text(
             _getWeatherDescription(context, weather.current.weatherCode),
@@ -772,8 +803,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
         SizedBox(height: ResponsiveText.padding(context, 12)),
-
-        // Status badge - Flexible sizing
         Flexible(
           child: Container(
             padding: EdgeInsets.symmetric(
@@ -805,8 +834,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     insights.isEmpty
                         ? S.of(context).good_for_farming
                         : (insights.any((i) => i.level == InsightLevel.critical)
-                            ? S.of(context).critical_farming
-                            : S.of(context).warning_farming),
+                        ? S.of(context).critical_farming
+                        : S.of(context).warning_farming),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -839,26 +868,28 @@ class _HomeScreenState extends State<HomeScreen> {
   LinearGradient _getWeatherGradient(WeatherData? weather) {
     if (weather == null) {
       return LinearGradient(
-        colors: [plantieColor, plantieColor.withValues(alpha: 0.8)],
+        colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)],
       );
     }
     final isSunny = weather.current.weatherCode == 0;
 
     return isSunny
         ? LinearGradient(
-            colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          )
+      colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    )
         : LinearGradient(
-            colors: [Color(0xFF4B79A1), Color(0xFF283E51)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          );
+      colors: [Color(0xFF4B79A1), Color(0xFF283E51)],
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+    );
   }
 }
 
-/// Modern Expandable Details Widget with Smooth Animations
+// =====================================================================
+// PlantDetailsExpandable (unchanged)
+// =====================================================================
 class _PlantDetailsExpandable extends StatefulWidget {
   final Plant plant;
   final BuildContext context;
@@ -883,7 +914,7 @@ class _PlantDetailsExpandableState extends State<_PlantDetailsExpandable>
     _expandedStates = [false, false, false, false];
     _controllers = List.generate(
       4,
-      (index) => AnimationController(
+          (index) => AnimationController(
         duration: const Duration(milliseconds: 400),
         vsync: this,
       ),
@@ -1016,12 +1047,10 @@ class _PlantDetailsExpandableState extends State<_PlantDetailsExpandable>
           borderRadius: BorderRadius.circular(16),
           child: Column(
             children: [
-              // Header
               Padding(
                 padding: EdgeInsets.all(ResponsiveText.padding(context, 16)),
                 child: Row(
                   children: [
-                    // Icon with background
                     Container(
                       width: 48,
                       height: 48,
@@ -1045,7 +1074,6 @@ class _PlantDetailsExpandableState extends State<_PlantDetailsExpandable>
                       ),
                     ),
                     SizedBox(width: ResponsiveText.padding(context, 12)),
-                    // Title
                     Expanded(
                       child: Text(
                         title,
@@ -1056,7 +1084,6 @@ class _PlantDetailsExpandableState extends State<_PlantDetailsExpandable>
                         ),
                       ),
                     ),
-                    // Expand/Collapse icon
                     AnimatedRotation(
                       turns: isExpanded ? 0.5 : 0,
                       duration: const Duration(milliseconds: 400),
@@ -1069,7 +1096,6 @@ class _PlantDetailsExpandableState extends State<_PlantDetailsExpandable>
                   ],
                 ),
               ),
-              // Expandable content - Simple visibility toggle without animations
               if (isExpanded)
                 Container(
                   padding: EdgeInsets.fromLTRB(
@@ -1101,18 +1127,14 @@ class _PlantDetailsExpandableState extends State<_PlantDetailsExpandable>
     required bool isDark,
   }) {
     if (index == 0) {
-      // Description
       return _buildDescriptionContent(context, sectionData as String, isDark);
     } else if (index == 1) {
-      // Nutrition
       return _buildNutritionContent(
           context, sectionData as Map<String, String>, color, isDark);
     } else if (index == 2) {
-      // Storage
       return _buildStorageContent(
           context, sectionData as Map<String, String>, color, isDark);
     } else {
-      // Diseases
       return _buildDiseasesContent(context, sectionData, color, isDark);
     }
   }
@@ -1131,11 +1153,11 @@ class _PlantDetailsExpandableState extends State<_PlantDetailsExpandable>
   }
 
   Widget _buildNutritionContent(
-    BuildContext context,
-    Map<String, dynamic> nutrition,
-    Color color,
-    bool isDark,
-  ) {
+      BuildContext context,
+      Map<String, dynamic> nutrition,
+      Color color,
+      bool isDark,
+      ) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isCompact = constraints.maxWidth < 360;
@@ -1151,122 +1173,122 @@ class _PlantDetailsExpandableState extends State<_PlantDetailsExpandable>
               ),
               child: isCompact
                   ? Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Container(
-                              width: 6,
-                              height: 6,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: color,
-                              ),
-                            ),
-                            SizedBox(width: ResponsiveText.padding(context, 10)),
-                            Expanded(
-                              child: Text(
-                                labelText,
-                                maxLines: 2,
-                                softWrap: true,
-                                style: TextStyle(
-                                  fontSize: ResponsiveText.label(context),
-                                  fontWeight: FontWeight.w600,
-                                  color: isDark ? Colors.white : Colors.grey[900],
-                                ),
-                              ),
-                            ),
-                          ],
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: color,
                         ),
-                        SizedBox(height: ResponsiveText.padding(context, 6)),
-                        Align(
-                          alignment: AlignmentDirectional.centerStart,
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: constraints.maxWidth,
-                            ),
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: ResponsiveText.padding(context, 10),
-                                vertical: ResponsiveText.padding(context, 6),
-                              ),
-                              decoration: BoxDecoration(
-                                color: color.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                valueText,
-                                maxLines: 2,
-                                softWrap: true,
-                                style: TextStyle(
-                                  fontSize: ResponsiveText.labelSmall(context),
-                                  fontWeight: FontWeight.w500,
-                                  color: color,
-                                ),
-                              ),
-                            ),
+                      ),
+                      SizedBox(width: ResponsiveText.padding(context, 10)),
+                      Expanded(
+                        child: Text(
+                          labelText,
+                          maxLines: 2,
+                          softWrap: true,
+                          style: TextStyle(
+                            fontSize: ResponsiveText.label(context),
+                            fontWeight: FontWeight.w600,
+                            color: isDark ? Colors.white : Colors.grey[900],
                           ),
                         ),
-                      ],
-                    )
-                  : Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Container(
-                          width: 6,
-                          height: 6,
-                          margin: EdgeInsets.only(
-                            top: ResponsiveText.padding(context, 6),
-                          ),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: ResponsiveText.padding(context, 6)),
+                  Align(
+                    alignment: AlignmentDirectional.centerStart,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: constraints.maxWidth,
+                      ),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: ResponsiveText.padding(context, 10),
+                          vertical: ResponsiveText.padding(context, 6),
+                        ),
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          valueText,
+                          maxLines: 2,
+                          softWrap: true,
+                          style: TextStyle(
+                            fontSize: ResponsiveText.labelSmall(context),
+                            fontWeight: FontWeight.w500,
                             color: color,
                           ),
                         ),
-                        SizedBox(width: ResponsiveText.padding(context, 10)),
-                        Expanded(
-                          child: Text(
-                            labelText,
-                            maxLines: 2,
-                            softWrap: true,
-                            style: TextStyle(
-                              fontSize: ResponsiveText.label(context),
-                              fontWeight: FontWeight.w600,
-                              color: isDark ? Colors.white : Colors.grey[900],
-                            ),
-                          ),
-                        ),
-                        SizedBox(width: ResponsiveText.padding(context, 8)),
-                        Flexible(
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(
-                              maxWidth: constraints.maxWidth * 0.42,
-                            ),
-                            child: Container(
-                              padding: EdgeInsets.symmetric(
-                                horizontal: ResponsiveText.padding(context, 10),
-                                vertical: ResponsiveText.padding(context, 4),
-                              ),
-                              decoration: BoxDecoration(
-                                color: color.withValues(alpha: 0.15),
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: Text(
-                                valueText,
-                                maxLines: 2,
-                                softWrap: true,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontSize: ResponsiveText.labelSmall(context),
-                                  fontWeight: FontWeight.w500,
-                                  color: color,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
+                  ),
+                ],
+              )
+                  : Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    width: 6,
+                    height: 6,
+                    margin: EdgeInsets.only(
+                      top: ResponsiveText.padding(context, 6),
+                    ),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: color,
+                    ),
+                  ),
+                  SizedBox(width: ResponsiveText.padding(context, 10)),
+                  Expanded(
+                    child: Text(
+                      labelText,
+                      maxLines: 2,
+                      softWrap: true,
+                      style: TextStyle(
+                        fontSize: ResponsiveText.label(context),
+                        fontWeight: FontWeight.w600,
+                        color: isDark ? Colors.white : Colors.grey[900],
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: ResponsiveText.padding(context, 8)),
+                  Flexible(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: constraints.maxWidth * 0.42,
+                      ),
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: ResponsiveText.padding(context, 10),
+                          vertical: ResponsiveText.padding(context, 4),
+                        ),
+                        decoration: BoxDecoration(
+                          color: color.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          valueText,
+                          maxLines: 2,
+                          softWrap: true,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: ResponsiveText.labelSmall(context),
+                            fontWeight: FontWeight.w500,
+                            color: color,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             );
           }).toList(),
         );
@@ -1275,11 +1297,11 @@ class _PlantDetailsExpandableState extends State<_PlantDetailsExpandable>
   }
 
   Widget _buildStorageContent(
-    BuildContext context,
-    Map<String, dynamic> storage,
-    Color color,
-    bool isDark,
-  ) {
+      BuildContext context,
+      Map<String, dynamic> storage,
+      Color color,
+      bool isDark,
+      ) {
     return Column(
       children: storage.entries.map((entry) {
         return Padding(
@@ -1335,11 +1357,11 @@ class _PlantDetailsExpandableState extends State<_PlantDetailsExpandable>
   }
 
   Widget _buildDiseasesContent(
-    BuildContext context,
-    dynamic diseasesData,
-    Color color,
-    bool isDark,
-  ) {
+      BuildContext context,
+      dynamic diseasesData,
+      Color color,
+      bool isDark,
+      ) {
     final diseases = diseasesData is Iterable ? diseasesData.toList() : [];
 
     if (diseases.isEmpty) {

@@ -3,7 +3,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:intl/intl.dart';
-import 'package:plantie/shared/styles/colors.dart';
 import 'package:readmore/readmore.dart';
 import '../../generated/l10n.dart';
 import '../../layout/cubit/cubit.dart';
@@ -59,7 +58,7 @@ Widget buildCard({
   return GestureDetector(
     onTap: onTap,
     child: Card(
-      color: plantieColor,
+      color: AppColors.primary,
       elevation: 3,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
@@ -366,7 +365,7 @@ Widget buildPostItem(PostModel post, BuildContext context, int index) {
                 post.text ?? '',
                 trimMode: TrimMode.Line,
                 trimLines: 3,
-                colorClickableText: plantieColor,
+                colorClickableText: AppColors.primary,
                 trimCollapsedText: S.of(context).showMore,
                 trimExpandedText: S.of(context).showLess,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -374,11 +373,11 @@ Widget buildPostItem(PostModel post, BuildContext context, int index) {
                   fontSize: 15,
                 ),
                 moreStyle: TextStyle(
-                  color: plantieColor,
+                  color: AppColors.primary,
                   fontWeight: FontWeight.w600,
                 ),
                 lessStyle: TextStyle(
-                  color: plantieColor,
+                  color: AppColors.primary,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -428,8 +427,8 @@ Widget _buildPostHeader(
               shape: BoxShape.circle,
               gradient: LinearGradient(
                 colors: [
-                  plantieColor.withValues(alpha: 0.95),
-                  plantieColor.withValues(alpha: 0.35),
+                  AppColors.primary.withValues(alpha: 0.95),
+                  AppColors.primary.withValues(alpha: 0.35),
                 ],
               ),
             ),
@@ -440,7 +439,7 @@ Widget _buildPostHeader(
                 height: 46,
                 fit: BoxFit.cover,
                 placeholder: (context, url) => Container(
-                  color: plantieColor.withValues(alpha: 0.1),
+                  color: AppColors.primary.withValues(alpha: 0.1),
                   child: const Center(
                     child: SizedBox(
                       width: 18,
@@ -551,7 +550,7 @@ Widget _buildEngagementStats(
                 Icon(
                   Icons.thumb_up_off_alt,
                   size: 13,
-                  color: plantieColor,
+                  color: AppColors.primary,
                 ),
                 const SizedBox(width: 6),
                 Text(
@@ -583,7 +582,7 @@ Widget _buildEngagementStats(
                 Icon(
                   IconBroken.Chat,
                   size: 13,
-                  color: plantieColor,
+                  color: AppColors.primary,
                 ),
                 const SizedBox(width: 6),
                 Text(
@@ -681,7 +680,7 @@ Widget _buildPostActions(
               child: Container(
                 decoration: BoxDecoration(
                   color: isLiked
-                      ? plantieColor.withValues(alpha: 0.12)
+                      ? AppColors.primary.withValues(alpha: 0.12)
                       : (isDark
                       ? Colors.white10
                       : Colors.black.withValues(alpha: 0.04)),
@@ -695,7 +694,7 @@ Widget _buildPostActions(
                       isLiked ? Icons.thumb_up : Icons.thumb_up_off_alt,
                       size: 17,
                       color: isLiked
-                          ? plantieColor
+                          ? AppColors.primary
                           : (isDark ? Colors.grey[300] : Colors.grey[700]),
                     ),
                     const SizedBox(width: 8),
@@ -704,7 +703,7 @@ Widget _buildPostActions(
                       style: TextStyle(
                         fontWeight: FontWeight.w700,
                         color: isLiked
-                            ? plantieColor
+                            ? AppColors.primary
                             : (isDark ? Colors.grey[100] : Colors.grey[900]),
                         fontSize: 13.5,
                       ),
@@ -787,7 +786,7 @@ void showOfflineRetry(BuildContext context, VoidCallback onRetry) {
             Navigator.pop(ctx);
             onRetry();
           },
-          style: ElevatedButton.styleFrom(backgroundColor: plantieColor),
+          style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
           child: Text(S.of(ctx).retry),
         ),
       ],

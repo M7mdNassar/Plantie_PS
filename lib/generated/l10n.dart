@@ -3133,6 +3133,26 @@ class S {
       args: [],
     );
   }
+
+  /// `Failed to load plants`
+  String get failedToLoadPlants {
+    return Intl.message(
+      'Failed to load plants',
+      name: 'failedToLoadPlants',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unable to load plant data. Please check your internet connection and try again.`
+  String get failedToLoadPlantsMessage {
+    return Intl.message(
+      'Unable to load plant data. Please check your internet connection and try again.',
+      name: 'failedToLoadPlantsMessage',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
