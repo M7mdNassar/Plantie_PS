@@ -871,6 +871,12 @@ abstract class S {
   /// **'Are you sure you want to logout?'**
   String get logoutConfirm;
 
+  /// No description provided for @refresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get refresh;
+
   /// No description provided for @home.
   ///
   /// In en, this message translates to:
@@ -2304,6 +2310,60 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Could not post comment. Please try again.'**
   String get commentFailed;
+
+  /// No description provided for @failedToLoadPlants.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load plants'**
+  String get failedToLoadPlants;
+
+  /// No description provided for @failedToLoadPlantsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load plant data. Please check your internet connection and try again.'**
+  String get failedToLoadPlantsMessage;
+
+  /// No description provided for @aiAssistant.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Assistant'**
+  String get aiAssistant;
+
+  /// No description provided for @aiAssistantEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How can I help you?'**
+  String get aiAssistantEmptyTitle;
+
+  /// No description provided for @aiAssistantEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask me anything about plants, farming, or gardening.'**
+  String get aiAssistantEmptySubtitle;
+
+  /// No description provided for @typeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a message...'**
+  String get typeMessage;
+
+  /// No description provided for @clearChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear Chat'**
+  String get clearChat;
+
+  /// No description provided for @clearChatConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to clear this conversation?'**
+  String get clearChatConfirmation;
+
+  /// No description provided for @clear.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clear;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

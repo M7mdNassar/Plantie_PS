@@ -423,6 +423,9 @@ class SAr extends S {
   String get logoutConfirm => 'هل أنت متأكد من تسجيل الخروج؟';
 
   @override
+  String get refresh => 'تحديث';
+
+  @override
   String get home => 'الرئيسية';
 
   @override
@@ -1175,4 +1178,34 @@ class SAr extends S {
 
   @override
   String get commentFailed => 'لم يتم نشر التعليق. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get failedToLoadPlants => 'فشل تحميل النباتات';
+
+  @override
+  String get failedToLoadPlantsMessage =>
+      'تعذر تحميل بيانات النباتات. يرجى التحقق من اتصال الإنترنت والمحاولة مرة أخرى.';
+
+  @override
+  String get aiAssistant => 'المساعد الذكي';
+
+  @override
+  String get aiAssistantEmptyTitle => 'كيف يمكنني مساعدتك؟';
+
+  @override
+  String get aiAssistantEmptySubtitle =>
+      'اسألني أي شيء عن النباتات، الزراعة، أو البستنة.';
+
+  @override
+  String get typeMessage => 'اكتب رسالة...';
+
+  @override
+  String get clearChat => 'مسح المحادثة';
+
+  @override
+  String get clearChatConfirmation =>
+      'هل أنت متأكد من رغبتك في مسح هذه المحادثة؟';
+
+  @override
+  String get clear => 'مسح';
 }

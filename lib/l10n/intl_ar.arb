@@ -35,7 +35,7 @@
   "reset_password": "إعادة تعيين كلمة المرور",
   "sent_email_to_update_paassword" : "تم ارسال رابط اعاده كلمه المرور علي الايميل",
   "submit": "إرسال",
-
+  "refresh": "تحديث",
 
   "name": "الإسم",
   "creat_account2" : "إنشاء حساب",
@@ -515,7 +515,18 @@
   "commentFailed": "لم يتم نشر التعليق. يرجى المحاولة مرة أخرى.",
 
   "failedToLoadPlants": "فشل تحميل النباتات",
-  "failedToLoadPlantsMessage": "تعذر تحميل بيانات النباتات. يرجى التحقق من اتصال الإنترنت والمحاولة مرة أخرى."
+  "failedToLoadPlantsMessage": "تعذر تحميل بيانات النباتات. يرجى التحقق من اتصال الإنترنت والمحاولة مرة أخرى.",
+
+  "aiAssistant": "المساعد الذكي",
+  "aiAssistantEmptyTitle": "كيف يمكنني مساعدتك؟",
+  "aiAssistantEmptySubtitle": "اسألني أي شيء عن النباتات، الزراعة، أو البستنة.",
+  "typeMessage": "اكتب رسالة...",
+  "clearChat": "مسح المحادثة",
+  "clearChatConfirmation": "هل أنت متأكد من رغبتك في مسح هذه المحادثة؟",
+  "clear" : "مسح"
+
+
+
 
 
 

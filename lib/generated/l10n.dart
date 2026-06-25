@@ -1089,6 +1089,11 @@ class S {
     );
   }
 
+  /// `Refresh`
+  String get refresh {
+    return Intl.message('Refresh', name: 'refresh', desc: '', args: []);
+  }
+
   /// `Home`
   String get home {
     return Intl.message('Home', name: 'home', desc: '', args: []);
@@ -3152,6 +3157,66 @@ class S {
       desc: '',
       args: [],
     );
+  }
+
+  /// `AI Assistant`
+  String get aiAssistant {
+    return Intl.message(
+      'AI Assistant',
+      name: 'aiAssistant',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `How can I help you?`
+  String get aiAssistantEmptyTitle {
+    return Intl.message(
+      'How can I help you?',
+      name: 'aiAssistantEmptyTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ask me anything about plants, farming, or gardening.`
+  String get aiAssistantEmptySubtitle {
+    return Intl.message(
+      'Ask me anything about plants, farming, or gardening.',
+      name: 'aiAssistantEmptySubtitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Type a message...`
+  String get typeMessage {
+    return Intl.message(
+      'Type a message...',
+      name: 'typeMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear Chat`
+  String get clearChat {
+    return Intl.message('Clear Chat', name: 'clearChat', desc: '', args: []);
+  }
+
+  /// `Are you sure you want to clear this conversation?`
+  String get clearChatConfirmation {
+    return Intl.message(
+      'Are you sure you want to clear this conversation?',
+      name: 'clearChatConfirmation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Clear`
+  String get clear {
+    return Intl.message('Clear', name: 'clear', desc: '', args: []);
   }
 }
 
