@@ -194,7 +194,7 @@
    "settings": "Settings",
    "logoutConfirm": "Are you sure you want to logout?",
    "cancel": "Cancel",
-
+    "refresh": "Refresh",
 
 
 
@@ -512,9 +512,15 @@
   "commentFailed": "Could not post comment. Please try again.",
 
   "failedToLoadPlants": "Failed to load plants",
-  "failedToLoadPlantsMessage": "Unable to load plant data. Please check your internet connection and try again."
+  "failedToLoadPlantsMessage": "Unable to load plant data. Please check your internet connection and try again.",
 
-
+  "aiAssistant": "AI Assistant",
+  "aiAssistantEmptyTitle": "How can I help you?",
+  "aiAssistantEmptySubtitle": "Ask me anything about plants, farming, or gardening.",
+  "typeMessage": "Type a message...",
+  "clearChat": "Clear Chat",
+  "clearChatConfirmation": "Are you sure you want to clear this conversation?",
+  "clear" : "Clear"
 
 
 }

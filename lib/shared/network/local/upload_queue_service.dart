@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:path_provider/path_provider.dart';
 import '../remote/supabase_auth_service.dart';
 import 'history_db.dart';
 import '../remote/supabase_service.dart';
@@ -38,7 +37,6 @@ class UploadQueueService {
     );
   }
 
-  /// Add an offline action (post or comment) to the queue
   Future<void> addOfflineAction({
     required String type,
     required String userId,
@@ -51,10 +49,9 @@ class UploadQueueService {
       'created_at': DateTime.now().toIso8601String(),
     });
     debugPrint('✅ Offline action queued: $type (ID: $id)');
-    attemptPendingUploads(); // trigger if online
+    attemptPendingUploads();
   }
 
-  /// Main method to attempt uploading all pending items (detections + offline actions)
   Future<void> attemptPendingUploads() async {
     if (_isUploading) {
       debugPrint('⏳ Upload already in progress, skipping...');
@@ -99,9 +96,6 @@ class UploadQueueService {
     }
   }
 
-
-
-  /// Upload a single detection result to Supabase
   Future<void> _uploadSingleItem(Map<String, dynamic> item) async {
     try {
       final itemId = item['id'] as int;
@@ -180,7 +174,6 @@ class UploadQueueService {
     }
   }
 
-  /// Add a new detection to the upload queue
   Future<int?> addDetectionToQueue({
     required String imagePath,
     required String predictedClass,
@@ -206,9 +199,7 @@ class UploadQueueService {
       final id = await _db.insertUploadQueueItem(queueItem);
       debugPrint('✅ Detection added to queue with ID: $id');
 
-      // Attempt upload immediately if online
       attemptPendingUploads();
-
       return id;
     } catch (e) {
       debugPrint('❌ Error adding detection to queue: $e');
@@ -216,17 +207,13 @@ class UploadQueueService {
     }
   }
 
-  /// Update corrected label for a queued detection
-  Future<void> updateCorrectionForQueueItem(
-      int queueId, String correctedLabel) async {
+  Future<void> updateCorrectionForQueueItem(int queueId, String correctedLabel) async {
     try {
       await _db.updateCorrectedLabel(queueId, correctedLabel);
       debugPrint('✅ Corrected label updated for queue item: $queueId');
 
-      // If item was already uploaded, don't re-upload; otherwise trigger upload
       final items = await _db.getPendingUploadQueueItems();
-      final item =
-          items.firstWhere((i) => i['id'] == queueId, orElse: () => {});
+      final item = items.firstWhere((i) => i['id'] == queueId, orElse: () => {});
       if (item.isNotEmpty) {
         attemptPendingUploads();
       }
@@ -235,37 +222,35 @@ class UploadQueueService {
     }
   }
 
-  /// Upgrade a guest session to authenticated (linkIdentity)
-  /// Updates all upload queue items with the new authenticated user ID
   Future<void> upgradeGuestToAuthenticated({
     required String guestId,
     required String authenticatedUserId,
   }) async {
     try {
-      debugPrint(
-          '🔄 Upgrading guest $guestId to authenticated $authenticatedUserId');
-
-      // Update all queue items with the new user ID
+      debugPrint('🔄 Upgrading guest $guestId to authenticated $authenticatedUserId');
       await _db.updateUserIdForQueueItems(guestId, authenticatedUserId);
-
       debugPrint('✅ Upload queue items updated with new user ID');
-
-      // Trigger uploads with the new authenticated user
       attemptPendingUploads();
     } catch (e) {
       debugPrint('❌ Error upgrading guest session: $e');
     }
   }
 
-
+  // ==================== OFFLINE ACTION UPLOAD (null-safe) ====================
   Future<void> _uploadOfflineAction(Map<String, dynamic> action) async {
     final id = action['id'] as int;
-    final type = action['action_type'] as String;
-    final data = jsonDecode(action['data'] as String);
-    final userId = action['user_id'] as String;
+    final type = action['action_type'] as String? ?? ''; // ✅ null-safe
+    final dataRaw = action['data'] as String?; // ✅ may be null
+    if (dataRaw == null) {
+      debugPrint('⚠️ Offline action $id has null data, marking failed');
+      await _db.updateOfflineActionStatus(id, 'failed');
+      return;
+    }
+    final Map<String, dynamic> data = jsonDecode(dataRaw);
+    final userId = action['user_id'] as String? ?? ''; // ✅ null-safe
 
     // Ensure user has a Supabase session
-    final authService = SupabaseAuthService(); // import it if needed
+    final authService = SupabaseAuthService();
     final ready = await authService.syncUserIfNeeded(userId);
     if (!ready) {
       debugPrint('⚠️ Cannot sync user for action $id, retrying later');
@@ -294,14 +279,13 @@ class UploadQueueService {
   }
 
   Future<void> _uploadPost(Map<String, dynamic> data) async {
-    final userId = data['user_id'];
-    final text = data['text'];
+    final userId = data['user_id'] as String? ?? '';
+    final text = data['text'] as String? ?? '';
     final images = data['images'] as List<dynamic>? ?? [];
 
-    // Upload images (if any)
     List<String> uploadedUrls = [];
     for (final imagePath in images) {
-      final file = File(imagePath);
+      final file = File(imagePath as String);
       if (await file.exists()) {
         final bytes = await file.readAsBytes();
         final fileName = 'post_${DateTime.now().millisecondsSinceEpoch}.jpg';
@@ -315,12 +299,10 @@ class UploadQueueService {
           uploadedUrls.add(url);
         } catch (e) {
           debugPrint('❌ Failed to upload image: $e');
-          // Continue with other images; if all fail, we still proceed with text-only post.
         }
       }
     }
 
-    // Insert post
     final response = await supabaseService.client
         .from('posts')
         .insert({'user_id': userId, 'text': text})
@@ -329,7 +311,6 @@ class UploadQueueService {
 
     final postId = response['id'] as String;
 
-    // Insert image records
     if (uploadedUrls.isNotEmpty) {
       final imageInserts = uploadedUrls.map((url) => {
         'post_id': postId,
@@ -341,22 +322,17 @@ class UploadQueueService {
   }
 
   Future<void> _uploadComment(Map<String, dynamic> data) async {
-    final postId = data['post_id'];
-    final userId = data['user_id'];
-    final text = data['text'];
+    final postId = data['post_id'] as String? ?? '';
+    final userId = data['user_id'] as String? ?? '';
+    final text = data['text'] as String? ?? '';
     await supabaseService.client
         .from('comments')
         .insert({'post_id': postId, 'user_id': userId, 'text': text});
   }
 
-
-
   void dispose() {
     _connectivitySubscription.cancel();
   }
-
-
-
 }
 
 final uploadQueueService = UploadQueueService();

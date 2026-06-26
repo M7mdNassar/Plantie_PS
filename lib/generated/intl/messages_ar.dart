@@ -68,6 +68,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "aboutMe": MessageLookupByLibrary.simpleMessage("نبذة عني"),
     "acre": MessageLookupByLibrary.simpleMessage("فدان"),
     "addPhotos": MessageLookupByLibrary.simpleMessage("إضافة صور"),
+    "aiAssistant": MessageLookupByLibrary.simpleMessage("المساعد الذكي"),
+    "aiAssistantEmptySubtitle": MessageLookupByLibrary.simpleMessage(
+      "اسألني أي شيء عن النباتات، الزراعة، أو البستنة.",
+    ),
+    "aiAssistantEmptyTitle": MessageLookupByLibrary.simpleMessage(
+      "كيف يمكنني مساعدتك؟",
+    ),
     "allowAccess": MessageLookupByLibrary.simpleMessage("السماح بالوصول"),
     "analyzing": MessageLookupByLibrary.simpleMessage("جاري تحليل الصورة..."),
     "analyzingImage": MessageLookupByLibrary.simpleMessage(
@@ -128,6 +135,11 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "chooseFromGallery": MessageLookupByLibrary.simpleMessage("اختر من المعرض"),
     "choosePlant": MessageLookupByLibrary.simpleMessage("اختر نبتة"),
+    "clear": MessageLookupByLibrary.simpleMessage("مسح"),
+    "clearChat": MessageLookupByLibrary.simpleMessage("مسح المحادثة"),
+    "clearChatConfirmation": MessageLookupByLibrary.simpleMessage(
+      "هل أنت متأكد من رغبتك في مسح هذه المحادثة؟",
+    ),
     "clearImage": MessageLookupByLibrary.simpleMessage("صورة واضحة"),
     "clearSearch": MessageLookupByLibrary.simpleMessage("مسح البحث"),
     "clearSky": MessageLookupByLibrary.simpleMessage("سماء صافية"),
@@ -593,6 +605,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "recommendedTreatment": MessageLookupByLibrary.simpleMessage(
       "العلاج الموصى به",
     ),
+    "refresh": MessageLookupByLibrary.simpleMessage("تحديث"),
     "register": MessageLookupByLibrary.simpleMessage("تسجيل"),
     "register_button": MessageLookupByLibrary.simpleMessage("إنشاء حساب"),
     "requiredFertilizers": m10,
@@ -667,6 +680,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "treeNote": m13,
     "trending": MessageLookupByLibrary.simpleMessage("الرائج"),
     "tryAgain": MessageLookupByLibrary.simpleMessage("حاول مرة أخرى"),
+    "typeMessage": MessageLookupByLibrary.simpleMessage("اكتب رسالة..."),
     "unit": MessageLookupByLibrary.simpleMessage("الوحدة:"),
     "unknownDisease": MessageLookupByLibrary.simpleMessage("غير معروف"),
     "unlikePost": MessageLookupByLibrary.simpleMessage("إلغاء الإعجاب"),

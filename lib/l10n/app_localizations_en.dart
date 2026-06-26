@@ -423,6 +423,9 @@ class SEn extends S {
   String get logoutConfirm => 'Are you sure you want to logout?';
 
   @override
+  String get refresh => 'Refresh';
+
+  @override
   String get home => 'Home';
 
   @override
@@ -1185,4 +1188,34 @@ class SEn extends S {
 
   @override
   String get commentFailed => 'Could not post comment. Please try again.';
+
+  @override
+  String get failedToLoadPlants => 'Failed to load plants';
+
+  @override
+  String get failedToLoadPlantsMessage =>
+      'Unable to load plant data. Please check your internet connection and try again.';
+
+  @override
+  String get aiAssistant => 'AI Assistant';
+
+  @override
+  String get aiAssistantEmptyTitle => 'How can I help you?';
+
+  @override
+  String get aiAssistantEmptySubtitle =>
+      'Ask me anything about plants, farming, or gardening.';
+
+  @override
+  String get typeMessage => 'Type a message...';
+
+  @override
+  String get clearChat => 'Clear Chat';
+
+  @override
+  String get clearChatConfirmation =>
+      'Are you sure you want to clear this conversation?';
+
+  @override
+  String get clear => 'Clear';
 }

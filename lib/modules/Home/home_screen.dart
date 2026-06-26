@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:plantie/modules/Home/cubit/cubit.dart';
 import 'package:plantie/modules/Home/cubit/states.dart';
 import 'package:plantie/modules/Home/fertilizer_screen.dart';
@@ -13,6 +15,10 @@ import 'package:shimmer/shimmer.dart';
 import '../../generated/l10n.dart';
 import '../../models/plant.dart';
 import '../../models/weather_model.dart';
+import 'dart:async';
+
+import '../AIAssistant/ai_chat_screen.dart';
+
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,20 +28,32 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  String _locationName = '';
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final cubit = HomeCubit.get(context);
-
-      if (cubit.plants.isEmpty) {
-        cubit.loadPlants();
-      }
-
-      if (cubit.weatherData == null) {
-        cubit.getWeatherData();
-      }
+      if (cubit.plants.isEmpty) cubit.loadPlants();
+      if (cubit.weatherData == null) cubit.getWeatherData();
+      _fetchLocationName();
     });
+  }
+
+  Future<void> _fetchLocationName() async {
+    try {
+      final position = await Geolocator.getCurrentPosition();
+      final placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+      if (placemarks.isNotEmpty) {
+        final pm = placemarks.first;
+        setState(() {
+          _locationName = '${pm.locality ?? ''}, ${pm.country ?? ''}';
+        });
+      }
+    } catch (_) {
+      // Silently fail – location name is optional
+    }
   }
 
   @override
@@ -45,18 +63,19 @@ class _HomeScreenState extends State<HomeScreen> {
       current is HomeGetPlantsSuccessState ||
           current is HomeGetPlantsErrorState ||
           current is HomeLoadingPlantsState ||
-          current is WeatherSuccessState ||
+          current is WeatherLoadedState ||
           current is WeatherLoadingState ||
-          current is LocationServicesDisabledState ||
           current is LocationPermissionDeniedState ||
           current is LocationPermanentlyDeniedState ||
+          current is LocationServicesDisabledState ||
           current is HomeChangeSelectedIndexState,
       builder: (context, state) {
         final cubit = HomeCubit.get(context);
         final plants = cubit.plants;
         final hasPlants = plants.isNotEmpty;
+        final locale = Localizations.localeOf(context).languageCode;
 
-        // ✅ Show error state if plants failed to load (Issue 13)
+        // Show error state if plants failed to load (Issue 13)
         if (state is HomeGetPlantsErrorState && plants.isEmpty) {
           return Scaffold(
             body: SafeArea(
@@ -66,11 +85,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: AppColors.error,
-                      ),
+                      Icon(Icons.error_outline, size: 64, color: AppColors.error),
                       const SizedBox(height: 16),
                       Text(
                         S.of(context).failedToLoadPlants,
@@ -95,10 +110,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.primary,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 32,
-                            vertical: 14,
-                          ),
+                          padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(12),
                           ),
@@ -113,53 +125,138 @@ class _HomeScreenState extends State<HomeScreen> {
         }
 
         return Scaffold(
-          body: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            child: SafeArea(
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(
-                  ResponsiveText.padding(context, 16),
-                  ResponsiveText.padding(context, 16),
-                  ResponsiveText.padding(context, 16),
-                  ResponsiveText.padding(context, 20),
+          body: SafeArea(
+            child: CustomScrollView(
+              physics: const BouncingScrollPhysics(),
+              slivers: [
+                // App bar with location
+                SliverAppBar(
+                  backgroundColor: Colors.transparent,
+                  elevation: 0,
+                  pinned: true,
+                  toolbarHeight: 80,
+                  title: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              S.of(context).home,
+                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                                fontSize: ResponsiveText.headline(context),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            if (_locationName.isNotEmpty)
+                              Text(
+                                _locationName,
+                                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                  color: Colors.grey[600],
+                                  fontSize: ResponsiveText.labelSmall(context),
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                          ],
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.refresh_rounded),
+                        onPressed: () {
+                          cubit.refreshWeather();
+                          cubit.loadPlants();
+                        },
+                        tooltip: S.of(context).refresh,
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.chat_bubble_outline),
+                        onPressed: () => navigateTo(context, const AIChatScreen()),
+                        tooltip: S.of(context).aiAssistant,
+                      ),
+                    ],
+                  ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    _buildHeader(context),
-                    SizedBox(height: ResponsiveText.padding(context, 20)),
-                    _buildWeatherCard(context, state, cubit),
-                    SizedBox(height: ResponsiveText.padding(context, 24)),
-                    if (cubit.weatherData != null)
-                      _buildWeatherDescription(context, cubit),
-                    SizedBox(height: ResponsiveText.padding(context, 24)),
-                    _buildChoosePlantHeader(context),
-                    SizedBox(height: ResponsiveText.padding(context, 12)),
-                    _buildPlantCarousel(context, cubit),
-                    SizedBox(height: ResponsiveText.padding(context, 20)),
-                    if (hasPlants) ...[
-                      _buildPlantNameHeader(
+
+                // Weather card
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    child: _buildWeatherCard(context, state, cubit),
+                  ),
+                ),
+
+                // Weather insights (if any)
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+                    child: _buildWeatherDescription(context, cubit),
+                  ),
+                ),
+
+                // Plant carousel header
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
+                    child: Text(
+                      S.of(context).choosePlant,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontSize: ResponsiveText.title(context),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ),
+
+                // Plant carousel
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    child: _buildPlantCarousel(context, cubit, locale),
+                  ),
+                ),
+
+                // Plant details
+                if (hasPlants) ...[
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: _buildPlantDetailCard(
                         context,
                         plants[cubit.selectedIndex],
+                        locale,
                       ),
-                      SizedBox(height: ResponsiveText.padding(context, 12)),
-                      _buildCalculateButton(context, cubit, plants),
-                      SizedBox(height: ResponsiveText.padding(context, 20)),
-                      _buildPlantDetailCard(
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: _buildCalculateButton(
                         context,
+                        cubit,
                         plants[cubit.selectedIndex],
+                        locale,
                       ),
-                      SizedBox(height: ResponsiveText.padding(context, 20)),
-                      _PlantDetailsExpandable(
+                    ),
+                  ),
+                  SliverToBoxAdapter(
+                    child: Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: _PlantDetailsExpandable(
                         plant: plants[cubit.selectedIndex],
                         context: context,
                       ),
-                    ] else
-                      _buildLoadingShimmer(),
-                    SizedBox(height: ResponsiveText.padding(context, 20)),
-                  ],
-                ),
-              ),
+                    ),
+                  ),
+                ] else
+                  SliverToBoxAdapter(
+                    child: _buildLoadingShimmer(),
+                  ),
+
+                const SliverToBoxAdapter(child: SizedBox(height: 20)),
+              ],
             ),
           ),
         );
@@ -167,414 +264,9 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // =====================================================================
-  // All other methods (unchanged from original)
-  // =====================================================================
-
-  Widget _buildHeader(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          S.of(context).home,
-          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-            fontSize: ResponsiveText.headline(context),
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        SizedBox(height: ResponsiveText.padding(context, 4)),
-        Text(
-          S.of(context).homeSubtitle,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontSize: ResponsiveText.bodySmall(context),
-            color: isDark ? Colors.grey[400] : Colors.grey[600],
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildWeatherDescription(BuildContext context, HomeCubit cubit) {
-    if (cubit.insights.isEmpty) return const SizedBox.shrink();
-
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final topInsight = cubit.insights.first;
-    final Color levelColor = topInsight.level == InsightLevel.critical
-        ? AppColors.error
-        : (topInsight.level == InsightLevel.warning
-        ? AppColors.warning
-        : AppColors.success);
-
-    return Container(
-      padding: EdgeInsets.all(ResponsiveText.padding(context, 12)),
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: levelColor.withValues(alpha: 0.3)),
-        boxShadow: [
-          BoxShadow(
-            color: levelColor.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          Icon(
-            topInsight.icon,
-            color: levelColor,
-            size: ResponsiveText.iconSizeSmall(context),
-          ),
-          SizedBox(width: ResponsiveText.padding(context, 8)),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  topInsight.title,
-                  style: TextStyle(
-                    fontSize: ResponsiveText.labelSmall(context),
-                    fontWeight: FontWeight.bold,
-                    color: levelColor,
-                  ),
-                ),
-                Text(
-                  topInsight.message,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    fontSize: ResponsiveText.bodySmall(context),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildChoosePlantHeader(BuildContext context) {
-    return Text(
-      S.of(context).choosePlant,
-      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-        fontSize: ResponsiveText.title(context),
-        fontWeight: FontWeight.w600,
-      ),
-    );
-  }
-
-  Widget _buildPlantNameHeader(BuildContext context, Plant plant) {
-    return Text(
-      plant.name,
-      maxLines: 1,
-      overflow: TextOverflow.ellipsis,
-      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-        fontSize: ResponsiveText.title(context),
-        fontWeight: FontWeight.w600,
-      ),
-    );
-  }
-
-  Widget _buildCalculateButton(
-      BuildContext context, HomeCubit cubit, List<Plant> plants) {
-    return SizedBox(
-      width: double.infinity,
-      height: (48 * ResponsiveText.getScale(context)).clamp(44.0, 56.0),
-      child: ElevatedButton.icon(
-        style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primary,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-        onPressed: () {
-          final plant = plants[cubit.selectedIndex];
-          navigateTo(
-            context,
-            FertilizerScreen(
-              plant: PlantData(
-                name: plant.name,
-                type: plant.category,
-                npk: plant.npk,
-                emoji: cubit.plantEmojis[cubit.selectedIndex],
-              ),
-            ),
-          );
-        },
-        icon: const Icon(Icons.calculate, size: 18),
-        label: Text(
-          S.of(context).calculateFertilizer,
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: ResponsiveText.body(context),
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPlantCarousel(BuildContext context, HomeCubit cubit) {
-    final emojiSize = ResponsiveText.emojiSmall(context);
-    final carouselHeight = (emojiSize + 32).clamp(110.0, 160.0);
-    final padding = ResponsiveText.padding(context, 12);
-    final edgeInset = ResponsiveText.padding(context, 4);
-    final plantsCount = cubit.plants.isNotEmpty ? cubit.plants.length : cubit.plantEmojis.length;
-
-    return SizedBox(
-      height: carouselHeight,
-      child: ListView.separated(
-        shrinkWrap: true,
-        scrollDirection: Axis.horizontal,
-        padding: EdgeInsets.symmetric(horizontal: edgeInset),
-        itemBuilder: (context, index) =>
-            _buildPlantItemOptimized(context, index, cubit, emojiSize),
-        itemCount: plantsCount,
-        separatorBuilder: (context, index) => SizedBox(width: padding),
-        physics: const BouncingScrollPhysics(),
-      ),
-    );
-  }
-
-  Widget _buildPlantItemOptimized(
-      BuildContext context, int index, dynamic cubit, double emojiSize) {
-    bool isSelected = index == cubit.selectedIndex;
-
-    return GestureDetector(
-      onTap: () => cubit.changeSelectedIndex(index),
-      child: AnimatedScale(
-        scale: isSelected ? 1.08 : 1.0,
-        duration: const Duration(milliseconds: 200),
-        child: _buildEmojiCard(context, cubit, index, isSelected, emojiSize),
-      ),
-    );
-  }
-
-  Widget _buildEmojiCard(BuildContext context, dynamic cubit, int index,
-      bool isSelected, double emojiSize) {
-    final padding = ResponsiveText.padding(context, 12);
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          padding: EdgeInsets.all(padding * 0.75),
-          constraints: BoxConstraints(
-            minWidth: emojiSize + padding,
-            minHeight: emojiSize + padding,
-          ),
-          decoration: BoxDecoration(
-            color: isSelected
-                ? AppColors.primary.withValues(alpha: 0.15)
-                : Colors.transparent,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: isSelected ? AppColors.primary : Colors.transparent,
-              width: 2,
-            ),
-          ),
-          child: Center(
-            child: Text(
-              cubit.plantEmojis[index],
-              style: TextStyle(fontSize: emojiSize),
-              textScaler: TextScaler.noScaling,
-            ),
-          ),
-        ),
-        if (isSelected)
-          Padding(
-            padding: EdgeInsets.only(top: ResponsiveText.padding(context, 6)),
-            child: Container(
-              width: (emojiSize * 0.6).clamp(20.0, 40.0),
-              height: 3,
-              decoration: BoxDecoration(
-                color: AppColors.primary,
-                borderRadius: BorderRadius.circular(1.5),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
-
-  Widget _buildLoadingShimmer() {
-    return Column(
-      children: List.generate(
-          3,
-              (index) => Padding(
-            padding: const EdgeInsets.only(bottom: 16),
-            child: Shimmer.fromColors(
-              baseColor: Colors.grey[300]!,
-              highlightColor: Colors.grey[100]!,
-              child: Container(
-                height: 120,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-              ),
-            ),
-          )),
-    );
-  }
-
-  Widget _buildPlantDetailCard(BuildContext context, Plant plant) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color:
-            isDark ? AppColors.shadowColorDark : AppColors.shadowColorLight,
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: EdgeInsets.all(ResponsiveText.padding(context, 16)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: ResponsiveText.padding(context, 8),
-                        vertical: ResponsiveText.padding(context, 4),
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        plant.category,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.bold,
-                          fontSize: ResponsiveText.labelSmall(context),
-                        ),
-                      ),
-                    ),
-                    SizedBox(height: ResponsiveText.padding(context, 8)),
-                    Text(
-                      plant.name,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontSize: ResponsiveText.title(context),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(width: ResponsiveText.padding(context, 12)),
-              Container(
-                width:
-                (70 * ResponsiveText.getScale(context)).clamp(60.0, 80.0),
-                height:
-                (70 * ResponsiveText.getScale(context)).clamp(60.0, 80.0),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  HomeCubit.get(context)
-                      .plantEmojis[HomeCubit.get(context).selectedIndex],
-                  style: TextStyle(
-                    fontSize: ResponsiveText.emojiSmall(context),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: ResponsiveText.padding(context, 16)),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(Icons.calendar_today,
-                  color: AppColors.primary,
-                  size: ResponsiveText.iconSizeSmall(context)),
-              SizedBox(width: ResponsiveText.padding(context, 8)),
-              Expanded(
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: '${S.of(context).plantingTime}: ',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontSize: ResponsiveText.label(context),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      TextSpan(
-                        text: plant.plantingTime,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontSize: ResponsiveText.label(context),
-                        ),
-                      ),
-                    ],
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: ResponsiveText.padding(context, 8)),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Icon(Icons.eco,
-                  color: AppColors.primary,
-                  size: ResponsiveText.iconSizeSmall(context)),
-              SizedBox(width: ResponsiveText.padding(context, 8)),
-              Expanded(
-                child: Text.rich(
-                  TextSpan(
-                    children: [
-                      TextSpan(
-                        text: '${S.of(context).npkFormula}: ',
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontSize: ResponsiveText.label(context),
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      TextSpan(
-                        text: plant.npk,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          fontSize: ResponsiveText.label(context),
-                        ),
-                      ),
-                    ],
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
+  // ============================================================
+  // Weather components
+  // ============================================================
   Widget _buildWeatherCard(
       BuildContext context,
       HomeStates state,
@@ -619,8 +311,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _getWeatherContent(
-      HomeStates state, HomeCubit cubit, BuildContext context) {
+  Widget _getWeatherContent(HomeStates state, HomeCubit cubit, BuildContext context) {
     if (cubit.weatherData != null) {
       if (cubit.insights.isEmpty) {
         cubit.generateInsights(context);
@@ -633,86 +324,45 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     if (state is LocationPermissionDeniedState) {
-      return _buildPermissionDenied(cubit, context);
+      return _buildWeatherError(
+        context,
+        icon: Icons.location_off,
+        message: S.of(context).locationDenied,
+        buttonText: S.of(context).allowAccess,
+        onPressed: () => cubit.requestLocationPermission(),
+      );
     }
 
     if (state is LocationPermanentlyDeniedState) {
-      return _buildPermanentDenial(cubit, context);
+      return _buildWeatherError(
+        context,
+        icon: Icons.settings,
+        message: S.of(context).permanentDenial,
+        buttonText: S.of(context).openSettings,
+        onPressed: () => cubit.openAppSettings(),
+      );
     }
 
     if (state is LocationServicesDisabledState) {
-      return _buildServicesDisabled(cubit, context);
+      return _buildWeatherError(
+        context,
+        icon: Icons.location_disabled,
+        message: S.of(context).gpsDisabled,
+        buttonText: S.of(context).enableGPS,
+        onPressed: () => cubit.openLocationSettings(),
+      );
     }
 
     if (state is WeatherFetchErrorState) {
-      return _buildError(state.msg, cubit, context);
+      return _buildWeatherError(
+        context,
+        icon: Icons.error_outline,
+        message: S.of(context).weatherErrorTitle,
+        buttonText: S.of(context).tryAgain,
+        onPressed: () => cubit.getWeatherData(),
+      );
     }
 
-    return _buildInitial(cubit, context);
-  }
-
-  Widget _buildLoading(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        CircularProgressIndicator(
-          color: Colors.white,
-          strokeWidth: 2,
-        ),
-        SizedBox(height: ResponsiveText.padding(context, 12)),
-        Text(
-          S.of(context).fetchingWeather,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: ResponsiveText.bodySmall(context),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPermissionDenied(HomeCubit cubit, BuildContext context) {
-    return _buildWeatherError(
-      context,
-      icon: Icons.location_off,
-      message: S.of(context).locationDenied,
-      buttonText: S.of(context).allowAccess,
-      onPressed: () => cubit.requestLocationPermission(),
-    );
-  }
-
-  Widget _buildPermanentDenial(HomeCubit cubit, BuildContext context) {
-    return _buildWeatherError(
-      context,
-      icon: Icons.settings,
-      message: S.of(context).permanentDenial,
-      buttonText: S.of(context).openSettings,
-      onPressed: () => cubit.openAppSettings(),
-    );
-  }
-
-  Widget _buildServicesDisabled(HomeCubit cubit, BuildContext context) {
-    return _buildWeatherError(
-      context,
-      icon: Icons.location_disabled,
-      message: S.of(context).gpsDisabled,
-      buttonText: S.of(context).enableGPS,
-      onPressed: () => cubit.openLocationSettings(),
-    );
-  }
-
-  Widget _buildError(String msg, HomeCubit cubit, BuildContext context) {
-    return _buildWeatherError(
-      context,
-      icon: Icons.error_outline,
-      message: S.of(context).weatherErrorTitle,
-      buttonText: S.of(context).tryAgain,
-      onPressed: () => cubit.getWeatherData(),
-    );
-  }
-
-  Widget _buildInitial(HomeCubit cubit, BuildContext context) {
     return _buildWeatherError(
       context,
       icon: Icons.cloud_outlined,
@@ -765,8 +415,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildWeatherData(WeatherData weather, List<FarmingInsight> insights,
-      BuildContext context) {
+  Widget _buildWeatherData(WeatherData weather, List<FarmingInsight> insights, BuildContext context) {
     final scale = ResponsiveText.getScale(context);
     final statusColor = insights.isEmpty
         ? AppColors.success
@@ -812,22 +461,12 @@ class _HomeScreenState extends State<HomeScreen> {
             decoration: BoxDecoration(
               color: Colors.white.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: statusColor.withValues(alpha: 0.4),
-                width: 1,
-              ),
+              border: Border.all(color: statusColor.withValues(alpha: 0.4), width: 1),
             ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  width: 6,
-                  height: 6,
-                  decoration: BoxDecoration(
-                    color: statusColor,
-                    shape: BoxShape.circle,
-                  ),
-                ),
+                Container(width: 6, height: 6, decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle)),
                 SizedBox(width: ResponsiveText.padding(context, 6)),
                 Flexible(
                   child: Text(
@@ -853,6 +492,82 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildLoading(BuildContext context) {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+        SizedBox(height: ResponsiveText.padding(context, 12)),
+        Text(
+          S.of(context).fetchingWeather,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: ResponsiveText.bodySmall(context),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildWeatherDescription(BuildContext context, HomeCubit cubit) {
+    // ✅ Regenerate insights with the current locale
+    cubit.generateInsights(context);
+
+    if (cubit.insights.isEmpty) return const SizedBox.shrink();
+
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final topInsight = cubit.insights.first;
+    final Color levelColor = topInsight.level == InsightLevel.critical
+        ? AppColors.error
+        : (topInsight.level == InsightLevel.warning ? AppColors.warning : AppColors.success);
+
+    return Container(
+      padding: EdgeInsets.all(ResponsiveText.padding(context, 12)),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: levelColor.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: levelColor.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Icon(topInsight.icon, color: levelColor, size: ResponsiveText.iconSizeSmall(context)),
+          SizedBox(width: ResponsiveText.padding(context, 8)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  topInsight.title,
+                  style: TextStyle(
+                    fontSize: ResponsiveText.labelSmall(context),
+                    fontWeight: FontWeight.bold,
+                    color: levelColor,
+                  ),
+                ),
+                Text(
+                  topInsight.message,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: ResponsiveText.bodySmall(context),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   String _getWeatherDescription(BuildContext context, int code) {
     if (code == 0) return S.of(context).clearSky;
     if (code <= 3) return S.of(context).partlyCloudy;
@@ -872,7 +587,6 @@ class _HomeScreenState extends State<HomeScreen> {
       );
     }
     final isSunny = weather.current.weatherCode == 0;
-
     return isSunny
         ? LinearGradient(
       colors: [Color(0xFFFFD700), Color(0xFFFFA500)],
@@ -885,11 +599,303 @@ class _HomeScreenState extends State<HomeScreen> {
       end: Alignment.bottomRight,
     );
   }
+
+  // ============================================================
+  // Plant carousel
+  // ============================================================
+  Widget _buildPlantCarousel(BuildContext context, HomeCubit cubit, String locale) {
+    final emojiSize = ResponsiveText.emojiSmall(context);
+    final carouselHeight = (emojiSize + 32).clamp(110.0, 160.0);
+    final padding = ResponsiveText.padding(context, 12);
+    final edgeInset = ResponsiveText.padding(context, 4);
+    final plants = cubit.plants;
+
+    return SizedBox(
+      height: carouselHeight,
+      child: ListView.separated(
+        shrinkWrap: true,
+        scrollDirection: Axis.horizontal,
+        padding: EdgeInsets.symmetric(horizontal: edgeInset),
+        itemBuilder: (context, index) {
+          final plant = plants[index];
+          final isSelected = index == cubit.selectedIndex;
+          return _buildPlantItem(context, index, cubit, plant, isSelected, emojiSize);
+        },
+        itemCount: plants.length,
+        separatorBuilder: (context, index) => SizedBox(width: padding),
+        physics: const BouncingScrollPhysics(),
+      ),
+    );
+  }
+
+  Widget _buildPlantItem(
+      BuildContext context,
+      int index,
+      HomeCubit cubit,
+      Plant plant,
+      bool isSelected,
+      double emojiSize,
+      ) {
+    return GestureDetector(
+      onTap: () => cubit.changeSelectedIndex(index),
+      child: AnimatedScale(
+        scale: isSelected ? 1.08 : 1.0,
+        duration: const Duration(milliseconds: 200),
+        child: _buildEmojiCard(plant, isSelected, emojiSize),
+      ),
+    );
+  }
+
+  Widget _buildEmojiCard(Plant plant, bool isSelected, double emojiSize) {
+    final padding = ResponsiveText.padding(context, 12);
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Container(
+          padding: EdgeInsets.all(padding * 0.75),
+          constraints: BoxConstraints(
+            minWidth: emojiSize + padding,
+            minHeight: emojiSize + padding,
+          ),
+          decoration: BoxDecoration(
+            color: isSelected ? AppColors.primary.withValues(alpha: 0.15) : Colors.transparent,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: isSelected ? AppColors.primary : Colors.transparent,
+              width: 2,
+            ),
+          ),
+          child: Center(
+            child: Text(
+              plant.emoji,
+              style: TextStyle(fontSize: emojiSize),
+              textScaler: TextScaler.noScaling,
+            ),
+          ),
+        ),
+        if (isSelected)
+          Padding(
+            padding: EdgeInsets.only(top: ResponsiveText.padding(context, 6)),
+            child: Container(
+              width: (emojiSize * 0.6).clamp(20.0, 40.0),
+              height: 3,
+              decoration: BoxDecoration(
+                color: AppColors.primary,
+                borderRadius: BorderRadius.circular(1.5),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  // ============================================================
+  // Plant details card
+  // ============================================================
+  Widget _buildPlantDetailCard(BuildContext context, Plant plant, String locale) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: isDark ? AppColors.shadowColorDark : AppColors.shadowColorLight,
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: EdgeInsets.all(ResponsiveText.padding(context, 16)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: ResponsiveText.padding(context, 8),
+                        vertical: ResponsiveText.padding(context, 4),
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        plant.getCategory(locale),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.bold,
+                          fontSize: ResponsiveText.labelSmall(context),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: ResponsiveText.padding(context, 8)),
+                    Text(
+                      plant.getName(locale),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontSize: ResponsiveText.title(context),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: ResponsiveText.padding(context, 12)),
+              Container(
+                width: (70 * ResponsiveText.getScale(context)).clamp(60.0, 80.0),
+                height: (70 * ResponsiveText.getScale(context)).clamp(60.0, 80.0),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  plant.emoji,
+                  style: TextStyle(fontSize: ResponsiveText.emojiSmall(context)),
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: ResponsiveText.padding(context, 16)),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(Icons.calendar_today, color: AppColors.primary, size: ResponsiveText.iconSizeSmall(context)),
+              SizedBox(width: ResponsiveText.padding(context, 8)),
+              Expanded(
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '${S.of(context).plantingTime}: ',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontSize: ResponsiveText.label(context),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      TextSpan(
+                        text: plant.getPlantingTime(locale),
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontSize: ResponsiveText.label(context),
+                        ),
+                      ),
+                    ],
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+          SizedBox(height: ResponsiveText.padding(context, 8)),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Icon(Icons.eco, color: AppColors.primary, size: ResponsiveText.iconSizeSmall(context)),
+              SizedBox(width: ResponsiveText.padding(context, 8)),
+              Expanded(
+                child: Text.rich(
+                  TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '${S.of(context).npkFormula}: ',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontSize: ResponsiveText.label(context),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      TextSpan(
+                        text: plant.npk,
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontSize: ResponsiveText.label(context),
+                        ),
+                      ),
+                    ],
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCalculateButton(
+      BuildContext context,
+      HomeCubit cubit,
+      Plant plant,
+      String locale,
+      ) {
+    return SizedBox(
+      width: double.infinity,
+      height: (48 * ResponsiveText.getScale(context)).clamp(44.0, 56.0),
+      child: ElevatedButton.icon(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+        onPressed: () {
+          navigateTo(
+            context,
+            FertilizerScreen(plant: plant, locale: locale),
+          );
+        },
+        icon: const Icon(Icons.calculate, size: 18),
+        label: Text(
+          S.of(context).calculateFertilizer,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: TextStyle(
+            color: Colors.white,
+            fontSize: ResponsiveText.body(context),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingShimmer() {
+    return Column(
+      children: List.generate(
+        3,
+            (index) => Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Shimmer.fromColors(
+            baseColor: Colors.grey[300]!,
+            highlightColor: Colors.grey[100]!,
+            child: Container(
+              height: 120,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
-// =====================================================================
-// PlantDetailsExpandable (unchanged)
-// =====================================================================
+// ============================================================
+// PlantDetailsExpandable (same as before, but updated to use new model)
+// ============================================================
 class _PlantDetailsExpandable extends StatefulWidget {
   final Plant plant;
   final BuildContext context;
@@ -943,30 +949,33 @@ class _PlantDetailsExpandableState extends State<_PlantDetailsExpandable>
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final locale = Localizations.localeOf(context).languageCode;
+    final plant = widget.plant;
+
     final sections = [
       {
         'title': S.of(context).description,
         'icon': Icons.description,
         'color': const Color(0xFF4CAF50),
-        'content': widget.plant.description,
+        'content': plant.getDescription(locale),
       },
       {
         'title': S.of(context).nutrition,
         'icon': Icons.fastfood,
         'color': const Color(0xFFFF9800),
-        'content': widget.plant.nutritionRecommendations,
+        'content': plant.nutritionRecommendations,
       },
       {
         'title': S.of(context).storage,
         'icon': Icons.storage,
         'color': const Color(0xFF2196F3),
-        'content': widget.plant.storageInfo,
+        'content': plant.storageInfo,
       },
       {
         'title': S.of(context).diseases,
         'icon': Icons.health_and_safety,
         'color': const Color(0xFFF44336),
-        'content': widget.plant.diseaseAndPestControl,
+        'content': plant.diseaseAndPestControl,
       },
     ];
 
@@ -979,9 +988,7 @@ class _PlantDetailsExpandableState extends State<_PlantDetailsExpandable>
           final isExpanded = _expandedStates[index];
 
           return Padding(
-            padding: EdgeInsets.only(
-              bottom: ResponsiveText.padding(context, 12),
-            ),
+            padding: EdgeInsets.only(bottom: ResponsiveText.padding(context, 12)),
             child: _buildExpandableCard(
               context: context,
               index: index,
@@ -992,8 +999,9 @@ class _PlantDetailsExpandableState extends State<_PlantDetailsExpandable>
               isExpanded: isExpanded,
               animation: _controllers[index],
               onTap: () => _toggleExpanded(index),
-              plant: widget.plant,
+              plant: plant,
               sectionData: section['content'],
+              locale: locale,
             ),
           );
         }),
@@ -1013,6 +1021,7 @@ class _PlantDetailsExpandableState extends State<_PlantDetailsExpandable>
     required VoidCallback onTap,
     required Plant plant,
     required dynamic sectionData,
+    required String locale,
   }) {
     return Material(
       color: Colors.transparent,
@@ -1021,9 +1030,7 @@ class _PlantDetailsExpandableState extends State<_PlantDetailsExpandable>
           borderRadius: BorderRadius.circular(16),
           gradient: LinearGradient(
             colors: [
-              isDark
-                  ? (color).withValues(alpha: 0.08)
-                  : (color).withValues(alpha: 0.04),
+              isDark ? (color).withValues(alpha: 0.08) : (color).withValues(alpha: 0.04),
               isDark ? Colors.grey[800]! : Colors.grey[50]!,
             ],
             begin: Alignment.topLeft,
@@ -1066,11 +1073,7 @@ class _PlantDetailsExpandableState extends State<_PlantDetailsExpandable>
                         ),
                       ),
                       child: Center(
-                        child: Icon(
-                          icon,
-                          color: color,
-                          size: 24,
-                        ),
+                        child: Icon(icon, color: color, size: 24),
                       ),
                     ),
                     SizedBox(width: ResponsiveText.padding(context, 12)),
@@ -1110,6 +1113,7 @@ class _PlantDetailsExpandableState extends State<_PlantDetailsExpandable>
                     sectionData: sectionData,
                     color: color,
                     isDark: isDark,
+                    locale: locale,
                   ),
                 ),
             ],
@@ -1125,317 +1129,131 @@ class _PlantDetailsExpandableState extends State<_PlantDetailsExpandable>
     required dynamic sectionData,
     required Color color,
     required bool isDark,
+    required String locale,
   }) {
     if (index == 0) {
-      return _buildDescriptionContent(context, sectionData as String, isDark);
-    } else if (index == 1) {
-      return _buildNutritionContent(
-          context, sectionData as Map<String, String>, color, isDark);
-    } else if (index == 2) {
-      return _buildStorageContent(
-          context, sectionData as Map<String, String>, color, isDark);
-    } else {
-      return _buildDiseasesContent(context, sectionData, color, isDark);
-    }
-  }
-
-  Widget _buildDescriptionContent(
-      BuildContext context, String content, bool isDark) {
-    return Text(
-      content,
-      style: TextStyle(
-        fontSize: ResponsiveText.body(context),
-        height: 1.8,
-        color: isDark ? Colors.grey[300] : Colors.grey[700],
-        fontWeight: FontWeight.w400,
-      ),
-    );
-  }
-
-  Widget _buildNutritionContent(
-      BuildContext context,
-      Map<String, dynamic> nutrition,
-      Color color,
-      bool isDark,
-      ) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final isCompact = constraints.maxWidth < 360;
-
-        return Column(
-          children: nutrition.entries.map((entry) {
-            final valueText = entry.value.toString();
-            final labelText = _localizedPlantLabel(context, entry.key.toString());
-
-            return Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: ResponsiveText.padding(context, 8),
-              ),
-              child: isCompact
-                  ? Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 6,
-                        height: 6,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: color,
-                        ),
-                      ),
-                      SizedBox(width: ResponsiveText.padding(context, 10)),
-                      Expanded(
-                        child: Text(
-                          labelText,
-                          maxLines: 2,
-                          softWrap: true,
-                          style: TextStyle(
-                            fontSize: ResponsiveText.label(context),
-                            fontWeight: FontWeight.w600,
-                            color: isDark ? Colors.white : Colors.grey[900],
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: ResponsiveText.padding(context, 6)),
-                  Align(
-                    alignment: AlignmentDirectional.centerStart,
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: constraints.maxWidth,
-                      ),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: ResponsiveText.padding(context, 10),
-                          vertical: ResponsiveText.padding(context, 6),
-                        ),
-                        decoration: BoxDecoration(
-                          color: color.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          valueText,
-                          maxLines: 2,
-                          softWrap: true,
-                          style: TextStyle(
-                            fontSize: ResponsiveText.labelSmall(context),
-                            fontWeight: FontWeight.w500,
-                            color: color,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              )
-                  : Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Container(
-                    width: 6,
-                    height: 6,
-                    margin: EdgeInsets.only(
-                      top: ResponsiveText.padding(context, 6),
-                    ),
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: color,
-                    ),
-                  ),
-                  SizedBox(width: ResponsiveText.padding(context, 10)),
-                  Expanded(
-                    child: Text(
-                      labelText,
-                      maxLines: 2,
-                      softWrap: true,
-                      style: TextStyle(
-                        fontSize: ResponsiveText.label(context),
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white : Colors.grey[900],
-                      ),
-                    ),
-                  ),
-                  SizedBox(width: ResponsiveText.padding(context, 8)),
-                  Flexible(
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: constraints.maxWidth * 0.42,
-                      ),
-                      child: Container(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: ResponsiveText.padding(context, 10),
-                          vertical: ResponsiveText.padding(context, 4),
-                        ),
-                        decoration: BoxDecoration(
-                          color: color.withValues(alpha: 0.15),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Text(
-                          valueText,
-                          maxLines: 2,
-                          softWrap: true,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontSize: ResponsiveText.labelSmall(context),
-                            fontWeight: FontWeight.w500,
-                            color: color,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          }).toList(),
-        );
-      },
-    );
-  }
-
-  Widget _buildStorageContent(
-      BuildContext context,
-      Map<String, dynamic> storage,
-      Color color,
-      bool isDark,
-      ) {
-    return Column(
-      children: storage.entries.map((entry) {
-        return Padding(
-          padding: EdgeInsets.symmetric(
-            vertical: ResponsiveText.padding(context, 10),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                _localizedPlantLabel(context, entry.key.toString()),
-                style: TextStyle(
-                  fontSize: ResponsiveText.labelSmall(context),
-                  fontWeight: FontWeight.w700,
-                  color: color,
-                  letterSpacing: 0.5,
-                ),
-              ),
-              SizedBox(height: ResponsiveText.padding(context, 6)),
-              Text(
-                entry.value.toString(),
-                style: TextStyle(
-                  fontSize: ResponsiveText.body(context),
-                  fontWeight: FontWeight.w400,
-                  color: isDark ? Colors.grey[300] : Colors.grey[700],
-                  height: 1.5,
-                ),
-              ),
-            ],
-          ),
-        );
-      }).toList(),
-    );
-  }
-
-  String _localizedPlantLabel(BuildContext context, String key) {
-    final normalizedKey = key.trim().toLowerCase();
-
-    switch (normalizedKey) {
-      case 'nitrogen':
-        return S.of(context).nitrogen;
-      case 'phosphorus':
-        return S.of(context).phosphorus;
-      case 'potassium':
-        return S.of(context).potassium;
-      case 'temperature':
-        return S.of(context).temperature;
-      case 'humidity':
-        return S.of(context).humidity;
-      default:
-        return key;
-    }
-  }
-
-  Widget _buildDiseasesContent(
-      BuildContext context,
-      dynamic diseasesData,
-      Color color,
-      bool isDark,
-      ) {
-    final diseases = diseasesData is Iterable ? diseasesData.toList() : [];
-
-    if (diseases.isEmpty) {
-      return Center(
-        child: Text(
-          S.of(context).noDiseases,
-          style: TextStyle(
-            fontSize: ResponsiveText.body(context),
-            color: isDark ? Colors.grey[400] : Colors.grey[600],
-            fontStyle: FontStyle.italic,
-          ),
+      // Description – string
+      return Text(
+        sectionData as String,
+        style: TextStyle(
+          fontSize: ResponsiveText.body(context),
+          height: 1.8,
+          color: isDark ? Colors.grey[300] : Colors.grey[700],
+          fontWeight: FontWeight.w400,
         ),
       );
-    }
-
-    return Column(
-      children: diseases.asMap().entries.map((entry) {
-        final isLast = entry.key == diseases.length - 1;
-        final disease = entry.value;
-        return Column(
-          children: [
-            Padding(
-              padding: EdgeInsets.symmetric(
-                vertical: ResponsiveText.padding(context, 10),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.warning_rounded,
-                        size: 16,
-                        color: color,
-                      ),
-                      SizedBox(width: ResponsiveText.padding(context, 8)),
-                      Expanded(
-                        child: Text(
-                          disease.name ?? 'Unknown',
-                          style: TextStyle(
-                            fontSize: ResponsiveText.label(context),
-                            fontWeight: FontWeight.w700,
-                            color: isDark ? Colors.white : Colors.grey[900],
-                          ),
+    } else if (index == 1) {
+      // Nutrition – StorageInfo object
+      final nutrition = sectionData as NutritionRecommendations;
+      return Column(
+        children: [
+          _buildLabeledText(context, S.of(context).nitrogen, nutrition.nitrogen[locale] ?? '', color, isDark),
+          _buildLabeledText(context, S.of(context).phosphorus, nutrition.phosphorus[locale] ?? '', color, isDark),
+          _buildLabeledText(context, S.of(context).potassium, nutrition.potassium[locale] ?? '', color, isDark),
+        ],
+      );
+    } else if (index == 2) {
+      // Storage – StorageInfo object
+      final storage = sectionData as StorageInfo;
+      return Column(
+        children: [
+          _buildLabeledText(context, S.of(context).temperature, storage.temperature[locale] ?? '', color, isDark),
+          _buildLabeledText(context, S.of(context).humidity, storage.humidity[locale] ?? '', color, isDark),
+        ],
+      );
+    } else {
+      // Diseases – List<Disease>
+      final diseases = sectionData as List<Disease>;
+      if (diseases.isEmpty) {
+        return Center(
+          child: Text(
+            S.of(context).noDiseases,
+            style: TextStyle(
+              fontSize: ResponsiveText.body(context),
+              color: isDark ? Colors.grey[400] : Colors.grey[600],
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        );
+      }
+      return Column(
+        children: diseases.map((disease) {
+          return Padding(
+            padding: EdgeInsets.symmetric(vertical: ResponsiveText.padding(context, 8)),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(Icons.warning_rounded, size: 16, color: color),
+                    SizedBox(width: ResponsiveText.padding(context, 8)),
+                    Expanded(
+                      child: Text(
+                        disease.name[locale] ?? disease.name['en'] ?? '',
+                        style: TextStyle(
+                          fontSize: ResponsiveText.label(context),
+                          fontWeight: FontWeight.w700,
+                          color: isDark ? Colors.white : Colors.grey[900],
                         ),
                       ),
-                    ],
-                  ),
-                  SizedBox(height: ResponsiveText.padding(context, 6)),
-                  Text(
-                    disease.prevention ?? '',
-                    style: TextStyle(
-                      fontSize: ResponsiveText.bodySmall(context),
-                      fontWeight: FontWeight.w400,
-                      color: isDark ? Colors.grey[400] : Colors.grey[700],
-                      height: 1.6,
                     ),
+                  ],
+                ),
+                SizedBox(height: ResponsiveText.padding(context, 6)),
+                Text(
+                  disease.prevention[locale] ?? disease.prevention['en'] ?? '',
+                  style: TextStyle(
+                    fontSize: ResponsiveText.bodySmall(context),
+                    fontWeight: FontWeight.w400,
+                    color: isDark ? Colors.grey[400] : Colors.grey[700],
+                    height: 1.6,
                   ),
-                ],
+                ),
+              ],
+            ),
+          );
+        }).toList(),
+      );
+    }
+  }
+
+  Widget _buildLabeledText(BuildContext context, String label, String value, Color color, bool isDark) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: ResponsiveText.padding(context, 8)),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 6,
+            height: 6,
+            margin: EdgeInsets.only(top: ResponsiveText.padding(context, 6)),
+            decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+          ),
+          SizedBox(width: ResponsiveText.padding(context, 10)),
+          Expanded(
+            child: Text(
+              label,
+              style: TextStyle(
+                fontSize: ResponsiveText.label(context),
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white : Colors.grey[900],
               ),
             ),
-            if (!isLast)
-              Padding(
-                padding: EdgeInsets.symmetric(
-                  vertical: ResponsiveText.padding(context, 6),
-                ),
-                child: Container(
-                  height: 1,
-                  color: isDark ? Colors.grey[700] : Colors.grey[200],
-                ),
+          ),
+          SizedBox(width: ResponsiveText.padding(context, 8)),
+          Expanded(
+            flex: 2,
+            child: Text(
+              value,
+              style: TextStyle(
+                fontSize: ResponsiveText.labelSmall(context),
+                fontWeight: FontWeight.w400,
+                color: isDark ? Colors.grey[400] : Colors.grey[700],
               ),
-          ],
-        );
-      }).toList(),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

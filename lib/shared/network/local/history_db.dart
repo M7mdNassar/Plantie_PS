@@ -27,18 +27,21 @@ class HistoryDBHelper {
   final String uploadQueueColumnUploaded = 'uploaded';
   final String uploadQueueColumnUploadAttempts = 'upload_attempts';
 
-
-
-  // New table name and columns
+  // Offline actions table
   static const String offlineTableName = 'offline_actions';
   static const String offlineColumnId = 'id';
-  static const String offlineColumnType = 'action_type'; // 'post', 'comment'
-  static const String offlineColumnData = 'data'; // JSON string
+  static const String offlineColumnType = 'action_type';
+  static const String offlineColumnData = 'data';
   static const String offlineColumnUserId = 'user_id';
-  static const String offlineColumnStatus = 'status'; // 'pending', 'uploading', 'done', 'failed'
+  static const String offlineColumnStatus = 'status';
   static const String offlineColumnAttempts = 'attempts';
   static const String offlineColumnCreatedAt = 'created_at';
 
+  // Cached posts table
+  static const String cachedPostsTable = 'cached_posts';
+  static const String cachedPostId = 'post_id';
+  static const String cachedPostData = 'post_data';
+  static const String cachedAt = 'cached_at';
 
   HistoryDBHelper._internal();
 
@@ -53,7 +56,7 @@ class HistoryDBHelper {
     final path = join(databasePath, 'history.db');
     return await openDatabase(
       path,
-      version: 3, // Incremented version for new table
+      version: 4, // ✅ Updated to 4 to include offline_actions and cached_posts
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE $tableName (
@@ -64,7 +67,6 @@ class HistoryDBHelper {
           )
         ''');
 
-        // Create upload queue table
         await db.execute('''
           CREATE TABLE $uploadQueueTableName (
             $uploadQueueColumnId INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -89,16 +91,24 @@ class HistoryDBHelper {
             $offlineColumnStatus TEXT NOT NULL DEFAULT 'pending',
             $offlineColumnAttempts INTEGER DEFAULT 0,
             $offlineColumnCreatedAt TEXT NOT NULL
-             )
-         ''');
+          )
+        ''');
 
         await db.execute('''
-          CREATE TABLE cached_posts (
-          post_id TEXT PRIMARY KEY,
-          post_data TEXT NOT NULL,
-          cached_at TEXT NOT NULL
-             )
+          CREATE TABLE $cachedPostsTable (
+            $cachedPostId TEXT PRIMARY KEY,
+            $cachedPostData TEXT NOT NULL,
+            $cachedAt TEXT NOT NULL
+          )
         ''');
+
+        await db.execute('''
+  CREATE TABLE IF NOT EXISTS chat_history (
+    session_id TEXT PRIMARY KEY,
+    messages TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+  )
+''');
 
       },
       onUpgrade: (db, oldVersion, newVersion) async {
@@ -113,7 +123,6 @@ class HistoryDBHelper {
           ''');
         }
         if (oldVersion < 3) {
-          // Create upload queue table if upgrading from version < 3
           await db.execute('''
             CREATE TABLE IF NOT EXISTS $uploadQueueTableName (
               $uploadQueueColumnId INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -129,25 +138,33 @@ class HistoryDBHelper {
             )
           ''');
         }
-
         if (oldVersion < 4) {
           await db.execute('''
-    CREATE TABLE $offlineTableName (
-      $offlineColumnId INTEGER PRIMARY KEY AUTOINCREMENT,
-      $offlineColumnType TEXT NOT NULL,
-      $offlineColumnData TEXT NOT NULL,
-      $offlineColumnUserId TEXT NOT NULL,
-      $offlineColumnStatus TEXT NOT NULL DEFAULT 'pending',
-      $offlineColumnAttempts INTEGER DEFAULT 0,
-      $offlineColumnCreatedAt TEXT NOT NULL
-    )
-  ''');
-
+            CREATE TABLE IF NOT EXISTS $offlineTableName (
+              $offlineColumnId INTEGER PRIMARY KEY AUTOINCREMENT,
+              $offlineColumnType TEXT NOT NULL,
+              $offlineColumnData TEXT NOT NULL,
+              $offlineColumnUserId TEXT NOT NULL,
+              $offlineColumnStatus TEXT NOT NULL DEFAULT 'pending',
+              $offlineColumnAttempts INTEGER DEFAULT 0,
+              $offlineColumnCreatedAt TEXT NOT NULL
+            )
+          ''');
           await db.execute('''
-    CREATE TABLE cached_posts (
-      post_id TEXT PRIMARY KEY,
-      post_data TEXT NOT NULL,
-      cached_at TEXT NOT NULL
+            CREATE TABLE IF NOT EXISTS $cachedPostsTable (
+              $cachedPostId TEXT PRIMARY KEY,
+              $cachedPostData TEXT NOT NULL,
+              $cachedAt TEXT NOT NULL
+            )
+          ''');
+        }
+
+        if (oldVersion < 5) {
+          await db.execute('''
+    CREATE TABLE IF NOT EXISTS chat_history (
+      session_id TEXT PRIMARY KEY,
+      messages TEXT NOT NULL,
+      updated_at TEXT NOT NULL
     )
   ''');
         }
@@ -156,7 +173,6 @@ class HistoryDBHelper {
   }
 
   // ==================== HISTORY TABLE METHODS ====================
-
   Future<int> insertHistory(Map<String, dynamic> row) async {
     final db = await database;
     return await db.insert(tableName, row);
@@ -172,25 +188,20 @@ class HistoryDBHelper {
   }
 
   // ==================== UPLOAD QUEUE TABLE METHODS ====================
-
-  /// Insert a detection result into the upload queue
   Future<int> insertUploadQueueItem(Map<String, dynamic> row) async {
     final db = await database;
     return await db.insert(uploadQueueTableName, row);
   }
 
-  /// Get all pending upload queue items (not yet uploaded, attempts < 3)
   Future<List<Map<String, dynamic>>> getPendingUploadQueueItems() async {
     final db = await database;
     return await db.query(
       uploadQueueTableName,
-      where:
-          '$uploadQueueColumnUploaded = 0 AND $uploadQueueColumnUploadAttempts < 3',
+      where: '$uploadQueueColumnUploaded = 0 AND $uploadQueueColumnUploadAttempts < 3',
       orderBy: '$uploadQueueColumnDetectedAt ASC',
     );
   }
 
-  /// Update upload queue item after successful upload
   Future<int> markUploadQueueItemAsUploaded(int id) async {
     final db = await database;
     return await db.update(
@@ -201,7 +212,6 @@ class HistoryDBHelper {
     );
   }
 
-  /// Increment upload attempts for a queue item
   Future<int> incrementUploadAttempts(int id) async {
     final db = await database;
     final currentItem = await db.query(
@@ -209,10 +219,8 @@ class HistoryDBHelper {
       where: '$uploadQueueColumnId = ?',
       whereArgs: [id],
     );
-
     if (currentItem.isNotEmpty) {
-      final currentAttempts =
-          currentItem.first[uploadQueueColumnUploadAttempts] as int;
+      final currentAttempts = currentItem.first[uploadQueueColumnUploadAttempts] as int;
       return await db.update(
         uploadQueueTableName,
         {uploadQueueColumnUploadAttempts: currentAttempts + 1},
@@ -223,7 +231,6 @@ class HistoryDBHelper {
     return 0;
   }
 
-  /// Update user_corrected_label for a queue item
   Future<int> updateCorrectedLabel(int id, String correctedLabel) async {
     final db = await database;
     return await db.update(
@@ -234,9 +241,7 @@ class HistoryDBHelper {
     );
   }
 
-  /// Get all upload queue items for a user
-  Future<List<Map<String, dynamic>>> getUserUploadQueueItems(
-      String userId) async {
+  Future<List<Map<String, dynamic>>> getUserUploadQueueItems(String userId) async {
     final db = await database;
     return await db.query(
       uploadQueueTableName,
@@ -246,9 +251,7 @@ class HistoryDBHelper {
     );
   }
 
-  /// Update supabase_user_id for all items with old user ID (for guest to auth upgrade)
-  Future<int> updateUserIdForQueueItems(
-      String oldUserId, String newUserId) async {
+  Future<int> updateUserIdForQueueItems(String oldUserId, String newUserId) async {
     final db = await database;
     return await db.update(
       uploadQueueTableName,
@@ -258,7 +261,7 @@ class HistoryDBHelper {
     );
   }
 
-
+  // ==================== OFFLINE ACTIONS ====================
   Future<int> insertOfflineAction(Map<String, dynamic> data) async {
     final db = await database;
     return await db.insert(offlineTableName, data);
@@ -284,5 +287,21 @@ class HistoryDBHelper {
       where: '$offlineColumnId = ?',
       whereArgs: [id],
     );
+  }
+
+  // ==================== CACHED POSTS ====================
+  Future<void> insertCachedPost(Map<String, dynamic> data) async {
+    final db = await database;
+    await db.insert(cachedPostsTable, data, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  Future<List<Map<String, dynamic>>> getCachedPosts() async {
+    final db = await database;
+    return await db.query(cachedPostsTable, orderBy: '$cachedAt DESC');
+  }
+
+  Future<void> clearCachedPosts() async {
+    final db = await database;
+    await db.delete(cachedPostsTable);
   }
 }

@@ -68,6 +68,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "aboutMe": MessageLookupByLibrary.simpleMessage("About Me"),
     "acre": MessageLookupByLibrary.simpleMessage("Acre"),
     "addPhotos": MessageLookupByLibrary.simpleMessage("Add Photos"),
+    "aiAssistant": MessageLookupByLibrary.simpleMessage("AI Assistant"),
+    "aiAssistantEmptySubtitle": MessageLookupByLibrary.simpleMessage(
+      "Ask me anything about plants, farming, or gardening.",
+    ),
+    "aiAssistantEmptyTitle": MessageLookupByLibrary.simpleMessage(
+      "How can I help you?",
+    ),
     "allowAccess": MessageLookupByLibrary.simpleMessage("Allow Access"),
     "analyzing": MessageLookupByLibrary.simpleMessage("Analyzing Image..."),
     "analyzingImage": MessageLookupByLibrary.simpleMessage(
@@ -132,6 +139,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "Choose from Gallery",
     ),
     "choosePlant": MessageLookupByLibrary.simpleMessage("Choose a Plant"),
+    "clear": MessageLookupByLibrary.simpleMessage("Clear"),
+    "clearChat": MessageLookupByLibrary.simpleMessage("Clear Chat"),
+    "clearChatConfirmation": MessageLookupByLibrary.simpleMessage(
+      "Are you sure you want to clear this conversation?",
+    ),
     "clearImage": MessageLookupByLibrary.simpleMessage("Clear image"),
     "clearSearch": MessageLookupByLibrary.simpleMessage("Clear search"),
     "clearSky": MessageLookupByLibrary.simpleMessage("Clear Sky"),
@@ -625,6 +637,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "recommendedTreatment": MessageLookupByLibrary.simpleMessage(
       "Recommended Treatment",
     ),
+    "refresh": MessageLookupByLibrary.simpleMessage("Refresh"),
     "register": MessageLookupByLibrary.simpleMessage("Register"),
     "register_button": MessageLookupByLibrary.simpleMessage("Register"),
     "requiredFertilizers": m10,
@@ -699,6 +712,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "treeNote": m13,
     "trending": MessageLookupByLibrary.simpleMessage("Trending"),
     "tryAgain": MessageLookupByLibrary.simpleMessage("Try Again"),
+    "typeMessage": MessageLookupByLibrary.simpleMessage("Type a message..."),
     "unit": MessageLookupByLibrary.simpleMessage("Unit:"),
     "unknownDisease": MessageLookupByLibrary.simpleMessage("Unknown"),
     "unlikePost": MessageLookupByLibrary.simpleMessage("Unlike post"),

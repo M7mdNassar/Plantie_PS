@@ -51,31 +51,16 @@ class HomeCubit extends Cubit<HomeStates> {
     }
   }
 
-  List<String> plantEmojis = [
-    '🍎', // apple
-    '🫘', // bean
-    '🌽', // corn
-    '🥒', // cucumber
-    '🍇', // grapes
-    '🫒', // olives
-    '🌶️', // pepper
-    '🥔', // potato
-    '🍓', // strawberry
-    '🍅' // tomato
-  ];
-
   List<Plant> plants = [];
 
   Future<void> loadPlants() async {
     emit(HomeLoadingPlantsState());
-
     try {
-      final String response =
-      await rootBundle.loadString('assets/plants_data.json');
+      final String response = await rootBundle.loadString('assets/plants_data.json');
       final List<dynamic> data = jsonDecode(response);
-
-      plants = data.map((plant) => Plant.fromJson(plant)).toList();
-
+      plants = data.map((e) => Plant.fromJson(e)).toList();
+      // Update selectedIndex if out of range
+      if (selectedIndex >= plants.length) selectedIndex = 0;
       emit(HomeGetPlantsSuccessState());
     } catch (e) {
       log("$e");
