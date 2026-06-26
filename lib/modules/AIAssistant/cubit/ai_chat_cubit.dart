@@ -55,6 +55,10 @@ class AIChatCubit extends Cubit<AIChatState> {
 
       _subscription = stream.listen(
             (chunk) {
+
+              // print('🔸 Raw chunk: $chunk');
+
+
           // Update the last assistant message with the chunk
           final index = _messages.indexWhere((m) => m.id == _currentAssistantMessageId);
           if (index != -1) {
@@ -65,12 +69,31 @@ class AIChatCubit extends Cubit<AIChatState> {
             emit(AIChatStreaming(_messages, updated.content));
           }
         },
+
         onDone: () {
           _subscription?.cancel();
           _subscription = null;
+
+          // --- NEW: Format the full assistant message ---
+          final assistantIndex = _messages.indexWhere((m) => m.id == _currentAssistantMessageId);
+          if (assistantIndex != -1) {
+            final rawContent = _messages[assistantIndex].content;
+            final formattedContent = _formatMarkdown(rawContent);
+            _messages[assistantIndex] = _messages[assistantIndex].copyWith(
+              content: formattedContent,
+            );
+          }
+
+          final fullMessage = _messages.firstWhere(
+                (m) => m.id == _currentAssistantMessageId,
+            orElse: () => ChatMessage.assistant(''),
+          );
+          print('📦 Full Markdown response:\n${fullMessage.content}');
+
           _saveConversation();
           emit(AIChatSuccess(_messages));
         },
+
         onError: (error) {
           _subscription?.cancel();
           _subscription = null;
@@ -113,5 +136,30 @@ class AIChatCubit extends Cubit<AIChatState> {
     _subscription?.cancel();
     _saveConversation();
     return super.close();
+  }
+
+  String _formatMarkdown(String raw) {
+    // 1. Remove the "rag_tool" prefix if present
+    String text = raw.replaceFirst(RegExp(r'^rag_tool\s*'), '');
+
+    // 2. Ensure a newline before headings (## or #) if not already preceded by newline
+    text = text.replaceAllMapped(
+      RegExp(r'(?<!\n)(#{1,2}\s)'),
+          (match) => '\n${match.group(0)}',
+    );
+
+    // 3. Ensure a newline before list items (- ) if not already preceded by newline
+    text = text.replaceAllMapped(
+      RegExp(r'(?<!\n)(- )'),
+          (match) => '\n${match.group(0)}',
+    );
+
+    // 4. (Optional) Add an extra newline after headings to separate sections
+    text = text.replaceAllMapped(
+      RegExp(r'(#{1,2}\s[^\n]+)\n?'),
+          (match) => '${match.group(0)}\n',
+    );
+
+    return text.trim();
   }
 }

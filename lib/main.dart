@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:plantie/config/environment.dart';
 import 'package:plantie/shared/network/local/cache_helper.dart';
 import 'package:plantie/shared/styles/themes.dart';
@@ -16,6 +17,7 @@ import 'generated/l10n.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MobileAds.instance.initialize();
 
   // Load .env once – needed for App title and Supabase URL later in LottieLoadingScreen
   await dotenv.load(fileName: Environment.fileName);
