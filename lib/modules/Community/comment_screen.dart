@@ -7,6 +7,7 @@ import '../../generated/l10n.dart';
 import '../../models/user/user_model.dart';
 import '../../shared/styles/app_colors.dart';
 import '../../shared/styles/icon_broken.dart';
+import '../../shared/network/remote/supabase_auth_service.dart';
 import 'cubit/cubit.dart';
 
 class CommentScreen extends StatefulWidget {
@@ -24,7 +25,7 @@ class _CommentScreenState extends State<CommentScreen> {
   final ValueNotifier<List<CommentModel>> _commentsNotifier = ValueNotifier([]);
   bool _isSubmitting = false;
   bool _isLoadingComments = true;
-  bool _isOffline = false;                     // ← new flag for offline state
+  bool _isOffline = false;
   RealtimeChannel? _commentsChannel;
 
   @override
@@ -34,11 +35,26 @@ class _CommentScreenState extends State<CommentScreen> {
     _loadInitialComments();
   }
 
+  // --- UPDATED: quick connectivity check ---
   Future<void> _loadInitialComments() async {
     setState(() {
       _isLoadingComments = true;
       _isOffline = false;
     });
+
+    // ✅ Quick connectivity check first
+    final authService = SupabaseAuthService();
+    final hasInternet = await authService.isConnectedFast();
+    if (!hasInternet) {
+      if (mounted) {
+        setState(() {
+          _isLoadingComments = false;
+          _isOffline = true;
+        });
+      }
+      return;
+    }
+
     try {
       final response = await supabaseService.client
           .from('comments')
@@ -59,7 +75,7 @@ class _CommentScreenState extends State<CommentScreen> {
       }).toList();
 
       _commentsNotifier.value = comments;
-      _subscribeToCommentChanges();            // only subscribe after successful load
+      _subscribeToCommentChanges();
       if (mounted) setState(() => _isLoadingComments = false);
     } catch (e) {
       debugPrint('❌ Load comments error: $e');
@@ -468,7 +484,6 @@ class _CommentScreenState extends State<CommentScreen> {
       _focusNode.unfocus();
     });
 
-    // Add optimistic to UI
     _commentsNotifier.value = [optimistic, ..._commentsNotifier.value];
 
     try {
@@ -479,9 +494,7 @@ class _CommentScreenState extends State<CommentScreen> {
         userName: currentUser.name,
         userImage: currentUser.image,
       );
-      // Real-time event will replace the optimistic comment automatically
     } catch (e) {
-      // Remove optimistic on failure
       _commentsNotifier.value = _commentsNotifier.value
           .where((c) => !c.commentId.startsWith('temp-'))
           .toList();
@@ -494,7 +507,6 @@ class _CommentScreenState extends State<CommentScreen> {
           _showOfflineDialog(() => _submitComment(context, cubit, currentUser));
         }
       } else {
-        // Generic error – show SnackBar
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

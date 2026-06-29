@@ -3218,6 +3218,191 @@ class S {
   String get clear {
     return Intl.message('Clear', name: 'clear', desc: '', args: []);
   }
+
+  /// `No free messages left.`
+  String get noFreeMessages {
+    return Intl.message(
+      'No free messages left.',
+      name: 'noFreeMessages',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `0 free`
+  String get noFreeMessagesShort {
+    return Intl.message(
+      '0 free',
+      name: 'noFreeMessagesShort',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Watch Ad`
+  String get watchAdButton {
+    return Intl.message('Watch Ad', name: 'watchAdButton', desc: '', args: []);
+  }
+
+  /// `{count} free`
+  String freeCount(int count) {
+    return Intl.message(
+      '$count free',
+      name: 'freeCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `🎉 +1 free chat! You now have {count} remaining.`
+  String rewardReceived(int count) {
+    return Intl.message(
+      '🎉 +1 free chat! You now have $count remaining.',
+      name: 'rewardReceived',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Ad failed to show. Please try again.`
+  String get adFailedToShow {
+    return Intl.message(
+      'Ad failed to show. Please try again.',
+      name: 'adFailedToShow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ad not available. Please try again later.`
+  String get adNotAvailable {
+    return Intl.message(
+      'Ad not available. Please try again later.',
+      name: 'adNotAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You are offline. Please try again when you have a connection.`
+  String get offlineLikeMessage {
+    return Intl.message(
+      'You are offline. Please try again when you have a connection.',
+      name: 'offlineLikeMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No Internet Connection`
+  String get chatOfflineTitle {
+    return Intl.message(
+      'No Internet Connection',
+      name: 'chatOfflineTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The AI Assistant needs an internet connection to work. Please connect and try again.`
+  String get chatOfflineMessage {
+    return Intl.message(
+      'The AI Assistant needs an internet connection to work. Please connect and try again.',
+      name: 'chatOfflineMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ask AI Assistant`
+  String get askAIAssistant {
+    return Intl.message(
+      'Ask AI Assistant',
+      name: 'askAIAssistant',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Get instant farming advice`
+  String get askAIAssistantSubtitle {
+    return Intl.message(
+      'Get instant farming advice',
+      name: 'askAIAssistantSubtitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Weather for Your Farm`
+  String get weather_permission_title {
+    return Intl.message(
+      'Weather for Your Farm',
+      name: 'weather_permission_title',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We need your location to show accurate weather and farming advice for your area.`
+  String get weather_permission_message {
+    return Intl.message(
+      'We need your location to show accurate weather and farming advice for your area.',
+      name: 'weather_permission_message',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not now`
+  String get notNow {
+    return Intl.message('Not now', name: 'notNow', desc: '', args: []);
+  }
+
+  /// `Allow`
+  String get allow_access {
+    return Intl.message('Allow', name: 'allow_access', desc: '', args: []);
+  }
+
+  /// `Tap to get weather`
+  String get tapToGetWeather {
+    return Intl.message(
+      'Tap to get weather',
+      name: 'tapToGetWeather',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Permission Required`
+  String get permission_required {
+    return Intl.message(
+      'Permission Required',
+      name: 'permission_required',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Location permission has been permanently denied. Please enable it in your device settings to use weather features.`
+  String get location_permission_denied_forever {
+    return Intl.message(
+      'Location permission has been permanently denied. Please enable it in your device settings to use weather features.',
+      name: 'location_permission_denied_forever',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open Settings`
+  String get open_settings {
+    return Intl.message(
+      'Open Settings',
+      name: 'open_settings',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

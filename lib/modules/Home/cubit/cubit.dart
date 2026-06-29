@@ -13,7 +13,7 @@ import '../../../models/plant.dart';
 import '../../../models/weather_model.dart';
 
 // =====================================================================
-// WEATHER CACHE CLASS (private, inside cubit file)
+// WEATHER CACHE CLASS
 // =====================================================================
 class _WeatherCache {
   WeatherData? data;
@@ -59,7 +59,6 @@ class HomeCubit extends Cubit<HomeStates> {
       final String response = await rootBundle.loadString('assets/plants_data.json');
       final List<dynamic> data = jsonDecode(response);
       plants = data.map((e) => Plant.fromJson(e)).toList();
-      // Update selectedIndex if out of range
       if (selectedIndex >= plants.length) selectedIndex = 0;
       emit(HomeGetPlantsSuccessState());
     } catch (e) {
@@ -69,7 +68,7 @@ class HomeCubit extends Cubit<HomeStates> {
   }
 
   // ------------------------------------------------------------------
-  // Weather caching (Issue 12)
+  // Weather
   // ------------------------------------------------------------------
   final _WeatherCache _cache = _WeatherCache();
 
@@ -79,7 +78,7 @@ class HomeCubit extends Cubit<HomeStates> {
   Future<void> getWeatherData() async {
     if (_isRequestingLocation) return;
 
-    // 1. Check cache first
+    // Check cache
     if (_cache.isValid) {
       weatherData = _cache.data;
       emit(WeatherLoadedState());
@@ -123,9 +122,7 @@ class HomeCubit extends Cubit<HomeStates> {
         position.longitude,
       );
 
-      // Cache the result
       _cache.set(weatherData!);
-
       emit(WeatherLoadedState());
     } catch (e) {
       log("Weather Error: $e");
@@ -135,7 +132,7 @@ class HomeCubit extends Cubit<HomeStates> {
     }
   }
 
-  // Force refresh (bypass cache)
+  // Force refresh (bypass cache) – kept for potential manual refresh
   Future<void> refreshWeather() async {
     _cache.clear();
     await getWeatherData();

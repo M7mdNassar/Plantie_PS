@@ -11,7 +11,8 @@ import 'package:plantie/shared/network/remote/supabase_service.dart';
 import '../../../models/post/post_model.dart';
 import '../../../models/user/user_model.dart';
 import '../../../shared/network/local/history_db.dart';
-import '../../../shared/network/local/upload_queue_service.dart';
+import '../../../shared/network/local/image_storage_helper.dart';
+import '../../../shared/network/local/social_upload_service.dart';
 import '../../../shared/network/remote/supabase_auth_service.dart';
 
 class CommunityCubit extends Cubit<CommunityStates> {
@@ -367,7 +368,6 @@ class CommunityCubit extends Cubit<CommunityStates> {
   // LIKES (with null safety)
   // --------------------------------------------------------------------------
   Future<void> _fetchCurrentUserLikes(List<PostModel> posts) async {
-    // ✅ Null safety check
     final user = CurrentUser.user;
     if (user == null) {
       debugPrint('⚠️ CurrentUser is null, skipping likes fetch');
@@ -399,8 +399,8 @@ class CommunityCubit extends Cubit<CommunityStates> {
     }
   }
 
+  // --- UPDATED: toggleLike without queueing ---
   Future<void> toggleLike(String postId) async {
-    // ✅ Null safety check
     final user = CurrentUser.user;
     if (user == null) {
       emit(CommunityErrorState("User not logged in"));
@@ -411,7 +411,7 @@ class CommunityCubit extends Cubit<CommunityStates> {
     final authService = SupabaseAuthService();
     final hasInternet = await authService.isConnectedFast();
     if (!hasInternet) {
-      emit(CommunityErrorState('offline_like'));
+      emit(CommunityErrorState('offline_like'));   // <-- just error, no queue
       return;
     }
 
@@ -481,7 +481,7 @@ class CommunityCubit extends Cubit<CommunityStates> {
   }
 
   // --------------------------------------------------------------------------
-  // COMMENTS (with null safety on userId? Already uses parameter)
+  // COMMENTS
   // --------------------------------------------------------------------------
   Future<void> addComment({
     required String postId,
@@ -490,8 +490,6 @@ class CommunityCubit extends Cubit<CommunityStates> {
     required String userName,
     required String? userImage,
   }) async {
-    // userId is passed, but we still need to ensure sync works.
-    // We'll check if CurrentUser.user exists (for consistency).
     final user = CurrentUser.user;
     if (user == null) {
       emit(CommunityErrorState("User not logged in"));
@@ -501,7 +499,7 @@ class CommunityCubit extends Cubit<CommunityStates> {
     final authService = SupabaseAuthService();
     final hasInternet = await authService.isConnectedFast();
     if (!hasInternet) {
-      await uploadQueueService.addOfflineAction(
+      await socialUploadService.addOfflineAction(
         type: 'comment',
         userId: userId,
         data: {
@@ -516,7 +514,7 @@ class CommunityCubit extends Cubit<CommunityStates> {
 
     final online = await authService.syncUserIfNeeded(userId);
     if (!online) {
-      await uploadQueueService.addOfflineAction(
+      await socialUploadService.addOfflineAction(
         type: 'comment',
         userId: userId,
         data: {
@@ -584,8 +582,9 @@ class CommunityCubit extends Cubit<CommunityStates> {
   }
 
   // --------------------------------------------------------------------------
-  // POST CREATION
+  // POST CREATION – UPDATED: no queueing, just emit offline_queued
   // --------------------------------------------------------------------------
+
   Future<void> createPost({required String text}) async {
     final user = CurrentUser.user;
     if (user == null || user.id.isEmpty) {
@@ -615,46 +614,38 @@ class CommunityCubit extends Cubit<CommunityStates> {
     final authService = SupabaseAuthService();
     final hasInternet = await authService.isConnectedFast();
     if (!hasInternet) {
-      final imagePaths = _postImages.map((f) => f.path).toList();
-      await uploadQueueService.addOfflineAction(
+      // Offline: save images permanently and queue the post
+      List<String> imagePaths = [];
+      for (final file in _postImages) {
+        final saved = await ImageStorageHelper.saveImagePermanently(file);
+        imagePaths.add(saved.path);
+      }
+
+      await socialUploadService.addOfflineAction(
         type: 'post',
         userId: user.id,
         data: {
           'user_id': user.id,
           'text': text,
           'images': imagePaths,
+          'pending_id': pendingId,
         },
       );
-      _posts.removeWhere((p) => p.postId == pendingId);
+      _postImages.clear();
+      emit(CreatePostSuccessState());
       emit(CommunityPostsLoadedState(List.from(_posts)));
-      emit(CommunityErrorState('offline_queued'));
       isCreatingPost = false;
       return;
     }
 
-    final online = await authService.syncUserIfNeeded(user.id);
-    if (!online) {
-      final imagePaths = _postImages.map((f) => f.path).toList();
-      await uploadQueueService.addOfflineAction(
-        type: 'post',
-        userId: user.id,
-        data: {
-          'user_id': user.id,
-          'text': text,
-          'images': imagePaths,
-        },
-      );
-      _posts.removeWhere((p) => p.postId == pendingId);
-      emit(CommunityPostsLoadedState(List.from(_posts)));
-      emit(CommunityErrorState('offline_queued'));
-      isCreatingPost = false;
-      return;
-    }
-
+    // Online path
     try {
       List<String> uploadedUrls = [];
       if (_postImages.isNotEmpty) {
-        uploadedUrls = await _uploadPostImages(pendingId);
+        final permanentImages = await Future.wait(
+            _postImages.map((f) => ImageStorageHelper.saveImagePermanently(f))
+        );
+        uploadedUrls = await _uploadPostImagesFromFiles(permanentImages, pendingId);
       }
 
       final postResponse = await supabaseService.client
@@ -695,9 +686,9 @@ class CommunityCubit extends Cubit<CommunityStates> {
     }
   }
 
-  Future<List<String>> _uploadPostImages(String tempId) async {
+  Future<List<String>> _uploadPostImagesFromFiles(List<File> images, String tempId) async {
     final bucket = supabaseService.client.storage.from('post-images');
-    final futures = _postImages.asMap().entries.map((entry) async {
+    final futures = images.asMap().entries.map((entry) async {
       final idx = entry.key;
       final file = entry.value;
       final ext = path.extension(file.path);
@@ -708,6 +699,7 @@ class CommunityCubit extends Cubit<CommunityStates> {
     });
     return await Future.wait(futures);
   }
+
 
   // --------------------------------------------------------------------------
   // IMAGE PICKING

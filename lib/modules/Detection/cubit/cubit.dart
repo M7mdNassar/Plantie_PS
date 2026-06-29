@@ -4,9 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:plantie/modules/Detection/cubit/states.dart';
 import 'package:plantie/models/user/user_model.dart';
-import 'package:plantie/shared/network/local/upload_queue_service.dart';
-import '../../../models/disease_info.dart';
 import '../../../models/history_item.dart';
+import '../../../shared/network/local/detection_upload_service.dart';
 import '../../../shared/utils/disease_label_parser.dart';
 import '../../../shared/network/local/history_db.dart';
 import '../../../shared/network/local/image_storage_helper.dart';
@@ -19,13 +18,12 @@ class DetectionCubit extends Cubit<DetectionStates> {
   static DetectionCubit get(context) => BlocProvider.of(context);
 
   File? _currentImage;
-  String? _currentResult;
+  String? _currentResult; // stores disease KEY, not localized name
   String? _orginalResult;
   List<HistoryItem> history = [];
   int? _currentQueueId;
 
   File? get currentImage => _currentImage;
-
   String? get currentResult => _currentResult;
   String? get orginalResult => _orginalResult;
   int? get currentQueueId => _currentQueueId;
@@ -45,10 +43,10 @@ class DetectionCubit extends Cubit<DetectionStates> {
     _currentQueueId = null;
   }
 
-  void setDetectionResult(File image, String result) {
+  void setDetectionResult(File image, String diseaseKey) {
     _isProcessing = false;
     _currentImage = image;
-    _currentResult = result;
+    _currentResult = diseaseKey; // store key, not display name
     emit(DetectionResultState());
   }
 
@@ -57,25 +55,20 @@ class DetectionCubit extends Cubit<DetectionStates> {
     print('   - image: ${image.path}');
     print('   - title: $displayTitle');
     print('   - confidence: $confidence');
-    print('   - _isProcessing before: $_isProcessing');
 
     _isProcessing = false;
     _currentImage = image;
-    _currentResult = displayTitle;
+    _currentResult = displayTitle; // for non-plant, we store the display message
     _orginalResult = null;
     detectionRejected = true;
     detectionConfidence = confidence;
     detectionUncertain = false;
 
-    print('🟢 [Cubit] Emitting DetectionResultState');
     emit(DetectionResultState());
-    print('🟢 [Cubit] DetectionResultState emitted');
   }
 
   void startDetectionLoading(File image) {
     print('🔵 [Cubit] startDetectionLoading called');
-    print('   - image: ${image.path}');
-    print('   - _isProcessing: $_isProcessing');
     if (_isProcessing) {
       print('⚠️ Already processing, ignoring');
       return;
@@ -83,7 +76,6 @@ class DetectionCubit extends Cubit<DetectionStates> {
     _isProcessing = true;
     _currentImage = image;
     clearDetectionFlags();
-    print('🔵 [Cubit] Emitting DetectionLoadingState');
     emit(DetectionLoadingState());
   }
 
@@ -124,34 +116,15 @@ class DetectionCubit extends Cubit<DetectionStates> {
 
   Future<void> addDetectionToHistory(File image, String result) async {
     try {
-      // ✅ Null safety: ensure user exists before queueing
       final user = CurrentUser.user;
       if (user == null) {
         log('⚠️ CurrentUser is null, cannot queue detection');
-        // Still save locally? We can save without user ID, but then upload won't work.
-        // For safety, we store with 'unknown' but that will fail RLS.
-        // Better to show error.
         emit(HistoryErrorState('User not logged in. Cannot save detection.'));
         return;
       }
 
-      File permanentImage = image;
-      if (!await image.exists()) {
-        throw Exception('Original image file not found at ${image.path}');
-      }
-
-      final documentsDir = await getApplicationDocumentsDirectory();
-      if (!image.path.startsWith(documentsDir.path)) {
-        log('Image not in permanent storage, copying now...');
-        final savedImage = await ImageStorageHelper.saveImagePermanently(image);
-        permanentImage = savedImage;
-      } else {
-        if (!await permanentImage.exists()) {
-          throw Exception('Permanent image file not found at ${permanentImage.path}');
-        }
-      }
-
-      final finalImagePath = permanentImage.path;
+      // ✅ Image is already permanent (saved by ImagePickerHandler)
+      final finalImagePath = image.path;
 
       final newItem = HistoryItem(
         id: 0,
@@ -174,14 +147,16 @@ class DetectionCubit extends Cubit<DetectionStates> {
       currentPlantName = plantKey != null
           ? DiseaseLabelParser.formatPlantDisplayName(plantKey)
           : null;
-      final diseaseName = DiseaseInfo.data[result]?.name ?? result;
-      setDetectionResult(permanentImage, diseaseName);
+
+      // Store the disease key, not the display name
+      setDetectionResult(image, result);
 
       final confidence = detectionConfidence ?? 0.95;
       final plantTypeKey = plantKey ?? 'unknown';
-      final userId = user.id; // now non-null
+      final userId = user.id;
 
-      final queueId = await uploadQueueService.addDetectionToQueue(
+      // ✅ addDetectionToQueue now returns Future<int?>, so assignment is valid
+      final queueId = await detectionUploadService.addDetectionToQueue(
         imagePath: finalImagePath,
         predictedClass: result,
         confidenceScore: confidence,
@@ -190,7 +165,6 @@ class DetectionCubit extends Cubit<DetectionStates> {
       );
 
       _currentQueueId = queueId;
-
       log('✅ Detection queued for upload with user ID: $userId (Queue ID: $queueId)');
     } catch (e) {
       emit(HistoryErrorState('Failed to save detection: $e'));

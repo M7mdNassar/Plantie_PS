@@ -420,7 +420,7 @@ Widget _buildPostHeader(
       children: [
         Semantics(
           image: true,
-          label: '${authorName} ${S.of(context).avatar}',
+          label: '$authorName ${S.of(context).avatar}',
           child: Container(
             padding: const EdgeInsets.all(2),
             decoration: BoxDecoration(

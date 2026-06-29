@@ -49,8 +49,9 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
   @override
   Widget build(BuildContext context) {
     final isDark = AppCubit.get(context).isDark;
-    final diseaseData = DiseaseInfo.data[widget.item.diseaseKey];
-    final isHealthy = widget.item.diseaseKey.toLowerCase().contains('healthy');
+    final diseaseKey = widget.item.diseaseKey;
+    final diseaseData = DiseaseInfo.data[diseaseKey];
+    final isHealthy = diseaseKey.toLowerCase().contains('healthy');
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
@@ -81,7 +82,11 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
-        widget.item.title,
+        // Use localized name for title
+        DiseaseInfo.getLocalizedName(
+          widget.item.diseaseKey,
+          Localizations.localeOf(context).languageCode,
+        ),
         style: Theme.of(context).textTheme.headlineSmall?.copyWith(
           fontWeight: FontWeight.w600,
         ),
@@ -132,26 +137,25 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
             ],
           ),
         ),
-        // Status Badge
-         Positioned(
-           top: 24,
-           right: 24,
-           child: Container(
-             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-             decoration: BoxDecoration(
-               color: isHealthy
-                   ? AppColors.success.withValues(alpha: 0.85)
-                   : AppColors.warning.withValues(alpha: 0.85),
-               borderRadius: BorderRadius.circular(20),
-               boxShadow: [
-                 BoxShadow(
-                   color: (isHealthy ? AppColors.success : AppColors.warning)
-                       .withValues(alpha: 0.3),
-                   blurRadius: 8,
-                   spreadRadius: 2,
-                 )
-               ],
-             ),
+        Positioned(
+          top: 24,
+          right: 24,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: isHealthy
+                  ? AppColors.success.withValues(alpha: 0.85)
+                  : AppColors.warning.withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: (isHealthy ? AppColors.success : AppColors.warning)
+                      .withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  spreadRadius: 2,
+                )
+              ],
+            ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -188,38 +192,41 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-             // Disease Name Card
-             _buildInfoCard(
-               context,
-               isDark,
-               icon: Icons.healing,
-               title: S.of(context).detectionResult,
-               subtitle: diseaseData?.name ?? widget.item.title,
-               iconColor: isHealthy ? AppColors.success : AppColors.warning,
-             ),
+            // Disease Name Card (localized)
+            _buildInfoCard(
+              context,
+              isDark,
+              icon: Icons.healing,
+              title: S.of(context).detectionResult,
+              subtitle: DiseaseInfo.getLocalizedName(
+                widget.item.diseaseKey,
+                Localizations.localeOf(context).languageCode,
+              ),
+              iconColor: isHealthy ? AppColors.success : AppColors.warning,
+            ),
             const SizedBox(height: 16),
 
-             // Treatment Card
-             if (!isHealthy) ...[
-               _buildExpandableCard(
-                 context,
-                 isDark,
-                 icon: Icons.medication,
-                 title: S.of(context).recommendedTreatment,
-                 content: diseaseData?.treatment ?? 'No treatment found',
-                 iconColor: AppColors.primary,
-               ),
-               const SizedBox(height: 16),
-             ],
+            // Treatment Card (if not healthy)
+            if (!isHealthy) ...[
+              _buildExpandableCard(
+                context,
+                isDark,
+                icon: Icons.medication,
+                title: S.of(context).recommendedTreatment,
+                content: DiseaseInfo.getTreatment(widget.item.diseaseKey),
+                iconColor: AppColors.primary,
+              ),
+              const SizedBox(height: 16),
+            ],
 
-            // Tips Card
+            // Tips Card (if not healthy)
             if (!isHealthy) ...[
               _buildExpandableCard(
                 context,
                 isDark,
                 icon: Icons.lightbulb,
                 title: S.of(context).expertAdvice,
-                content: diseaseData?.tips ?? 'No tips available',
+                content: DiseaseInfo.getTips(widget.item.diseaseKey),
                 iconColor: AppColors.tertiary,
               ),
               const SizedBox(height: 16),
@@ -248,13 +255,13 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
   }
 
   Widget _buildInfoCard(
-    BuildContext context,
-    bool isDark, {
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required Color iconColor,
-  }) {
+      BuildContext context,
+      bool isDark, {
+        required IconData icon,
+        required String title,
+        required String subtitle,
+        required Color iconColor,
+      }) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
@@ -315,13 +322,13 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
   }
 
   Widget _buildExpandableCard(
-    BuildContext context,
-    bool isDark, {
-    required IconData icon,
-    required String title,
-    required String content,
-    required Color iconColor,
-  }) {
+      BuildContext context,
+      bool isDark, {
+        required IconData icon,
+        required String title,
+        required String content,
+        required Color iconColor,
+      }) {
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
       duration: const Duration(milliseconds: 500),
@@ -391,25 +398,25 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
     );
   }
 
-   Widget _buildFindStoreButton(BuildContext context) {
-     return Material(
-       child: InkWell(
-         onTap: () => _openNearestStore(context),
-         borderRadius: BorderRadius.circular(14),
-         child: Container(
-           width: double.infinity,
-           padding: const EdgeInsets.symmetric(vertical: 16),
-           decoration: BoxDecoration(
-             borderRadius: BorderRadius.circular(14),
-             gradient: AppColors.greenGradient,
-             boxShadow: [
-               BoxShadow(
-                 color: AppColors.primary.withValues(alpha: 0.3),
-                 blurRadius: 12,
-                 spreadRadius: 2,
-               )
-             ],
-           ),
+  Widget _buildFindStoreButton(BuildContext context) {
+    return Material(
+      child: InkWell(
+        onTap: () => _openNearestStore(context),
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            gradient: AppColors.greenGradient,
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withValues(alpha: 0.3),
+                blurRadius: 12,
+                spreadRadius: 2,
+              )
+            ],
+          ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -494,7 +501,6 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Warning Icon with animation
               TweenAnimationBuilder<double>(
                 tween: Tween(begin: 0, end: 1),
                 duration: const Duration(milliseconds: 600),
@@ -518,8 +524,6 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
                 },
               ),
               const SizedBox(height: 24),
-
-              // Title
               Text(
                 S.of(context).confirmDelete,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -528,10 +532,8 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
-
-              // Description
               Text(
-                '${S.of(context).deleteConfirmation}\n\n"${widget.item.title}"',
+                '${S.of(context).deleteConfirmation}\n\n"${DiseaseInfo.getLocalizedName(widget.item.diseaseKey, Localizations.localeOf(context).languageCode)}"',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: isDark
                       ? AppColors.darkTextSecondary
@@ -540,11 +542,8 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
-
-              // Buttons row
               Row(
                 children: [
-                  // Cancel Button
                   Expanded(
                     child: Material(
                       child: InkWell(
@@ -576,8 +575,6 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
                     ),
                   ),
                   const SizedBox(width: 12),
-
-                  // Delete Button with danger styling
                   Expanded(
                     child: Material(
                       child: InkWell(
@@ -595,8 +592,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color:
-                                    AppColors.error.withValues(alpha: 0.3),
+                                color: AppColors.error.withValues(alpha: 0.3),
                                 blurRadius: 8,
                                 spreadRadius: 1,
                               )
@@ -627,10 +623,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
   }
 
   void _deleteWithAnimation(BuildContext context) {
-    // Close bottom sheet first
     Navigator.pop(context);
-
-    // Show loading state
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -641,31 +634,22 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
       ),
     );
 
-    // Execute deletion
     DetectionCubit.get(context)
         .deleteHistoryItem(widget.item.id, widget.item.imagePath)
         .then((_) {
-      // Close loading dialog
       if (context.mounted) {
         Navigator.pop(context);
-
-        // Show success feedback
         showToast(
           text: S.of(context).deletedSuccessfully,
           state: ToastStates.success,
         );
-
-        // Navigate back to detection screen
         if (context.mounted) {
           Navigator.pop(context);
         }
       }
     }).catchError((error) {
-      // Close loading dialog
       if (context.mounted) {
         Navigator.pop(context);
-
-        // Show error feedback
         showToast(
           text: S.of(context).errorOccurred(error.toString()),
           state: ToastStates.error,

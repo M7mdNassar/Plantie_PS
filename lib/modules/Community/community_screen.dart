@@ -13,6 +13,7 @@ import 'package:plantie/shared/styles/responsive_text.dart';
 import '../../generated/l10n.dart';
 import '../../shared/styles/app_colors.dart';
 import '../../shared/styles/icon_broken.dart';
+import '../../shared/network/local/social_upload_service.dart';
 
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
@@ -24,7 +25,7 @@ class CommunityScreen extends StatefulWidget {
 class _CommunityScreenState extends State<CommunityScreen> {
   final ValueNotifier<bool> _showCreatePostButton = ValueNotifier<bool>(true);
   int _lastPrefetchedPostCount = 0;
-  bool _isFiltering = false;          // Show shimmer while filtering
+  bool _isFiltering = false;
 
   @override
   void initState() {
@@ -99,7 +100,6 @@ class _CommunityScreenState extends State<CommunityScreen> {
                     selected: isSelected,
                     onSelected: (selected) {
                       if (selected) {
-                        // Instant UI feedback – show shimmer immediately
                         setState(() => _isFiltering = true);
                         cubit.setSortFilter(entry.key);
                       }
@@ -212,12 +212,36 @@ class _CommunityScreenState extends State<CommunityScreen> {
     );
   }
 
+  void _showOfflineMessage(BuildContext context, String message) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
+        title: Row(
+          children: [
+            Icon(Icons.wifi_off_rounded, color: Colors.grey[600]),
+            const SizedBox(width: 12),
+            Text(S.of(ctx).noInternetConnection),
+          ],
+        ),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(S.of(ctx).ok),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<CommunityCubit, CommunityStates>(
       listener: (context, state) {
         if (state is CommunityPostsLoadedState) {
-          // New posts arrived – hide shimmer
           setState(() => _isFiltering = false);
           _prefetchUpcomingImages(context, CommunityCubit.get(context));
         }
@@ -227,13 +251,25 @@ class _CommunityScreenState extends State<CommunityScreen> {
 
         if (state is CommunityErrorState) {
           final cubit = CommunityCubit.get(context);
-          setState(() => _isFiltering = false); // stop shimmer on error
+          setState(() => _isFiltering = false);
+
+          if (state.error == 'offline_like') {
+            _showOfflineMessage(context, S.of(context).offlineLikeMessage);
+            return;
+          }
+          if (state.error == 'offline_queued') {
+            _showOfflineMessage(context, S.of(context).offlinePostMessage);
+            return;
+          }
 
           if (state.error == 'offline_filter') {
             _showOfflineRetryDialog(context, () {
-              cubit.setSortFilter(cubit.feedSort); // retry filter
+              cubit.setSortFilter(cubit.feedSort);
             });
-          } else if (cubit.posts.isNotEmpty) {
+            return;
+          }
+
+          if (cubit.posts.isNotEmpty) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.error), backgroundColor: Colors.red),
             );
@@ -280,7 +316,6 @@ class _CommunityScreenState extends State<CommunityScreen> {
                     slivers: [
                       _buildSliverAppBar(context, cubit, isDark),
 
-                      // Show shimmer during filter, or initial load, or error/offline/empty states
                       if (_isFiltering)
                         const SliverFillRemaining(
                           hasScrollBody: false,
@@ -330,6 +365,40 @@ class _CommunityScreenState extends State<CommunityScreen> {
                                 ),
                               ],
                     ],
+                  ),
+                  // Sync Status Banner
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    child: ValueListenableBuilder<int>(
+                      valueListenable: socialUploadService.pendingCount,
+                      builder: (context, count, _) {
+                        if (count == 0) return const SizedBox.shrink();
+                        return Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                          color: Colors.orange[100],
+                          child: Row(
+                            children: [
+                              const Icon(Icons.cloud_upload_rounded, color: Colors.orange, size: 20),
+                              const SizedBox(width: 8),
+                              Expanded(
+                                child: Text(
+                                  'You have $count pending ${count == 1 ? 'item' : 'items'} to sync.',
+                                  style: const TextStyle(fontSize: 14),
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              TextButton(
+                                onPressed: () => socialUploadService.attemptPendingUploads(),
+                                child: const Text('Sync Now', style: TextStyle(color: Colors.orange)),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
                   if (state is CommunityLoadingMoreState)
                     Positioned(

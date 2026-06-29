@@ -14,7 +14,8 @@ class HistoryItem {
     required this.date,
   });
 
-  String get title => DiseaseInfo.data[diseaseKey]?.name ?? diseaseKey;
+  String get title => diseaseKey;
+
   String get treatment => DiseaseInfo.data[diseaseKey]?.treatment ?? '';
   String get tips => DiseaseInfo.data[diseaseKey]?.tips ?? '';
 

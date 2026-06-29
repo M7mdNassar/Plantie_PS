@@ -10,7 +10,8 @@ import '../../shared/network/local/history_db.dart';
 import '../../shared/network/local/local_user_storage.dart';
 import '../../shared/network/remote/supabase_service.dart';
 import '../../shared/network/remote/supabase_auth_service.dart';
-import '../../shared/network/local/upload_queue_service.dart';
+import '../../shared/network/local/detection_upload_service.dart';
+import '../../shared/network/local/social_upload_service.dart';
 import '../Detection/Classification/plant_disease_pipeline.dart';
 import '../OnBoarding/on_boarding_screen.dart';
 import '../Registration/registration_screen.dart';
@@ -46,8 +47,11 @@ class _LottieLoadingScreenState extends State<LottieLoadingScreen> {
         HistoryDBHelper().database,
       ]);
 
-      uploadQueueService; // start service
-      debugPrint('✅ Upload queue service initialized');
+      // Start the upload services (singletons are initialized)
+      // Reference them to ensure they are loaded and listening.
+      detectionUploadService;
+      socialUploadService;
+      debugPrint('✅ Upload services initialized');
 
       // Routing
       final onBoarding = CacheHelper.getData(key: 'onBoarding') ?? false;
@@ -63,7 +67,7 @@ class _LottieLoadingScreenState extends State<LottieLoadingScreen> {
             debugPrint('✅ User loaded locally: ${user.id} - ${user.name}');
             startWidget = const AppLayout();
 
-            // 🔁 One‑time background sync – no need to wait
+            // One‑time background sync – no need to wait
             unawaited(SupabaseAuthService().syncUserIfNeeded(user.id));
           } else {
             startWidget = const RegistrationScreen();
@@ -91,7 +95,6 @@ class _LottieLoadingScreenState extends State<LottieLoadingScreen> {
       );
     }
   }
-
 
   @override
   Widget build(BuildContext context) {

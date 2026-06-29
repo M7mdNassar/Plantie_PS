@@ -1218,4 +1218,72 @@ class SEn extends S {
 
   @override
   String get clear => 'Clear';
+
+  @override
+  String get noFreeMessages => 'No free messages left.';
+
+  @override
+  String get noFreeMessagesShort => '0 free';
+
+  @override
+  String get watchAdButton => 'Watch Ad';
+
+  @override
+  String freeCount(int count) {
+    return '$count free';
+  }
+
+  @override
+  String rewardReceived(int count) {
+    return '🎉 +1 free chat! You now have $count remaining.';
+  }
+
+  @override
+  String get adFailedToShow => 'Ad failed to show. Please try again.';
+
+  @override
+  String get adNotAvailable => 'Ad not available. Please try again later.';
+
+  @override
+  String get offlineLikeMessage =>
+      'You are offline. Please try again when you have a connection.';
+
+  @override
+  String get chatOfflineTitle => 'No Internet Connection';
+
+  @override
+  String get chatOfflineMessage =>
+      'The AI Assistant needs an internet connection to work. Please connect and try again.';
+
+  @override
+  String get askAIAssistant => 'Ask AI Assistant';
+
+  @override
+  String get askAIAssistantSubtitle => 'Get instant farming advice';
+
+  @override
+  String get weather_permission_title => 'Weather for Your Farm';
+
+  @override
+  String get weather_permission_message =>
+      'We need your location to show accurate weather and farming advice for your area.';
+
+  @override
+  String get notNow => 'Not now';
+
+  @override
+  String get allow_access => 'Allow';
+
+  @override
+  String get tapToGetWeather => 'Tap to get weather';
+
+  @override
+  String get permission_required => 'Permission Required';
+
+  @override
+  String get location_permission_denied_forever =>
+      'Location permission has been permanently denied. Please enable it in your device settings to use weather features.';
+
+  @override
+  String get open_settings => 'Open Settings';
 }

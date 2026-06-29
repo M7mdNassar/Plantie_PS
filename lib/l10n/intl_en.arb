@@ -520,7 +520,42 @@
   "typeMessage": "Type a message...",
   "clearChat": "Clear Chat",
   "clearChatConfirmation": "Are you sure you want to clear this conversation?",
-  "clear" : "Clear"
+  "clear" : "Clear",
+
+  "noFreeMessages": "No free messages left.",
+  "noFreeMessagesShort": "0 free",
+  "watchAdButton": "Watch Ad",
+  "freeCount": "{count} free",
+  "@freeCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "rewardReceived": "🎉 +1 free chat! You now have {count} remaining.",
+  "@rewardReceived": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "adFailedToShow": "Ad failed to show. Please try again.",
+  "adNotAvailable": "Ad not available. Please try again later.",
+
+  "offlineLikeMessage": "You are offline. Please try again when you have a connection.",
+
+  "chatOfflineTitle": "No Internet Connection",
+  "chatOfflineMessage": "The AI Assistant needs an internet connection to work. Please connect and try again.",
+  "askAIAssistant": "Ask AI Assistant",
+  "askAIAssistantSubtitle": "Get instant farming advice",
+  "weather_permission_title": "Weather for Your Farm",
+  "weather_permission_message": "We need your location to show accurate weather and farming advice for your area.",
+  "notNow": "Not now",
+  "allow_access": "Allow",
+  "tapToGetWeather": "Tap to get weather",
+
+  "permission_required": "Permission Required",
+  "location_permission_denied_forever": "Location permission has been permanently denied. Please enable it in your device settings to use weather features.",
+  "open_settings": "Open Settings"
 
 
 }

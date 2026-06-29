@@ -523,12 +523,38 @@
   "typeMessage": "اكتب رسالة...",
   "clearChat": "مسح المحادثة",
   "clearChatConfirmation": "هل أنت متأكد من رغبتك في مسح هذه المحادثة؟",
-  "clear" : "مسح"
+  "clear" : "مسح",
 
+  "noFreeMessages": "لا توجد رسائل مجانية متبقية.",
+  "noFreeMessagesShort": "0 مجانية",
+  "watchAdButton": "شاهد الإعلان",
+  "freeCount": "{count} مجانية",
+  "@freeCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "rewardReceived": "🎉 +1 رسالة مجانية! الآن لديك {count} متبقية.",
+  "@rewardReceived": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
 
+  "adFailedToShow": "فشل عرض الإعلان. يرجى المحاولة مرة أخرى.",
+  "adNotAvailable": "الإعلان غير متوفر. يرجى المحاولة لاحقاً.",
+  "offlineLikeMessage": "أنت غير متصل. يرجى المحاولة مرة أخرى عند توفر الاتصال.",
 
-
-
-
-
+  "chatOfflineTitle": "غير متصل بالإنترنت",
+  "chatOfflineMessage": "المساعد الذكي يحتاج إلى اتصال بالإنترنت للعمل. يرجى الاتصال والمحاولة مرة أخرى.",
+  "askAIAssistant": "اسأل المساعد الذكي",
+  "askAIAssistantSubtitle": "احصل على نصائح زراعية فورية",
+  "weather_permission_title": "الطقس لمزرعتك",
+  "weather_permission_message": "نحتاج إلى موقعك لعرض الطقس الدقيق ونصائح الزراعة لمنطقتك.",
+  "notNow": "ليس الآن",
+  "allow_access": "السماح",
+  "tapToGetWeather": "اضغط للحصول على الطقس",
+  "permission_required": "الصلاحية مطلوبة",
+  "location_permission_denied_forever": "تم رفض صلاحية الموقع بشكل دائم. يرجى تمكينها من إعدادات الجهاز لاستخدام ميزات الطقس.",
+  "open_settings": "فتح الإعدادات"
 }

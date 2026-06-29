@@ -1208,4 +1208,72 @@ class SAr extends S {
 
   @override
   String get clear => 'مسح';
+
+  @override
+  String get noFreeMessages => 'لا توجد رسائل مجانية متبقية.';
+
+  @override
+  String get noFreeMessagesShort => '0 مجانية';
+
+  @override
+  String get watchAdButton => 'شاهد الإعلان';
+
+  @override
+  String freeCount(int count) {
+    return '$count مجانية';
+  }
+
+  @override
+  String rewardReceived(int count) {
+    return '🎉 +1 رسالة مجانية! الآن لديك $count متبقية.';
+  }
+
+  @override
+  String get adFailedToShow => 'فشل عرض الإعلان. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get adNotAvailable => 'الإعلان غير متوفر. يرجى المحاولة لاحقاً.';
+
+  @override
+  String get offlineLikeMessage =>
+      'أنت غير متصل. يرجى المحاولة مرة أخرى عند توفر الاتصال.';
+
+  @override
+  String get chatOfflineTitle => 'غير متصل بالإنترنت';
+
+  @override
+  String get chatOfflineMessage =>
+      'المساعد الذكي يحتاج إلى اتصال بالإنترنت للعمل. يرجى الاتصال والمحاولة مرة أخرى.';
+
+  @override
+  String get askAIAssistant => 'اسأل المساعد الذكي';
+
+  @override
+  String get askAIAssistantSubtitle => 'احصل على نصائح زراعية فورية';
+
+  @override
+  String get weather_permission_title => 'الطقس لمزرعتك';
+
+  @override
+  String get weather_permission_message =>
+      'نحتاج إلى موقعك لعرض الطقس الدقيق ونصائح الزراعة لمنطقتك.';
+
+  @override
+  String get notNow => 'ليس الآن';
+
+  @override
+  String get allow_access => 'السماح';
+
+  @override
+  String get tapToGetWeather => 'اضغط للحصول على الطقس';
+
+  @override
+  String get permission_required => 'الصلاحية مطلوبة';
+
+  @override
+  String get location_permission_denied_forever =>
+      'تم رفض صلاحية الموقع بشكل دائم. يرجى تمكينها من إعدادات الجهاز لاستخدام ميزات الطقس.';
+
+  @override
+  String get open_settings => 'فتح الإعدادات';
 }

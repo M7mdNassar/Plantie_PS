@@ -4,7 +4,6 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../generated/l10n.dart';
 import '../../../layout/cubit/cubit.dart';
-import '../../../models/disease_info.dart';
 import '../../../shared/components/components.dart';
 import '../../../shared/network/local/image_storage_helper.dart';
 import '../../../shared/styles/app_colors.dart';
@@ -87,15 +86,11 @@ class ImagePickerHandler {
       print('💾 [Handler] Permanent image saved at: ${permanentImage.path}');
       final diseaseKey = analysis.diseaseLabel!;
       cubit.currentPlantName = analysis.plantName;
-      final diseaseInfo = DiseaseInfo.data[diseaseKey] ??
-          DiseaseData(
-            isArabic ? "مرض غير معروف" : "Unknown Disease",
-            isArabic ? "لا توجد تفاصيل" : "No details",
-            isArabic ? "لم يتم اكتشاف المرض" : "Disease not detected",
-          );
 
+      // ✅ Store the disease KEY (not the localized name)
       await cubit.addDetectionToHistory(permanentImage, diseaseKey);
-      cubit.setDetectionResult(permanentImage, diseaseInfo.name);
+      cubit.setDetectionResult(permanentImage, diseaseKey);
+
       print('✅ [Handler] Detection result set, process complete');
     } catch (e, stack) {
       print('❌ [Handler] Exception caught: $e');
@@ -110,8 +105,6 @@ class ImagePickerHandler {
       print('🏁 [Handler] Error handling complete');
     }
   }
-
-
 
   static String _getUserFriendlyErrorMessage(dynamic e, bool isArabic) {
     final errorStr = e.toString().toLowerCase();
@@ -140,6 +133,7 @@ class ImagePickerHandler {
         ? "حدث خطأ ما. يرجى المحاولة مرة أخرى."
         : "Something went wrong. Please try again.";
   }
+
   static Future<bool> _showImageGuidance(BuildContext context) async {
     return await showModalBottomSheet<bool>(
       context: context,
@@ -176,7 +170,7 @@ class ImagePickerHandler {
 }
 
 // ─────────────────────────────────────────────
-//  Image source selector modal (unchanged)
+//  Image source selector modal
 // ─────────────────────────────────────────────
 class _ImageSourceSelector extends StatelessWidget {
   const _ImageSourceSelector();
@@ -204,7 +198,7 @@ class _ImageSourceSelector extends StatelessWidget {
 }
 
 // ─────────────────────────────────────────────
-//  Capture guidance modal (unchanged)
+//  Capture guidance modal
 // ─────────────────────────────────────────────
 class _ConciseCaptureGuideModal extends StatelessWidget {
   const _ConciseCaptureGuideModal();

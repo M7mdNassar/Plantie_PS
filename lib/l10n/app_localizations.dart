@@ -2364,6 +2364,126 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Clear'**
   String get clear;
+
+  /// No description provided for @noFreeMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'No free messages left.'**
+  String get noFreeMessages;
+
+  /// No description provided for @noFreeMessagesShort.
+  ///
+  /// In en, this message translates to:
+  /// **'0 free'**
+  String get noFreeMessagesShort;
+
+  /// No description provided for @watchAdButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch Ad'**
+  String get watchAdButton;
+
+  /// No description provided for @freeCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} free'**
+  String freeCount(int count);
+
+  /// No description provided for @rewardReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'🎉 +1 free chat! You now have {count} remaining.'**
+  String rewardReceived(int count);
+
+  /// No description provided for @adFailedToShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad failed to show. Please try again.'**
+  String get adFailedToShow;
+
+  /// No description provided for @adNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad not available. Please try again later.'**
+  String get adNotAvailable;
+
+  /// No description provided for @offlineLikeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You are offline. Please try again when you have a connection.'**
+  String get offlineLikeMessage;
+
+  /// No description provided for @chatOfflineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Internet Connection'**
+  String get chatOfflineTitle;
+
+  /// No description provided for @chatOfflineMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The AI Assistant needs an internet connection to work. Please connect and try again.'**
+  String get chatOfflineMessage;
+
+  /// No description provided for @askAIAssistant.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask AI Assistant'**
+  String get askAIAssistant;
+
+  /// No description provided for @askAIAssistantSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Get instant farming advice'**
+  String get askAIAssistantSubtitle;
+
+  /// No description provided for @weather_permission_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Weather for Your Farm'**
+  String get weather_permission_title;
+
+  /// No description provided for @weather_permission_message.
+  ///
+  /// In en, this message translates to:
+  /// **'We need your location to show accurate weather and farming advice for your area.'**
+  String get weather_permission_message;
+
+  /// No description provided for @notNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get notNow;
+
+  /// No description provided for @allow_access.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get allow_access;
+
+  /// No description provided for @tapToGetWeather.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to get weather'**
+  String get tapToGetWeather;
+
+  /// No description provided for @permission_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission Required'**
+  String get permission_required;
+
+  /// No description provided for @location_permission_denied_forever.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission has been permanently denied. Please enable it in your device settings to use weather features.'**
+  String get location_permission_denied_forever;
+
+  /// No description provided for @open_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get open_settings;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

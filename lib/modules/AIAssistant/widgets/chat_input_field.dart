@@ -5,12 +5,14 @@ import '../../../generated/l10n.dart';
 class ChatInputField extends StatefulWidget {
   final Function(String) onSend;
   final bool isLoading;
+  final bool isEnabled;
   final FocusNode focusNode;
 
   const ChatInputField({
     super.key,
     required this.onSend,
     required this.isLoading,
+    this.isEnabled = true,
     required this.focusNode,
   });
 
@@ -28,8 +30,9 @@ class _ChatInputFieldState extends State<ChatInputField> {
   }
 
   void _send() {
+    if (!widget.isEnabled || widget.isLoading) return;
     final text = _controller.text.trim();
-    if (text.isEmpty || widget.isLoading) return;
+    if (text.isEmpty) return;
     _controller.clear();
     widget.onSend(text);
   }
@@ -37,9 +40,13 @@ class _ChatInputFieldState extends State<ChatInputField> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final isDisabled = !widget.isEnabled || widget.isLoading;
+    final hint = widget.isEnabled
+        ? S.of(context).typeMessage
+        : S.of(context).noFreeMessages; // or "Watch ad to continue"
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 40),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 30),
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkSurface : Colors.white,
         border: Border(
@@ -55,18 +62,25 @@ class _ChatInputFieldState extends State<ChatInputField> {
             child: TextField(
               controller: _controller,
               focusNode: widget.focusNode,
-              enabled: !widget.isLoading,
+              enabled: !isDisabled,
               decoration: InputDecoration(
-                hintText: S.of(context).typeMessage,
+                hintText: hint,
+                prefixIcon: isDisabled
+                    ? const Icon(Icons.lock_outline, size: 20, color: Colors.grey)
+                    : null,
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(24),
                   borderSide: BorderSide.none,
                 ),
                 filled: true,
-                fillColor: isDark ? AppColors.darkSurfaceVariant : Colors.grey[100],
+                fillColor: isDisabled
+                    ? (isDark ? Colors.grey[800] : Colors.grey[200])
+                    : (isDark ? AppColors.darkSurfaceVariant : Colors.grey[100]),
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                 hintStyle: TextStyle(
-                  color: isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary,
+                  color: isDisabled
+                      ? (isDark ? Colors.grey[600] : Colors.grey[400])
+                      : (isDark ? AppColors.darkTextTertiary : AppColors.lightTextTertiary),
                 ),
               ),
               textInputAction: TextInputAction.send,
@@ -75,7 +89,7 @@ class _ChatInputFieldState extends State<ChatInputField> {
           ),
           const SizedBox(width: 8),
           IconButton(
-            onPressed: widget.isLoading ? null : _send,
+            onPressed: isDisabled ? null : _send,
             icon: widget.isLoading
                 ? const SizedBox(
               width: 20,
@@ -87,7 +101,7 @@ class _ChatInputFieldState extends State<ChatInputField> {
             )
                 : Icon(
               Icons.send_rounded,
-              color: AppColors.primary,
+              color: isDisabled ? Colors.grey : AppColors.primary,
               size: 24,
             ),
           ),

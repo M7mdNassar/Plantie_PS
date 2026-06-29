@@ -2,56 +2,96 @@ import 'package:equatable/equatable.dart';
 import '../../../models/chat_message.dart';
 
 abstract class AIChatState extends Equatable {
-  const AIChatState();
+  final List<ChatMessage> messages;
+  final String? sessionId;
+  final int remainingFreeChats;   // <-- new field
+
+  const AIChatState({
+    this.messages = const [],
+    this.sessionId,
+    this.remainingFreeChats = 3,
+  });
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [messages, sessionId, remainingFreeChats];
 }
 
 class AIChatInitial extends AIChatState {
-  final List<ChatMessage> messages;
-  final String? sessionId;
-
-  const AIChatInitial({this.messages = const [], this.sessionId});
-
-  @override
-  List<Object?> get props => [messages, sessionId];
+  const AIChatInitial({
+    List<ChatMessage> messages = const [],
+    String? sessionId,
+    int remainingFreeChats = 3,
+  }) : super(
+    messages: messages,
+    sessionId: sessionId,
+    remainingFreeChats: remainingFreeChats,
+  );
 }
 
 class AIChatLoading extends AIChatState {
-  final List<ChatMessage> messages;
-
-  const AIChatLoading(this.messages);
-
-  @override
-  List<Object?> get props => [messages];
+  const AIChatLoading({
+    required List<ChatMessage> messages,
+    int remainingFreeChats = 3,
+  }) : super(
+    messages: messages,
+    remainingFreeChats: remainingFreeChats,
+  );
 }
 
 class AIChatStreaming extends AIChatState {
-  final List<ChatMessage> messages;
   final String partialResponse;
-
-  const AIChatStreaming(this.messages, this.partialResponse);
+  const AIChatStreaming({
+    required List<ChatMessage> messages,
+    required this.partialResponse,
+    int remainingFreeChats = 3,
+  }) : super(
+    messages: messages,
+    remainingFreeChats: remainingFreeChats,
+  );
 
   @override
-  List<Object?> get props => [messages, partialResponse];
+  List<Object?> get props => [messages, partialResponse, remainingFreeChats];
 }
 
 class AIChatSuccess extends AIChatState {
-  final List<ChatMessage> messages;
-
-  const AIChatSuccess(this.messages);
-
-  @override
-  List<Object?> get props => [messages];
+  const AIChatSuccess({
+    required List<ChatMessage> messages,
+    int remainingFreeChats = 3,
+  }) : super(
+    messages: messages,
+    remainingFreeChats: remainingFreeChats,
+  );
 }
 
 class AIChatError extends AIChatState {
   final String error;
-  final List<ChatMessage> messages;
+  const AIChatError({
+    required this.error,
+    required List<ChatMessage> messages,
+    int remainingFreeChats = 3,
+  }) : super(
+    messages: messages,
+    remainingFreeChats: remainingFreeChats,
+  );
+}
 
-  const AIChatError(this.error, this.messages);
+// Optional: you can add a special state for when the ad is loading or after reward
+class AIChatAdLoading extends AIChatState {
+  const AIChatAdLoading({
+    required List<ChatMessage> messages,
+    int remainingFreeChats = 3,
+  }) : super(
+    messages: messages,
+    remainingFreeChats: remainingFreeChats,
+  );
+}
 
-  @override
-  List<Object?> get props => [error, messages];
+class AIChatAdRewardSuccess extends AIChatState {
+  const AIChatAdRewardSuccess({
+    required List<ChatMessage> messages,
+    int remainingFreeChats = 3,
+  }) : super(
+    messages: messages,
+    remainingFreeChats: remainingFreeChats,
+  );
 }

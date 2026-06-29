@@ -6,7 +6,6 @@ import 'package:plantie/modules/AIAssistant/widgets/chat_bubble.dart';
 import 'package:plantie/modules/AIAssistant/widgets/chat_input_field.dart';
 import 'package:plantie/modules/AIAssistant/widgets/typing_indicator.dart';
 import 'package:plantie/shared/styles/app_colors.dart';
-import 'package:plantie/shared/styles/responsive_text.dart';
 import '../../generated/l10n.dart';
 import '../../models/chat_message.dart';
 
@@ -51,13 +50,88 @@ class _AIChatScreenState extends State<AIChatScreen> {
           if (state is AIChatStreaming || state is AIChatSuccess) {
             _scrollToBottom();
           }
+          if (state is AIChatAdRewardSuccess) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(S.of(context).rewardReceived(state.remainingFreeChats)),
+                duration: const Duration(seconds: 2),
+              ),
+            );
+          }
+          // --- Updated error handling with translations ---
+          if (state is AIChatError) {
+            String errorMessage;
+            // Check for specific ad error codes
+            if (state.error == 'ad_failed_to_show') {
+              errorMessage = S.of(context).adFailedToShow;
+            } else if (state.error == 'ad_not_available') {
+              errorMessage = S.of(context).adNotAvailable;
+            } else {
+              // Default: show the raw error message (or you can add more cases)
+              errorMessage = state.error;
+            }
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(errorMessage),
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
         },
         builder: (context, state) {
           final cubit = context.read<AIChatCubit>();
+          final hasNoAttempts = state.remainingFreeChats <= 0 &&
+              state is! AIChatStreaming &&
+              state is! AIChatLoading;
+          final isAdLoading = state is AIChatAdLoading;
+          final canType = !hasNoAttempts && !isAdLoading && state is! AIChatLoading && state is! AIChatStreaming;
 
           return Scaffold(
             appBar: AppBar(
-              title: Text(S.of(context).aiAssistant),
+              title: Row(
+                children: [
+                  Text(S.of(context).aiAssistant),
+                  const Spacer(),
+                  // Modern pill badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: hasNoAttempts ? Colors.orange : Colors.green,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          hasNoAttempts ? Icons.lock_outline : Icons.chat_bubble_outline,
+                          color: Colors.white,
+                          size: 14,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          hasNoAttempts
+                              ? S.of(context).noFreeMessagesShort
+                              : S.of(context).freeCount(state.remainingFreeChats),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // "Get More" button (always visible)
+                  if (hasNoAttempts)
+                    IconButton(
+                      icon: const Icon(Icons.add_circle_outline, color: Colors.orange),
+                      onPressed: cubit.watchAdToGetMore,
+                      tooltip: S.of(context).watchAdButton,
+                    ),
+                ],
+              ),
               backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
               actions: [
                 IconButton(
@@ -69,12 +143,64 @@ class _AIChatScreenState extends State<AIChatScreen> {
             ),
             body: Column(
               children: [
+                // Banner when no attempts left
+                if (hasNoAttempts)
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
+                    color: Colors.orange[100],
+                    child: Row(
+                      children: [
+                        const Icon(Icons.info_outline, color: Colors.orange),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            S.of(context).noFreeMessages,
+                            style: const TextStyle(fontSize: 14, color: Colors.black87),
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: isAdLoading ? null : cubit.watchAdToGetMore,
+                          child: isAdLoading
+                              ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.orange,
+                            ),
+                          )
+                              : Text(
+                            S.of(context).watchAdButton,
+                            style: const TextStyle(
+                              color: Colors.orange,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 Expanded(
                   child: _buildMessageList(context, state, cubit),
                 ),
                 ChatInputField(
-                  onSend: (text) => cubit.sendMessage(text),
-                  isLoading: state is AIChatLoading || state is AIChatStreaming,
+                  onSend: (text) {
+                    if (!canType) {
+                      // Should not happen because field is disabled, but safety
+                      if (hasNoAttempts) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(
+                            content: Text(S.of(context).noFreeMessages),
+                            duration: const Duration(seconds: 2),
+                          ),
+                        );
+                      }
+                      return;
+                    }
+                    cubit.sendMessage(text);
+                  },
+                  isLoading: state is AIChatLoading || state is AIChatStreaming || isAdLoading,
+                  isEnabled: canType,
                   focusNode: _focusNode,
                 ),
               ],
@@ -87,16 +213,13 @@ class _AIChatScreenState extends State<AIChatScreen> {
 
   Widget _buildMessageList(BuildContext context, AIChatState state, AIChatCubit cubit) {
     List<ChatMessage> messages = [];
-    String? partialResponse;
-
     if (state is AIChatInitial) messages = state.messages;
     if (state is AIChatLoading) messages = state.messages;
-    if (state is AIChatStreaming) {
-      messages = state.messages;
-      partialResponse = state.partialResponse;
-    }
+    if (state is AIChatStreaming) messages = state.messages;
     if (state is AIChatSuccess) messages = state.messages;
     if (state is AIChatError) messages = state.messages;
+    if (state is AIChatAdRewardSuccess) messages = state.messages;
+    if (state is AIChatAdLoading) messages = state.messages;
 
     if (messages.isEmpty && state is! AIChatStreaming) {
       return _buildEmptyState(context);
@@ -108,11 +231,11 @@ class _AIChatScreenState extends State<AIChatScreen> {
       itemCount: messages.length + (state is AIChatStreaming ? 1 : 0),
       itemBuilder: (context, index) {
         if (state is AIChatStreaming && index == messages.length) {
-          // Show typing indicator
           return const TypingIndicator();
         }
         final message = messages[index];
-        return ChatBubble(message: message);
+        // Use key for performance
+        return ChatBubble(key: ValueKey(message.id), message: message);
       },
     );
   }
