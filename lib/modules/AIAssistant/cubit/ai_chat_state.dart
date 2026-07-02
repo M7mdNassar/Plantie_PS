@@ -4,7 +4,7 @@ import '../../../models/chat_message.dart';
 abstract class AIChatState extends Equatable {
   final List<ChatMessage> messages;
   final String? sessionId;
-  final int remainingFreeChats;   // <-- new field
+  final int remainingFreeChats;
 
   const AIChatState({
     this.messages = const [],
@@ -75,7 +75,6 @@ class AIChatError extends AIChatState {
   );
 }
 
-// Optional: you can add a special state for when the ad is loading or after reward
 class AIChatAdLoading extends AIChatState {
   const AIChatAdLoading({
     required List<ChatMessage> messages,

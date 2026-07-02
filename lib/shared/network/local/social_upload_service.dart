@@ -42,7 +42,8 @@ class SocialUploadService {
     pendingCount.value = count;
   }
 
-  Future<void> addOfflineAction({
+  // ---- Modified to return the inserted ID ----
+  Future<int> addOfflineAction({
     required String type,
     required String userId,
     required Map<String, dynamic> data,
@@ -56,6 +57,7 @@ class SocialUploadService {
     debugPrint('✅ Offline action queued: $type (ID: $id)');
     await _updatePendingCount();
     attemptPendingUploads();
+    return id; // ← now returns the ID
   }
 
   Future<void> attemptPendingUploads() async {
@@ -91,8 +93,15 @@ class SocialUploadService {
     }
   }
 
+  // ---- Skip cancelled actions ----
   Future<void> _uploadOfflineAction(Map<String, dynamic> action) async {
     final id = action['id'] as int;
+    final status = action['status'] as String? ?? 'pending';
+    if (status != 'pending') {
+      debugPrint('⏭️ Skipping action $id (status: $status)');
+      return;
+    }
+
     final type = action['action_type'] as String? ?? '';
     final dataRaw = action['data'] as String?;
     if (dataRaw == null) {
@@ -134,6 +143,13 @@ class SocialUploadService {
       await _db.updateOfflineActionStatus(id, status, attempts: attempts);
       await _updatePendingCount();
     }
+  }
+
+  // ---- Delete/cancel a pending action ----
+  Future<void> deleteOfflineAction(int actionId) async {
+    await _db.updateOfflineActionStatus(actionId, 'cancelled');
+    await _updatePendingCount();
+    debugPrint('✅ Offline action $actionId cancelled');
   }
 
   Future<void> _uploadPost(Map<String, dynamic> data) async {
@@ -178,9 +194,6 @@ class SocialUploadService {
       }).toList();
       await supabaseService.client.from('post_images').insert(imageInserts);
     }
-
-    // If we have a pending ID, we could update local state here.
-    // But we'll handle it via real-time subscription.
   }
 
   Future<void> _uploadComment(Map<String, dynamic> data) async {

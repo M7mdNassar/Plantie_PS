@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:plantie/config/app_config.dart';
+import 'package:plantie/shared/network/remote/supabase_service.dart';
 
 class AIChatService {
-  static const String _baseUrl = 'https://plantie-rag-agent-production.up.railway.app';
-  static const String _chatEndpoint = '/api/v1/chat/stream-temp';
+  static String get _baseUrl => AppConfig.chatBaseUrl;
+  static String get _chatEndpoint => AppConfig.chatEndpoint;
 
   Stream<String> sendMessage({
     required String query,
@@ -13,7 +15,39 @@ class AIChatService {
     required double latitude,
     required double longitude,
   }) async* {
+    // First check if chat feature is enabled (config)
+    if (!AppConfig.isChatEnabled) {
+      yield 'Chat is currently unavailable. Please try again later.';
+      return;
+    }
+
+    // Check that baseUrl and endpoint are not empty (config may be missing)
+    if (_baseUrl.isEmpty || _chatEndpoint.isEmpty) {
+      yield 'Chat service is not configured. Please try again later.';
+      return;
+    }
+
+    // Debug: log the actual URL being used
     final url = Uri.parse('$_baseUrl$_chatEndpoint');
+    print('🔗 [AIChatService] Using URL: $url');
+
+    // Get Supabase JWT token
+    final session = supabaseService.client.auth.currentSession;
+    String? token = session?.accessToken;
+
+    print('🔑 [AIChatService] Supabase JWT Token:');
+    print(token ?? 'No token found (offline)');
+
+    if (token == null) {
+      try {
+        await supabaseService.client.auth.refreshSession();
+        final refreshed = supabaseService.client.auth.currentSession;
+        token = refreshed?.accessToken;
+      } catch (_) {
+        // Offline
+      }
+    }
+
     final body = jsonEncode({
       'query': query,
       'session_id': sessionId,
@@ -22,7 +56,7 @@ class AIChatService {
         'latitude': latitude,
         'longitude': longitude,
       },
-      'history': [], // Could pass previous messages if needed
+      'history': [],
       'top_k': 5,
     });
 
@@ -30,41 +64,46 @@ class AIChatService {
       ..headers.addAll({
         'Content-Type': 'application/json',
         'Accept': 'text/event-stream',
+        if (token != null) 'Authorization': 'Bearer $token',
       })
       ..body = body;
 
-    final streamedResponse = await request.send();
+    http.StreamedResponse? streamedResponse;
+    try {
+      streamedResponse = await request.send();
+    } catch (e) {
+      yield 'Network error: Could not reach chat service.';
+      return;
+    }
+
+    if (streamedResponse.statusCode == 401) {
+      yield 'Authentication failed. Please try again.';
+      return;
+    }
 
     if (streamedResponse.statusCode != 200) {
       final errorBody = await streamedResponse.stream.bytesToString();
-      throw Exception('Server error: ${streamedResponse.statusCode} - $errorBody');
+      yield 'Server error: ${streamedResponse.statusCode} - $errorBody';
+      return;
     }
 
-    // Parse Server-Sent Events or chunked JSON
-    // Assuming the endpoint returns SSE or plain text chunks.
-    // We'll parse line by line.
     final stream = streamedResponse.stream
         .transform(utf8.decoder)
         .transform(const LineSplitter());
 
-    String buffer = '';
     await for (final line in stream) {
       if (line.startsWith('data: ')) {
         final data = line.substring(6).trim();
         if (data.isNotEmpty && data != '[DONE]') {
-          // If it's JSON, extract the content. Otherwise, treat as plain text.
           try {
             final json = jsonDecode(data);
             final content = json['content'] ?? json['delta'] ?? json['text'] ?? data;
             yield content.toString();
           } catch (_) {
-            // If not JSON, yield the raw data
             yield data;
           }
         }
       } else if (line.isNotEmpty && !line.startsWith(':')) {
-        // Some APIs send raw text without "data:" prefix.
-        // If it's plain text, yield it.
         if (!line.startsWith('event:') && !line.startsWith('id:')) {
           yield line;
         }

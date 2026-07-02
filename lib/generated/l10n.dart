@@ -889,25 +889,25 @@ class S {
     return Intl.message('English', name: 'english', desc: '', args: []);
   }
 
-  /// `Log Out`
+  /// `Logout`
   String get logout {
-    return Intl.message('Log Out', name: 'logout', desc: '', args: []);
+    return Intl.message('Logout', name: 'logout', desc: '', args: []);
   }
 
-  /// `Confirm Sign Out`
+  /// `Confirm Logout`
   String get confirmLogout {
     return Intl.message(
-      'Confirm Sign Out',
+      'Confirm Logout',
       name: 'confirmLogout',
       desc: '',
       args: [],
     );
   }
 
-  /// `Are you sure you want to log out of your account?`
+  /// `Are you sure you want to log out?`
   String get logoutMessage {
     return Intl.message(
-      'Are you sure you want to log out of your account?',
+      'Are you sure you want to log out?',
       name: 'logoutMessage',
       desc: '',
       args: [],
@@ -959,10 +959,10 @@ class S {
     );
   }
 
-  /// `Name cannot be left empty`
+  /// `Name must not be empty`
   String get nameRequired {
     return Intl.message(
-      'Name cannot be left empty',
+      'Name must not be empty',
       name: 'nameRequired',
       desc: '',
       args: [],
@@ -2344,20 +2344,20 @@ class S {
     );
   }
 
-  /// `Welcome to Plantie!`
+  /// `Welcome to Plantie`
   String get welcomeToPlantie {
     return Intl.message(
-      'Welcome to Plantie!',
+      'Welcome to Plantie',
       name: 'welcomeToPlantie',
       desc: '',
       args: [],
     );
   }
 
-  /// `Discover expert plant care tips and join a community of plant lovers`
+  /// `Discover the art of plant care`
   String get discoverPlantCare {
     return Intl.message(
-      'Discover expert plant care tips and join a community of plant lovers',
+      'Discover the art of plant care',
       name: 'discoverPlantCare',
       desc: '',
       args: [],
@@ -2664,9 +2664,14 @@ class S {
     );
   }
 
-  /// `Error`
+  /// `Error Occurred`
   String get errorTitle {
-    return Intl.message('Error', name: 'errorTitle', desc: '', args: []);
+    return Intl.message(
+      'Error Occurred',
+      name: 'errorTitle',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Profile updated successfully`
@@ -3399,6 +3404,276 @@ class S {
     return Intl.message(
       'Open Settings',
       name: 'open_settings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Followers`
+  String get followers {
+    return Intl.message('Followers', name: 'followers', desc: '', args: []);
+  }
+
+  /// `Following`
+  String get following {
+    return Intl.message('Following', name: 'following', desc: '', args: []);
+  }
+
+  /// `Follow`
+  String get follow {
+    return Intl.message('Follow', name: 'follow', desc: '', args: []);
+  }
+
+  /// `Unfollow`
+  String get unfollow {
+    return Intl.message('Unfollow', name: 'unfollow', desc: '', args: []);
+  }
+
+  /// `Joined`
+  String get joinDate {
+    return Intl.message('Joined', name: 'joinDate', desc: '', args: []);
+  }
+
+  /// `User not found`
+  String get userNotFound {
+    return Intl.message(
+      'User not found',
+      name: 'userNotFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No posts yet`
+  String get noPostsYet {
+    return Intl.message('No posts yet', name: 'noPostsYet', desc: '', args: []);
+  }
+
+  /// `has no posts yet`
+  String get hasNoPosts {
+    return Intl.message(
+      'has no posts yet',
+      name: 'hasNoPosts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `About`
+  String get about {
+    return Intl.message('About', name: 'about', desc: '', args: []);
+  }
+
+  /// `Posts`
+  String get posts {
+    return Intl.message('Posts', name: 'posts', desc: '', args: []);
+  }
+
+  /// `Search Users`
+  String get searchUsers {
+    return Intl.message(
+      'Search Users',
+      name: 'searchUsers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Search by name...`
+  String get searchUsersHint {
+    return Intl.message(
+      'Search by name...',
+      name: 'searchUsersHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Type a name to search`
+  String get searchUsersEmpty {
+    return Intl.message(
+      'Type a name to search',
+      name: 'searchUsersEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No users found`
+  String get noUsersFound {
+    return Intl.message(
+      'No users found',
+      name: 'noUsersFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `View Profile`
+  String get viewProfile {
+    return Intl.message(
+      'View Profile',
+      name: 'viewProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Post Details`
+  String get postDetails {
+    return Intl.message(
+      'Post Details',
+      name: 'postDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Post not found`
+  String get postNotFound {
+    return Intl.message(
+      'Post not found',
+      name: 'postNotFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Weather feature is temporarily unavailable.`
+  String get weather_unavailable_title {
+    return Intl.message(
+      'Weather feature is temporarily unavailable.',
+      name: 'weather_unavailable_title',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please check back later.`
+  String get weather_unavailable_subtitle {
+    return Intl.message(
+      'Please check back later.',
+      name: 'weather_unavailable_subtitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Community feature is temporarily unavailable.`
+  String get community_unavailable_title {
+    return Intl.message(
+      'Community feature is temporarily unavailable.',
+      name: 'community_unavailable_title',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please check back later.`
+  String get community_unavailable_subtitle {
+    return Intl.message(
+      'Please check back later.',
+      name: 'community_unavailable_subtitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update Required`
+  String get update_required_title {
+    return Intl.message(
+      'Update Required',
+      name: 'update_required_title',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A new version of Plantie is available. Please update to continue using the app.`
+  String get update_required_message {
+    return Intl.message(
+      'A new version of Plantie is available. Please update to continue using the app.',
+      name: 'update_required_message',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update Now`
+  String get update_now {
+    return Intl.message('Update Now', name: 'update_now', desc: '', args: []);
+  }
+
+  /// `Pending uploads`
+  String get pendingUploadsTitle {
+    return Intl.message(
+      'Pending uploads',
+      name: 'pendingUploadsTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You have {count} pending {count, plural, one{item} other{items}} to sync.`
+  String pendingUploadsMessage(num count) {
+    return Intl.message(
+      'You have $count pending ${Intl.plural(count, one: 'item', other: 'items')} to sync.',
+      name: 'pendingUploadsMessage',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Sync Now`
+  String get syncNow {
+    return Intl.message('Sync Now', name: 'syncNow', desc: '', args: []);
+  }
+
+  /// `Waiting for connection...`
+  String get offlineSyncWait {
+    return Intl.message(
+      'Waiting for connection...',
+      name: 'offlineSyncWait',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fetching location...`
+  String get fetchingLocation {
+    return Intl.message(
+      'Fetching location...',
+      name: 'fetchingLocation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unknown location`
+  String get unknownLocation {
+    return Intl.message(
+      'Unknown location',
+      name: 'unknownLocation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `AI Chat Unavailable`
+  String get chat_unavailable_title {
+    return Intl.message(
+      'AI Chat Unavailable',
+      name: 'chat_unavailable_title',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Chat feature is currently disabled. Please try again later.`
+  String get chat_unavailable_subtitle {
+    return Intl.message(
+      'Chat feature is currently disabled. Please try again later.',
+      name: 'chat_unavailable_subtitle',
       desc: '',
       args: [],
     );

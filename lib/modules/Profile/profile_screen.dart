@@ -9,6 +9,7 @@ import '../../generated/l10n.dart';
 import '../../layout/cubit/cubit.dart';
 import '../../layout/cubit/states.dart';
 import '../../shared/components/constants.dart';
+import '../UserView/user_search_screen.dart';
 import 'cubit/cubit.dart';
 import 'cubit/states.dart';
 import 'edit_profile_screen.dart';
@@ -266,7 +267,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ),
 
-                        // Settings Cards
+                        // Settings Cards (including Search Users)
                         StaggerAnimation(
                           delayBetween: const Duration(milliseconds: 80),
                           duration: AnimationConstants.normalDuration,
@@ -280,6 +281,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 onChanged: (value) => appCubit.changeAppMode(),
                                 activeColor: isDark ? AppColors.primaryLight : AppColors.primary,
                               ),
+                              isDark: isDark,
+                            ),
+                            const SizedBox(height: 12),
+                            _buildSettingCard(
+                              context,
+                              icon: Icons.search_rounded,
+                              title: S.of(context).searchUsers,
+                              onTap: () => navigateTo(context, const UserSearchScreen()),
                               isDark: isDark,
                             ),
                             const SizedBox(height: 12),

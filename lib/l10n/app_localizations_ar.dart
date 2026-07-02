@@ -350,10 +350,10 @@ class SAr extends S {
   String get logout => 'تسجيل الخروج';
 
   @override
-  String get confirmLogout => 'تأكيد تسجيل الخروج';
+  String get confirmLogout => 'تأكيد الخروج';
 
   @override
-  String get logoutMessage => 'هل أنت متأكد من أنك تريد تسجيل الخروج من حسابك؟';
+  String get logoutMessage => 'هل أنت متأكد من رغبتك في تسجيل الخروج؟';
 
   @override
   String get editProfile => 'تعديل الملف الشخصي';
@@ -377,7 +377,7 @@ class SAr extends S {
   String get saveChanges => 'حفظ التغييرات';
 
   @override
-  String get nameRequired => 'لا يمكن ترك حقل الاسم فارغاً';
+  String get nameRequired => 'الاسم مطلوب';
 
   @override
   String get bioRequired => 'السيرة الذاتية مطلوبة';
@@ -527,7 +527,7 @@ class SAr extends S {
   String get postButton => 'نشر';
 
   @override
-  String get whatsOnMind => 'ما الذي يخطر ببالك؟';
+  String get whatsOnMind => 'ما الذي يدور في ذهنك؟';
 
   @override
   String get addPhotos => 'إضافة صور';
@@ -995,7 +995,7 @@ class SAr extends S {
   String get profileUpdatedMsg => 'تم تحديث بيانات ملفك الشخصي بأمان.';
 
   @override
-  String get errorTitle => 'خطأ في التحديث';
+  String get errorTitle => 'حدث خطأ ما';
 
   @override
   String get profileUpdatedSuccess => 'تم تحديث الملف الشخصي بنجاح';
@@ -1276,4 +1276,110 @@ class SAr extends S {
 
   @override
   String get open_settings => 'فتح الإعدادات';
+
+  @override
+  String get followers => 'المتابعون';
+
+  @override
+  String get following => 'المتابعة';
+
+  @override
+  String get follow => 'متابعة';
+
+  @override
+  String get unfollow => 'إلغاء المتابعة';
+
+  @override
+  String get joinDate => 'تاريخ الانضمام';
+
+  @override
+  String get userNotFound => 'المستخدم غير موجود';
+
+  @override
+  String get noPostsYet => 'لا توجد منشورات بعد';
+
+  @override
+  String get hasNoPosts => 'ليس لديه منشورات بعد';
+
+  @override
+  String get about => 'عن';
+
+  @override
+  String get posts => 'المنشورات';
+
+  @override
+  String get searchUsers => 'بحث عن مستخدمين';
+
+  @override
+  String get searchUsersHint => 'ابحث بالاسم...';
+
+  @override
+  String get searchUsersEmpty => 'اكتب اسماً للبحث';
+
+  @override
+  String get noUsersFound => 'لم يتم العثور على مستخدمين';
+
+  @override
+  String get viewProfile => 'عرض الملف';
+
+  @override
+  String get postDetails => 'تفاصيل المنشور';
+
+  @override
+  String get postNotFound => 'المنشور غير موجود';
+
+  @override
+  String get weather_unavailable_title => 'ميزة الطقس غير متاحة مؤقتاً.';
+
+  @override
+  String get weather_unavailable_subtitle => 'يرجى العودة لاحقاً.';
+
+  @override
+  String get community_unavailable_title => 'ميزة المجتمع غير متاحة مؤقتاً.';
+
+  @override
+  String get community_unavailable_subtitle => 'يرجى العودة لاحقاً.';
+
+  @override
+  String get update_required_title => 'تحديث مطلوب';
+
+  @override
+  String get update_required_message =>
+      'يتوفر إصدار جديد من Plantie. يرجى التحديث لمواصلة استخدام التطبيق.';
+
+  @override
+  String get update_now => 'تحديث الآن';
+
+  @override
+  String get pendingUploadsTitle => 'مرفوعات معلقة';
+
+  @override
+  String pendingUploadsMessage(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'عناصر',
+      one: 'عنصر',
+    );
+    return 'لديك $count $_temp0 معلقة للمزامنة.';
+  }
+
+  @override
+  String get syncNow => 'مزامنة الآن';
+
+  @override
+  String get offlineSyncWait => 'في انتظار الاتصال...';
+
+  @override
+  String get fetchingLocation => 'جاري جلب الموقع...';
+
+  @override
+  String get unknownLocation => 'موقع غير معروف';
+
+  @override
+  String get chat_unavailable_title => 'المساعد الذكي غير متاح';
+
+  @override
+  String get chat_unavailable_subtitle =>
+      'خدمة المحادثة معطلة حالياً. يرجى المحاولة لاحقاً.';
 }

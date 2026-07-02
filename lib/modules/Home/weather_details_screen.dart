@@ -10,8 +10,13 @@ import '../../shared/styles/app_colors.dart';
 
 class WeatherDetailsScreen extends StatelessWidget {
   final WeatherData weatherData;
+  final String? cityName;
 
-  const WeatherDetailsScreen({super.key, required this.weatherData});
+  const WeatherDetailsScreen({
+    super.key,
+    required this.weatherData,
+    this.cityName,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -56,9 +61,9 @@ class WeatherDetailsScreen extends StatelessWidget {
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
         gradient: LinearGradient(
-          colors: isDark 
-            ? [HexColor("1E1E1E"), HexColor("2C2C2C")]
-            : [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)],
+          colors: isDark
+              ? [HexColor("1E1E1E"), HexColor("2C2C2C")]
+              : [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -73,6 +78,20 @@ class WeatherDetailsScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
+          // ✅ Show city name if available
+          if (cityName != null && cityName!.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Text(
+                cityName!,
+                style: const TextStyle(
+                  color: Colors.white70,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  letterSpacing: 0.5,
+                ),
+              ),
+            ),
           Text(
             DateFormat('EEEE, d MMMM').format(DateTime.now()),
             style: const TextStyle(color: Colors.white70, fontSize: 16),
@@ -108,9 +127,18 @@ class WeatherDetailsScreen extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _buildQuickMetric(Icons.water_drop, '${weatherData.current.relativeHumidity}%', S.of(context).humidity_level),
-              _buildQuickMetric(Icons.air, '${weatherData.current.windSpeed} km/h', S.of(context).wind_speed),
-              _buildQuickMetric(Icons.umbrella, '${weatherData.current.precipitation} mm', S.of(context).precipitation),
+              _buildQuickMetric(
+                  Icons.water_drop,
+                  '${weatherData.current.relativeHumidity}%',
+                  S.of(context).humidity_level),
+              _buildQuickMetric(
+                  Icons.air,
+                  '${weatherData.current.windSpeed} km/h',
+                  S.of(context).wind_speed),
+              _buildQuickMetric(
+                  Icons.umbrella,
+                  '${weatherData.current.precipitation} mm',
+                  S.of(context).precipitation),
             ],
           )
         ],
@@ -123,13 +151,15 @@ class WeatherDetailsScreen extends StatelessWidget {
       children: [
         Icon(icon, color: Colors.white70, size: 20),
         const SizedBox(height: 8),
-        Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        Text(value,
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         Text(label, style: const TextStyle(color: Colors.white60, fontSize: 12)),
       ],
     );
   }
 
-  Widget _buildFarmingInsightsSection(BuildContext context, List<FarmingInsight> insights, bool isDark) {
+  Widget _buildFarmingInsightsSection(
+      BuildContext context, List<FarmingInsight> insights, bool isDark) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -145,7 +175,7 @@ class WeatherDetailsScreen extends StatelessWidget {
           ),
         ),
         if (insights.isEmpty)
-           _buildEmptyInsight(context, isDark)
+          _buildEmptyInsight(context, isDark)
         else
           ...insights.map((insight) => _buildInsightCard(insight, isDark)),
       ],
@@ -186,10 +216,10 @@ class WeatherDetailsScreen extends StatelessWidget {
   }
 
   Widget _buildInsightCard(FarmingInsight insight, bool isDark) {
-    final Color levelColor = insight.level == InsightLevel.critical 
-        ? Colors.red 
+    final Color levelColor = insight.level == InsightLevel.critical
+        ? Colors.red
         : (insight.level == InsightLevel.warning ? Colors.orange : Colors.green);
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -288,7 +318,8 @@ class WeatherDetailsScreen extends StatelessWidget {
                   children: [
                     Text(
                       DateFormat('HH:mm').format(time),
-                      style: TextStyle(fontSize: 12, color: isDark ? Colors.grey : Colors.grey[600]),
+                      style: TextStyle(fontSize: 12,
+                          color: isDark ? Colors.grey : Colors.grey[600]),
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -376,18 +407,23 @@ class WeatherDetailsScreen extends StatelessWidget {
                           interval: 10,
                           getTitlesWidget: (value, meta) => Text(
                             '${value.toInt()}°',
-                            style: TextStyle(color: isDark ? Colors.grey : Colors.grey[600], fontSize: 10),
+                            style: TextStyle(
+                                color: isDark ? Colors.grey : Colors.grey[600],
+                                fontSize: 10),
                           ),
                           reservedSize: 28,
                         ),
                       ),
-                      topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                      rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      topTitles:
+                      const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                      rightTitles:
+                      const AxisTitles(sideTitles: SideTitles(showTitles: false)),
                     ),
                     borderData: FlBorderData(show: false),
                     lineBarsData: [
                       LineChartBarData(
-                        spots: List.generate(24, (i) => FlSpot(i.toDouble(), weatherData.hourly.temperature[i])),
+                        spots: List.generate(24,
+                                (i) => FlSpot(i.toDouble(), weatherData.hourly.temperature[i])),
                         isCurved: true,
                         color: Colors.orange,
                         barWidth: 3,
@@ -399,7 +435,8 @@ class WeatherDetailsScreen extends StatelessWidget {
                         ),
                       ),
                       LineChartBarData(
-                        spots: List.generate(24, (i) => FlSpot(i.toDouble(), weatherData.hourly.precipitation[i] * 5)),
+                        spots: List.generate(24,
+                                (i) => FlSpot(i.toDouble(), weatherData.hourly.precipitation[i] * 5)),
                         isCurved: true,
                         color: Colors.blue,
                         barWidth: 2,
@@ -485,7 +522,8 @@ class WeatherDetailsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMetricCard(BuildContext context, String title, String value, IconData icon, Color color, bool isDark) {
+  Widget _buildMetricCard(BuildContext context, String title, String value,
+      IconData icon, Color color, bool isDark) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -510,7 +548,8 @@ class WeatherDetailsScreen extends StatelessWidget {
               Expanded(
                 child: Text(
                   title,
-                  style: TextStyle(fontSize: 12, color: isDark ? Colors.grey : Colors.grey[600]),
+                  style: TextStyle(fontSize: 12,
+                      color: isDark ? Colors.grey : Colors.grey[600]),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -557,7 +596,8 @@ class WeatherDetailsScreen extends StatelessWidget {
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: 7,
-            separatorBuilder: (context, index) => Divider(height: 1, color: isDark ? Colors.white10 : Colors.grey[100]),
+            separatorBuilder: (context, index) =>
+                Divider(height: 1, color: isDark ? Colors.white10 : Colors.grey[100]),
             itemBuilder: (context, index) {
               final date = DateTime.parse(weatherData.daily.time[index]);
               final isToday = index == 0;
@@ -569,12 +609,14 @@ class WeatherDetailsScreen extends StatelessWidget {
                       flex: 2,
                       child: Text(
                         isToday ? S.of(context).today : DateFormat('EEEE').format(date),
-                        style: TextStyle(fontWeight: isToday ? FontWeight.bold : FontWeight.normal),
+                        style: TextStyle(
+                            fontWeight: isToday ? FontWeight.bold : FontWeight.normal),
                       ),
                     ),
                     Expanded(
                       flex: 1,
-                      child: _getWeatherIcon(weatherData.daily.weatherCode[index], size: 30),
+                      child: _getWeatherIcon(weatherData.daily.weatherCode[index],
+                          size: 30),
                     ),
                     Expanded(
                       flex: 2,
@@ -588,7 +630,8 @@ class WeatherDetailsScreen extends StatelessWidget {
                           const SizedBox(width: 12),
                           Text(
                             '${weatherData.daily.temperatureMin[index].round()}°',
-                            style: TextStyle(color: isDark ? Colors.grey : Colors.grey[600]),
+                            style: TextStyle(
+                                color: isDark ? Colors.grey : Colors.grey[600]),
                           ),
                         ],
                       ),
@@ -604,7 +647,6 @@ class WeatherDetailsScreen extends StatelessWidget {
   }
 
   Widget _getWeatherIcon(int code, {double size = 50}) {
-    // WMO Weather interpretation codes (WW)
     if (code == 0) return Icon(Icons.wb_sunny, color: Colors.orange, size: size);
     if (code <= 3) return Icon(Icons.wb_cloudy, color: Colors.blueGrey, size: size);
     if (code <= 48) return Icon(Icons.foggy, color: Colors.grey, size: size);

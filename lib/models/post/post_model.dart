@@ -10,6 +10,7 @@ class PostModel {
   int commentCount;
   int likeCount;
   bool userLiked;
+  final int? offlineActionId; // field for offline queue ID
 
   PostModel({
     required this.postId,
@@ -21,9 +22,9 @@ class PostModel {
     this.commentCount = 0,
     this.likeCount = 0,
     this.userLiked = false,
+    this.offlineActionId, // ✅ optional
   });
 
-  // In post_model.dart
   Map<String, dynamic> toJson() => {
     'id': postId,
     'user_id': uId,
@@ -57,7 +58,6 @@ class PostModel {
     );
   }
 
-  // ✅ Add copyWith method
   PostModel copyWith({
     String? postId,
     String? uId,
@@ -68,6 +68,7 @@ class PostModel {
     int? commentCount,
     int? likeCount,
     bool? userLiked,
+    int? offlineActionId,
   }) {
     return PostModel(
       postId: postId ?? this.postId,
@@ -79,9 +80,11 @@ class PostModel {
       commentCount: commentCount ?? this.commentCount,
       likeCount: likeCount ?? this.likeCount,
       userLiked: userLiked ?? this.userLiked,
+      offlineActionId: offlineActionId ?? this.offlineActionId,
     );
   }
 }
+
 
 class CommentModel {
   final String commentId;

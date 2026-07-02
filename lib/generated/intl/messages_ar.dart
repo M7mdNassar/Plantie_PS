@@ -43,32 +43,36 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m9(error) => "خطأ: ${error}";
 
-  static String m10(type) => "النوع: ${type}";
+  static String m10(count) =>
+      "لديك ${count} ${Intl.plural(count, one: 'عنصر', other: 'عناصر')} معلقة للمزامنة.";
 
-  static String m11(calculationContext) =>
+  static String m11(type) => "النوع: ${type}";
+
+  static String m12(calculationContext) =>
       "السماد المطلوب (${calculationContext}):";
 
-  static String m12(count) => "🎉 +1 رسالة مجانية! الآن لديك ${count} متبقية.";
+  static String m13(count) => "🎉 +1 رسالة مجانية! الآن لديك ${count} متبقية.";
 
-  static String m13(value) =>
+  static String m14(value) =>
       "درجة حرارة التربة ${value}°م، مثالية لإنبات معظم البذور.";
 
-  static String m14(treatment) => "${treatment}";
+  static String m15(treatment) => "${treatment}";
 
-  static String m15(age) =>
+  static String m16(age) =>
       "ملاحظة: الحسابات تشمل عامل العمر لأشجار عمرها ${age} سنوات";
 
-  static String m16(error) => "فشل التحديث: ${error}";
+  static String m17(error) => "فشل التحديث: ${error}";
 
-  static String m17(error) => "خطأ في إرسال التأكيد: ${error}";
+  static String m18(error) => "خطأ في إرسال التأكيد: ${error}";
 
-  static String m18(error) => "خطأ في جلب بيانات الطقس: ${error}";
+  static String m19(error) => "خطأ في جلب بيانات الطقس: ${error}";
 
-  static String m19(value) =>
+  static String m20(value) =>
       "سرعة رياح عالية (${value} كم/ساعة). تجنب رش المبيدات لأنها قد تتطاير.";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+    "about": MessageLookupByLibrary.simpleMessage("عن"),
     "aboutMe": MessageLookupByLibrary.simpleMessage("نبذة عني"),
     "acre": MessageLookupByLibrary.simpleMessage("فدان"),
     "adFailedToShow": MessageLookupByLibrary.simpleMessage(
@@ -150,6 +154,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "chatOfflineTitle": MessageLookupByLibrary.simpleMessage(
       "غير متصل بالإنترنت",
     ),
+    "chat_unavailable_subtitle": MessageLookupByLibrary.simpleMessage(
+      "خدمة المحادثة معطلة حالياً. يرجى المحاولة لاحقاً.",
+    ),
+    "chat_unavailable_title": MessageLookupByLibrary.simpleMessage(
+      "المساعد الذكي غير متاح",
+    ),
     "checkNetwork": MessageLookupByLibrary.simpleMessage(
       "يرجى التحقق من حالة الشبكة والمحاولة مرة أخرى.",
     ),
@@ -174,6 +184,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "comments": MessageLookupByLibrary.simpleMessage("التعليقات"),
     "community": MessageLookupByLibrary.simpleMessage("المجتمع"),
+    "community_unavailable_subtitle": MessageLookupByLibrary.simpleMessage(
+      "يرجى العودة لاحقاً.",
+    ),
+    "community_unavailable_title": MessageLookupByLibrary.simpleMessage(
+      "ميزة المجتمع غير متاحة مؤقتاً.",
+    ),
     "completeProfilePrompt": MessageLookupByLibrary.simpleMessage(
       "أكمل ملفك الشخصي!",
     ),
@@ -181,7 +197,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "أضف نبذتك، موقعك، ورقم هاتفك ليصبح حسابك موثقاً.",
     ),
     "confirmDelete": MessageLookupByLibrary.simpleMessage("تأكيد الحذف"),
-    "confirmLogout": MessageLookupByLibrary.simpleMessage("تأكيد تسجيل الخروج"),
+    "confirmLogout": MessageLookupByLibrary.simpleMessage("تأكيد الخروج"),
     "contactInfo": MessageLookupByLibrary.simpleMessage("تفاصيل الاتصال"),
     "continueAsGuest": MessageLookupByLibrary.simpleMessage("المتابعة كضيف"),
     "continueButton": MessageLookupByLibrary.simpleMessage("متابعة"),
@@ -271,7 +287,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "خطأ في تحميل المنشورات",
     ),
     "errorOccurred": m1,
-    "errorTitle": MessageLookupByLibrary.simpleMessage("خطأ في التحديث"),
+    "errorTitle": MessageLookupByLibrary.simpleMessage("حدث خطأ ما"),
     "evapotranspiration": MessageLookupByLibrary.simpleMessage("التبخر والنتح"),
     "expertAdvice": MessageLookupByLibrary.simpleMessage("نصيحة الخبير"),
     "failedToLoadPlants": MessageLookupByLibrary.simpleMessage(
@@ -284,6 +300,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "feelsLike": m2,
     "feels_like": MessageLookupByLibrary.simpleMessage("الحرارة المحسوسة"),
     "fertilizerCalculator": m3,
+    "fetchingLocation": MessageLookupByLibrary.simpleMessage(
+      "جاري جلب الموقع...",
+    ),
     "fetchingWeather": MessageLookupByLibrary.simpleMessage(
       "جاري جلب بيانات الطقس...",
     ),
@@ -307,9 +326,12 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "focusTip3": MessageLookupByLibrary.simpleMessage("حافظ على ثبات الكاميرا"),
     "foggy": MessageLookupByLibrary.simpleMessage("ضبابي"),
+    "follow": MessageLookupByLibrary.simpleMessage("متابعة"),
     "followTheseSteps": MessageLookupByLibrary.simpleMessage(
       "اتبع هذه النصائح للحصول على أفضل النتائج",
     ),
+    "followers": MessageLookupByLibrary.simpleMessage("المتابعون"),
+    "following": MessageLookupByLibrary.simpleMessage("المتابعة"),
     "forget_password": MessageLookupByLibrary.simpleMessage(
       "هل نسيت كلمة المرور؟",
     ),
@@ -374,6 +396,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "guestPromptSignUp": MessageLookupByLibrary.simpleMessage("إنشاء حساب"),
     "guestPromptTitle": MessageLookupByLibrary.simpleMessage("سجّل للانضمام"),
     "guestSignIn": MessageLookupByLibrary.simpleMessage("تسجيل الدخول"),
+    "hasNoPosts": MessageLookupByLibrary.simpleMessage("ليس لديه منشورات بعد"),
     "have_account": MessageLookupByLibrary.simpleMessage("هل لديك حساب ؟"),
     "healthy": MessageLookupByLibrary.simpleMessage("صحي"),
     "high_evaporation": MessageLookupByLibrary.simpleMessage("تبخر عالٍ"),
@@ -403,6 +426,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "itemDeleted": MessageLookupByLibrary.simpleMessage(
       "تم إزالة المسح الخاص بك",
     ),
+    "joinDate": MessageLookupByLibrary.simpleMessage("تاريخ الانضمام"),
     "keepEditing": MessageLookupByLibrary.simpleMessage("متابعة التعديل"),
     "landArea": m8,
     "language": MessageLookupByLibrary.simpleMessage("اللغة"),
@@ -434,16 +458,14 @@ class MessageLookup extends MessageLookupByLibrary {
       "هل أنت متأكد من تسجيل الخروج؟",
     ),
     "logoutMessage": MessageLookupByLibrary.simpleMessage(
-      "هل أنت متأكد من أنك تريد تسجيل الخروج من حسابك؟",
+      "هل أنت متأكد من رغبتك في تسجيل الخروج؟",
     ),
     "mop": MessageLookupByLibrary.simpleMessage("كلوريد البوتاسيوم"),
     "moreOptions": MessageLookupByLibrary.simpleMessage("خيارات إضافية"),
     "name": MessageLookupByLibrary.simpleMessage("الإسم"),
     "nameField": MessageLookupByLibrary.simpleMessage("الاسم الكامل"),
     "nameHint": MessageLookupByLibrary.simpleMessage("اسمك"),
-    "nameRequired": MessageLookupByLibrary.simpleMessage(
-      "لا يمكن ترك حقل الاسم فارغاً",
-    ),
+    "nameRequired": MessageLookupByLibrary.simpleMessage("الاسم مطلوب"),
     "nameTooShort": MessageLookupByLibrary.simpleMessage(
       "الاسم يجب أن يكون حرفين على الأقل",
     ),
@@ -487,8 +509,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "noPostsMatch": MessageLookupByLibrary.simpleMessage(
       "لا توجد منشورات تطابق بحثك",
     ),
+    "noPostsYet": MessageLookupByLibrary.simpleMessage("لا توجد منشورات بعد"),
     "noStoresFound": MessageLookupByLibrary.simpleMessage(
       "لم يتم العثور على مشاتل قريبة",
+    ),
+    "noUsersFound": MessageLookupByLibrary.simpleMessage(
+      "لم يتم العثور على مستخدمين",
     ),
     "no_insights": MessageLookupByLibrary.simpleMessage(
       "لا توجد تنبيهات محددة اليوم.",
@@ -526,6 +552,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "offlineSubtitle": MessageLookupByLibrary.simpleMessage(
       "يرجى التحقق من حالة الشبكة والمحاولة مرة أخرى.",
+    ),
+    "offlineSyncWait": MessageLookupByLibrary.simpleMessage(
+      "في انتظار الاتصال...",
     ),
     "offlineTitle": MessageLookupByLibrary.simpleMessage(
       "لا يوجد اتصال بالإنترنت",
@@ -566,6 +595,10 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "partlyCloudy": MessageLookupByLibrary.simpleMessage("غائم جزئياً"),
     "password": MessageLookupByLibrary.simpleMessage("كلمة المرور"),
+    "pendingUploadsMessage": m10,
+    "pendingUploadsTitle": MessageLookupByLibrary.simpleMessage(
+      "مرفوعات معلقة",
+    ),
     "permanentDenial": MessageLookupByLibrary.simpleMessage(
       "تم رفض إذن الموقع بشكل دائم. يرجى التفعيل من الإعدادات.",
     ),
@@ -581,7 +614,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "phosphorus": MessageLookupByLibrary.simpleMessage("الفوسفور"),
     "photos": MessageLookupByLibrary.simpleMessage("الصور"),
     "plantDiagnosis": MessageLookupByLibrary.simpleMessage("تشخيص النباتات"),
-    "plantType": m10,
+    "plantType": m11,
     "plantingTime": MessageLookupByLibrary.simpleMessage("وقت الزراعة"),
     "pleaseWait": MessageLookupByLibrary.simpleMessage(
       "يرجى الانتظار بينما يكتشف الذكاء الاصطناعي...",
@@ -605,11 +638,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "postCreatedSuccessfully": MessageLookupByLibrary.simpleMessage(
       "تم إنشاء المنشور بنجاح!",
     ),
+    "postDetails": MessageLookupByLibrary.simpleMessage("تفاصيل المنشور"),
+    "postNotFound": MessageLookupByLibrary.simpleMessage("المنشور غير موجود"),
     "postOptions": MessageLookupByLibrary.simpleMessage("خيارات المنشور"),
     "postedBy": MessageLookupByLibrary.simpleMessage("منشور بواسطة"),
     "postingComment": MessageLookupByLibrary.simpleMessage(
       "جاري نشر التعليق...",
     ),
+    "posts": MessageLookupByLibrary.simpleMessage("المنشورات"),
     "potassium": MessageLookupByLibrary.simpleMessage("البوتاسيوم"),
     "precipitation": MessageLookupByLibrary.simpleMessage("هطول الأمطار"),
     "precipitation_chart": MessageLookupByLibrary.simpleMessage("هطول الأمطار"),
@@ -647,14 +683,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "refresh": MessageLookupByLibrary.simpleMessage("تحديث"),
     "register": MessageLookupByLibrary.simpleMessage("تسجيل"),
     "register_button": MessageLookupByLibrary.simpleMessage("إنشاء حساب"),
-    "requiredFertilizers": m11,
+    "requiredFertilizers": m12,
     "requiredField": MessageLookupByLibrary.simpleMessage("هذا الحقل مطلوب"),
     "reset_password": MessageLookupByLibrary.simpleMessage(
       "إعادة تعيين كلمة المرور",
     ),
     "retry": MessageLookupByLibrary.simpleMessage("إعادة المحاولة"),
     "retryButton": MessageLookupByLibrary.simpleMessage("إعادة المحاولة"),
-    "rewardReceived": m12,
+    "rewardReceived": m13,
     "save": MessageLookupByLibrary.simpleMessage("حفظ"),
     "saveAvatar": MessageLookupByLibrary.simpleMessage("حفظ الصورة"),
     "saveChanges": MessageLookupByLibrary.simpleMessage("حفظ التغييرات"),
@@ -669,6 +705,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "ابحث باستخدام محتوى المنشور",
     ),
     "searchPosts": MessageLookupByLibrary.simpleMessage("البحث في المنشورات"),
+    "searchUsers": MessageLookupByLibrary.simpleMessage("بحث عن مستخدمين"),
+    "searchUsersEmpty": MessageLookupByLibrary.simpleMessage(
+      "اكتب اسماً للبحث",
+    ),
+    "searchUsersHint": MessageLookupByLibrary.simpleMessage("ابحث بالاسم..."),
     "selectCountry": MessageLookupByLibrary.simpleMessage("اختر الدولة"),
     "selectLanguage": MessageLookupByLibrary.simpleMessage("اختر اللغة"),
     "sendOtpSms": MessageLookupByLibrary.simpleMessage(
@@ -685,7 +726,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "skip": MessageLookupByLibrary.simpleMessage("تخطي"),
     "snowy": MessageLookupByLibrary.simpleMessage("ثلجي"),
     "soil_condition": MessageLookupByLibrary.simpleMessage("حالة التربة"),
-    "soil_condition_message": m13,
+    "soil_condition_message": m14,
     "soil_temp": MessageLookupByLibrary.simpleMessage("درجة حرارة التربة"),
     "ssp": MessageLookupByLibrary.simpleMessage("سوبر فوسفات"),
     "startDetection": MessageLookupByLibrary.simpleMessage("ابدأ الكشف"),
@@ -695,6 +736,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "successTitle": MessageLookupByLibrary.simpleMessage("تم بنجاح"),
     "sunrise": MessageLookupByLibrary.simpleMessage("شروق الشمس"),
     "sunset": MessageLookupByLibrary.simpleMessage("غروب الشمس"),
+    "syncNow": MessageLookupByLibrary.simpleMessage("مزامنة الآن"),
     "takePhoto": MessageLookupByLibrary.simpleMessage("التقاط صورة"),
     "tapCamera": MessageLookupByLibrary.simpleMessage("اضغط الكاميرا"),
     "tapCameraToDetect": MessageLookupByLibrary.simpleMessage(
@@ -718,14 +760,16 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "today": MessageLookupByLibrary.simpleMessage("اليوم"),
     "treatment": MessageLookupByLibrary.simpleMessage("العلاج"),
-    "treatmentLabel": m14,
+    "treatmentLabel": m15,
     "treeAge": MessageLookupByLibrary.simpleMessage("عمر الشجرة (سنوات)"),
-    "treeNote": m15,
+    "treeNote": m16,
     "trending": MessageLookupByLibrary.simpleMessage("الرائج"),
     "tryAgain": MessageLookupByLibrary.simpleMessage("حاول مرة أخرى"),
     "typeMessage": MessageLookupByLibrary.simpleMessage("اكتب رسالة..."),
+    "unfollow": MessageLookupByLibrary.simpleMessage("إلغاء المتابعة"),
     "unit": MessageLookupByLibrary.simpleMessage("الوحدة:"),
     "unknownDisease": MessageLookupByLibrary.simpleMessage("غير معروف"),
+    "unknownLocation": MessageLookupByLibrary.simpleMessage("موقع غير معروف"),
     "unlikePost": MessageLookupByLibrary.simpleMessage("إلغاء الإعجاب"),
     "unsavedChangesMsg": MessageLookupByLibrary.simpleMessage(
       "لقد قمت بتعديل البيانات. الخروج الآن سيؤدي إلى فقدان جميع التعديلات.",
@@ -733,22 +777,31 @@ class MessageLookup extends MessageLookupByLibrary {
     "unsavedChangesTitle": MessageLookupByLibrary.simpleMessage(
       "تغييرات غير محفوظة",
     ),
-    "updateFailed": m16,
+    "updateFailed": m17,
+    "update_now": MessageLookupByLibrary.simpleMessage("تحديث الآن"),
+    "update_required_message": MessageLookupByLibrary.simpleMessage(
+      "يتوفر إصدار جديد من Plantie. يرجى التحديث لمواصلة استخدام التطبيق.",
+    ),
+    "update_required_title": MessageLookupByLibrary.simpleMessage(
+      "تحديث مطلوب",
+    ),
     "urea": MessageLookupByLibrary.simpleMessage("يوريا"),
     "userDataNotFound": MessageLookupByLibrary.simpleMessage(
       "لم يتم العثور على بيانات المستخدم. يرجى تسجيل الدخول مرة أخرى.",
     ),
-    "verificationError": m17,
+    "userNotFound": MessageLookupByLibrary.simpleMessage("المستخدم غير موجود"),
+    "verificationError": m18,
     "verificationSent": MessageLookupByLibrary.simpleMessage(
       "تم إعادة إرسال البريد التأكيدي. يرجى فحص صندوق الوارد.",
     ),
     "viewDetails": MessageLookupByLibrary.simpleMessage("عرض التفاصيل"),
+    "viewProfile": MessageLookupByLibrary.simpleMessage("عرض الملف"),
     "warning_farming": MessageLookupByLibrary.simpleMessage(
       "يرجى توخي الحذر عند القيام ببعض الأنشطة الزراعية.",
     ),
     "watchAdButton": MessageLookupByLibrary.simpleMessage("شاهد الإعلان"),
     "weather": MessageLookupByLibrary.simpleMessage("الطقس"),
-    "weatherError": m18,
+    "weatherError": m19,
     "weatherErrorTitle": MessageLookupByLibrary.simpleMessage(
       "خطأ في تحميل الطقس",
     ),
@@ -760,6 +813,12 @@ class MessageLookup extends MessageLookupByLibrary {
       "الطقس لمزرعتك",
     ),
     "weather_trends": MessageLookupByLibrary.simpleMessage("اتجاهات الطقس"),
+    "weather_unavailable_subtitle": MessageLookupByLibrary.simpleMessage(
+      "يرجى العودة لاحقاً.",
+    ),
+    "weather_unavailable_title": MessageLookupByLibrary.simpleMessage(
+      "ميزة الطقس غير متاحة مؤقتاً.",
+    ),
     "welcome": MessageLookupByLibrary.simpleMessage("مرحباً"),
     "welcomeToPlantie": MessageLookupByLibrary.simpleMessage(
       "مرحباً بك في Plantie",
@@ -771,9 +830,11 @@ class MessageLookup extends MessageLookupByLibrary {
       "احصل على المزيد من المحاصيل بمساعدة بلانتي!",
     ),
     "welcome_title": MessageLookupByLibrary.simpleMessage("بلانتي"),
-    "whatsOnMind": MessageLookupByLibrary.simpleMessage("ما الذي يخطر ببالك؟"),
+    "whatsOnMind": MessageLookupByLibrary.simpleMessage(
+      "ما الذي يدور في ذهنك؟",
+    ),
     "whatsYourName": MessageLookupByLibrary.simpleMessage("ما اسمك؟"),
-    "wind_message": m19,
+    "wind_message": m20,
     "wind_speed": MessageLookupByLibrary.simpleMessage("سرعة الرياح"),
     "wind_warning": MessageLookupByLibrary.simpleMessage("تحذير الرياح"),
     "writeComment": MessageLookupByLibrary.simpleMessage("اكتب تعليقاً"),

@@ -14,21 +14,16 @@ import 'components.dart';
 /// Methods ///
 Future<void> signOut(context) async {
   try {
-    // Clear local storage first
-    await LocalUserStorage.clearAll();
-    // Clear in-memory user
+    // Clear local user data but NOT the device ID
+    await LocalUserStorage.clearAll(); // This should only clear user data
+    // Ensure we don't clear the device_id key
     CurrentUser.clearUser();
-    // Sign out from Supabase
     await supabaseService.signOut();
-    // Use microtask to safely handle navigation after sign-out
     Future.microtask(() {
       if (context.mounted) {
         try {
-          AppCubit.get(context).currentIndex = 0; // reset
-          navigateAndFinish(
-            context,
-            const RegistrationScreen(),
-          );
+          AppCubit.get(context).currentIndex = 0;
+          navigateAndFinish(context, const RegistrationScreen());
         } catch (e) {
           debugPrint('⚠️ Navigation error after sign-out: $e');
         }

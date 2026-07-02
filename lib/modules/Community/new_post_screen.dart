@@ -62,7 +62,9 @@ class _NewPostScreenState extends State<NewPostScreen> {
           showToast(text: S.of(context).postCreatedSuccessfully, state: ToastStates.success);
           Navigator.pop(context);
         } else if (state is CommunityErrorState) {
-          if (state.error == 'offline_post_create') {
+          if (state.error == 'pending_post_exists') {
+            _showPendingPostDialog(context);
+          } else if (state.error == 'offline_post_create') {
             _showOfflineRetryDialog(context, () {
               final text = _textController.text;
               cubit.createPost(text: text);
@@ -406,6 +408,28 @@ class _NewPostScreenState extends State<NewPostScreen> {
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
             child: Text(S.of(ctx).retry),
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  void _showPendingPostDialog(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
+        title: Text('Pending Post Exists'),
+        content: Text(
+          'You already have a pending post. Please wait for it to sync or delete it before creating a new one.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(S.of(ctx).ok),
           ),
         ],
       ),

@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hexcolor/hexcolor.dart';
 import 'package:flutter/rendering.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:plantie/config/app_config.dart';
+import 'package:plantie/config/config_manager.dart';
 import 'package:plantie/modules/Community/cubit/cubit.dart';
 import 'package:plantie/modules/Community/cubit/states.dart';
 import 'package:plantie/modules/Community/new_post_screen.dart';
@@ -14,6 +16,7 @@ import '../../generated/l10n.dart';
 import '../../shared/styles/app_colors.dart';
 import '../../shared/styles/icon_broken.dart';
 import '../../shared/network/local/social_upload_service.dart';
+import '../../shared/network/remote/supabase_auth_service.dart';
 
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
@@ -27,17 +30,26 @@ class _CommunityScreenState extends State<CommunityScreen> {
   int _lastPrefetchedPostCount = 0;
   bool _isFiltering = false;
 
+  // Config check state (only for the posts area)
+  bool _isCheckingConfig = true;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) {
-        final cubit = CommunityCubit.get(context);
-        if (cubit.posts.isEmpty) {
-          cubit.getPosts();
-        }
+      final cubit = CommunityCubit.get(context);
+      if (cubit.posts.isEmpty) {
+        cubit.getPosts(); // will load cached or fetch
       }
+      _checkCommunityConfig();
     });
+  }
+
+  // ---------------------- Community config check (non‑blocking) ----------------------
+  Future<void> _checkCommunityConfig() async {
+    setState(() => _isCheckingConfig = true);
+    await ConfigManager().fetchIfNeeded(force: true);
+    setState(() => _isCheckingConfig = false);
   }
 
   void _setCreatePostButtonVisible(bool visible) {
@@ -45,6 +57,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
     _showCreatePostButton.value = visible;
   }
 
+  // ---------------------- Feed Sort Bar (Filters ALWAYS enabled) ----------------------
   PreferredSizeWidget _buildFeedSortBar(
       BuildContext context,
       CommunityCubit cubit,
@@ -98,6 +111,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
                   child: ChoiceChip(
                     label: Text(entry.value),
                     selected: isSelected,
+                    // ✅ ALWAYS enabled – the cubit handles offline check
                     onSelected: (selected) {
                       if (selected) {
                         setState(() => _isFiltering = true);
@@ -118,7 +132,9 @@ class _CommunityScreenState extends State<CommunityScreen> {
                       borderRadius: BorderRadius.circular(100),
                     ),
                     side: BorderSide(
-                      color: isSelected ? AppColors.primary.withOpacity(0.5) : Colors.transparent,
+                      color: isSelected
+                          ? AppColors.primary.withOpacity(0.5)
+                          : Colors.transparent,
                       width: 1,
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
@@ -135,6 +151,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
   Future<void> _refreshPosts() async {
     final cubit = CommunityCubit.get(context);
     _lastPrefetchedPostCount = 0;
+    // Re‑check config, then refresh posts
+    await _checkCommunityConfig();
     await cubit.getPosts(refresh: true);
   }
 
@@ -237,6 +255,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
     );
   }
 
+  // ---------------------- BUILD ----------------------
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<CommunityCubit, CommunityStates>(
@@ -247,6 +266,10 @@ class _CommunityScreenState extends State<CommunityScreen> {
         }
         if (state is CommunityLoadingMoreState) {
           _prefetchUpcomingImages(context, CommunityCubit.get(context));
+        }
+
+        if (state is CommunityOfflineState) {
+          setState(() => _isFiltering = false);
         }
 
         if (state is CommunityErrorState) {
@@ -280,6 +303,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
         final cubit = CommunityCubit.get(context);
         final isDark = Theme.of(context).brightness == Brightness.dark;
         final s = S.of(context);
+        final posts = cubit.posts;
+        final hasPosts = posts.isNotEmpty;
 
         return Scaffold(
           backgroundColor: isDark ? HexColor("0F0F0F") : Colors.grey[50],
@@ -292,13 +317,15 @@ class _CommunityScreenState extends State<CommunityScreen> {
                   _setCreatePostButtonVisible(false);
                 } else if (scrollNotification.direction == ScrollDirection.forward) {
                   _setCreatePostButtonVisible(true);
-                } else if (scrollNotification.metrics.pixels <= scrollNotification.metrics.minScrollExtent) {
+                } else if (scrollNotification.metrics.pixels <=
+                    scrollNotification.metrics.minScrollExtent) {
                   _setCreatePostButtonVisible(true);
                 }
               }
 
-              if (scrollNotification.metrics.pixels >= scrollNotification.metrics.maxScrollExtent * 0.8) {
-                if (cubit.hasMore() && !cubit.isFetchingMore && state is! CommunityOfflineState) {
+              if (scrollNotification.metrics.pixels >=
+                  scrollNotification.metrics.maxScrollExtent * 0.8) {
+                if (cubit.hasMore() && !cubit.isFetchingMore) {
                   cubit.loadMorePosts();
                 }
               }
@@ -312,61 +339,77 @@ class _CommunityScreenState extends State<CommunityScreen> {
               child: Stack(
                 children: [
                   CustomScrollView(
-                    physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+                    physics: const AlwaysScrollableScrollPhysics(
+                        parent: BouncingScrollPhysics()),
                     slivers: [
                       _buildSliverAppBar(context, cubit, isDark),
 
-                      if (_isFiltering)
+                      // ---------------------- POSTS AREA (new priority logic) ----------------------
+                      // Priority 1: Still checking config -> show loading
+                      if (_isCheckingConfig)
                         const SliverFillRemaining(
                           hasScrollBody: false,
-                          child: ShimmerPostSkeleton(),
+                          child: Center(child: CircularProgressIndicator()),
                         )
-                      else if ((state is CommunityLoadingState || state is CommunityInitialState) && cubit.posts.isEmpty)
-                        const SliverFillRemaining(
+                      // Priority 2: Config exists and community is disabled -> show unavailable
+                      else if (ConfigManager().hasCachedConfig &&
+                          !AppConfig.isCommunityEnabled)
+                        SliverFillRemaining(
                           hasScrollBody: false,
-                          child: ShimmerPostSkeleton(),
+                          child: _buildCommunityUnavailable(context),
                         )
-                      else if (state is CommunityOfflineState && cubit.posts.isEmpty)
-                          SliverFillRemaining(
-                            hasScrollBody: false,
-                            child: _buildOfflineState(context),
+                      // Priority 3: We have posts -> show them
+                      else if (hasPosts)
+                          SliverPadding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: ResponsiveText.padding(context, 12),
+                              vertical: ResponsiveText.padding(context, 14),
+                            ),
+                            sliver: SliverList(
+                              delegate: SliverChildBuilderDelegate(
+                                    (context, index) {
+                                  return Padding(
+                                    padding: EdgeInsets.only(
+                                        bottom: ResponsiveText.padding(
+                                            context, 14)),
+                                    child: buildPostItem(posts[index], context, index),
+                                  );
+                                },
+                                childCount: posts.length,
+                              ),
+                            ),
                           )
-                        else if (state is CommunityErrorState && cubit.posts.isEmpty)
+                        // Priority 4: No posts -> show appropriate placeholder based on state
+                        else if (state is CommunityOfflineState)
                             SliverFillRemaining(
                               hasScrollBody: false,
-                              child: _buildErrorState(context, state, cubit),
+                              child: _buildOfflineState(context),
                             )
-                          else if (state is CommunityEmptyState || (cubit.posts.isEmpty && state is! CommunityLoadingState && state is! CommunityInitialState && state is! CommunityOfflineState && state is! CommunityErrorState))
+                          else if (state is CommunityErrorState)
                               SliverFillRemaining(
                                 hasScrollBody: false,
-                                child: _buildEmptyState(context),
+                                child: _buildErrorState(context, state, cubit),
                               )
-                            else ...[
-                                SliverPadding(
-                                  padding: EdgeInsets.symmetric(
-                                    horizontal: ResponsiveText.padding(context, 12),
-                                    vertical: ResponsiveText.padding(context, 14),
+                            else if (state is CommunityLoadingState ||
+                                  state is CommunityInitialState)
+                                const SliverFillRemaining(
+                                  hasScrollBody: false,
+                                  child: ShimmerPostSkeleton(),
+                                )
+                              else if (state is CommunityEmptyState)
+                                  SliverFillRemaining(
+                                    hasScrollBody: false,
+                                    child: _buildEmptyState(context),
+                                  )
+                                else
+                                // Fallback: show empty state
+                                  SliverFillRemaining(
+                                    hasScrollBody: false,
+                                    child: _buildEmptyState(context),
                                   ),
-                                  sliver: SliverList(
-                                    delegate: SliverChildBuilderDelegate(
-                                          (context, index) {
-                                        return Padding(
-                                          padding: EdgeInsets.only(bottom: ResponsiveText.padding(context, 14)),
-                                          child: buildPostItem(cubit.posts[index], context, index),
-                                        );
-                                      },
-                                      childCount: cubit.posts.length,
-                                    ),
-                                  ),
-                                ),
-                                SliverPadding(
-                                  padding: EdgeInsets.only(bottom: ResponsiveText.padding(context, 110)),
-                                  sliver: const SliverToBoxAdapter(child: SizedBox.shrink()),
-                                ),
-                              ],
                     ],
                   ),
-                  // Sync Status Banner
+                  // Sync Status Banner (unchanged)
                   Positioned(
                     top: 0,
                     left: 0,
@@ -381,18 +424,51 @@ class _CommunityScreenState extends State<CommunityScreen> {
                           color: Colors.orange[100],
                           child: Row(
                             children: [
-                              const Icon(Icons.cloud_upload_rounded, color: Colors.orange, size: 20),
+                              const Icon(Icons.cloud_upload_rounded,
+                                  color: Colors.orange, size: 20),
                               const SizedBox(width: 8),
                               Expanded(
-                                child: Text(
-                                  'You have $count pending ${count == 1 ? 'item' : 'items'} to sync.',
-                                  style: const TextStyle(fontSize: 14),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Text(
+                                      S.of(context).pendingUploadsTitle,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    Text(
+                                      S.of(context).pendingUploadsMessage(count),
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.black54,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ),
-                              const SizedBox(width: 8),
-                              TextButton(
-                                onPressed: () => socialUploadService.attemptPendingUploads(),
-                                child: const Text('Sync Now', style: TextStyle(color: Colors.orange)),
+                              FutureBuilder<bool>(
+                                future: SupabaseAuthService().isConnectedFast(),
+                                builder: (context, snapshot) {
+                                  final isOnline = snapshot.data ?? false;
+                                  return TextButton(
+                                    onPressed: isOnline
+                                        ? () => socialUploadService.attemptPendingUploads()
+                                        : null,
+                                    child: Text(
+                                      isOnline
+                                          ? S.of(context).syncNow
+                                          : S.of(context).offlineSyncWait,
+                                      style: TextStyle(
+                                        color: isOnline ? Colors.orange : Colors.grey[500],
+                                        fontWeight: isOnline ? FontWeight.bold : FontWeight.normal,
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
                             ],
                           ),
@@ -407,7 +483,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
                       bottom: 20,
                       child: Center(
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 10),
                           decoration: BoxDecoration(
                             color: isDark ? HexColor('1C1C1E') : Colors.white,
                             borderRadius: BorderRadius.circular(100),
@@ -427,13 +504,17 @@ class _CommunityScreenState extends State<CommunityScreen> {
                                 height: 14,
                                 child: CircularProgressIndicator(
                                   strokeWidth: 2,
-                                  valueColor: AlwaysStoppedAnimation(AppColors.primary),
+                                  valueColor:
+                                  AlwaysStoppedAnimation(AppColors.primary),
                                 ),
                               ),
                               const SizedBox(width: 10),
                               Text(
                                 s.loadingMorePosts,
-                                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .labelMedium
+                                    ?.copyWith(
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: -0.2,
                                 ),
@@ -452,7 +533,54 @@ class _CommunityScreenState extends State<CommunityScreen> {
     );
   }
 
-  Widget _buildSliverAppBar(BuildContext context, CommunityCubit cubit, bool isDark) {
+  // ---------------------- Posts area placeholder widgets ----------------------
+  Widget _buildCommunityUnavailable(BuildContext context) {
+    final s = S.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.people_outline_rounded, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              s.community_unavailable_title,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              s.community_unavailable_subtitle,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: isDark ? Colors.grey[400] : Colors.grey[500],
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: _refreshPosts,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: Text(s.retry),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ---------------------- SLIVER APP BAR (unchanged) ----------------------
+  Widget _buildSliverAppBar(
+      BuildContext context, CommunityCubit cubit, bool isDark) {
     final s = S.of(context);
     return SliverAppBar(
       toolbarHeight: 72,
@@ -529,7 +657,9 @@ class _CommunityScreenState extends State<CommunityScreen> {
     );
   }
 
-  Widget _buildFloatingActionButton(BuildContext context, CommunityCubit cubit) {
+  // ---------------------- FLOATING ACTION BUTTON (unchanged) ----------------------
+  Widget _buildFloatingActionButton(
+      BuildContext context, CommunityCubit cubit) {
     final s = S.of(context);
     return ValueListenableBuilder<bool>(
       valueListenable: _showCreatePostButton,
@@ -616,6 +746,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
     );
   }
 
+  // ---------------------- POSTS LIST STATE WIDGETS (unchanged) ----------------------
   Widget _buildEmptyState(BuildContext context) {
     final s = S.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -713,7 +844,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
             ),
@@ -723,7 +855,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
     );
   }
 
-  Widget _buildErrorState(BuildContext context, CommunityErrorState state, CommunityCubit cubit) {
+  Widget _buildErrorState(
+      BuildContext context, CommunityErrorState state, CommunityCubit cubit) {
     final s = S.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -770,7 +903,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12)),
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
             ),

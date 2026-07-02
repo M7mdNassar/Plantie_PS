@@ -346,14 +346,13 @@ class SEn extends S {
   String get english => 'English';
 
   @override
-  String get logout => 'Log Out';
+  String get logout => 'Logout';
 
   @override
-  String get confirmLogout => 'Confirm Sign Out';
+  String get confirmLogout => 'Confirm Logout';
 
   @override
-  String get logoutMessage =>
-      'Are you sure you want to log out of your account?';
+  String get logoutMessage => 'Are you sure you want to log out?';
 
   @override
   String get editProfile => 'Edit Profile';
@@ -377,7 +376,7 @@ class SEn extends S {
   String get saveChanges => 'Save Changes';
 
   @override
-  String get nameRequired => 'Name cannot be left empty';
+  String get nameRequired => 'Name must not be empty';
 
   @override
   String get bioRequired => 'Bio must not be empty';
@@ -887,11 +886,10 @@ class SEn extends S {
   String get clearSearch => 'Clear search';
 
   @override
-  String get welcomeToPlantie => 'Welcome to Plantie!';
+  String get welcomeToPlantie => 'Welcome to Plantie';
 
   @override
-  String get discoverPlantCare =>
-      'Discover expert plant care tips and join a community of plant lovers';
+  String get discoverPlantCare => 'Discover the art of plant care';
 
   @override
   String get getOtpCode => 'Get OTP Code';
@@ -1003,7 +1001,7 @@ class SEn extends S {
       'Your profile information has been securely updated.';
 
   @override
-  String get errorTitle => 'Error';
+  String get errorTitle => 'Error Occurred';
 
   @override
   String get profileUpdatedSuccess => 'Profile updated successfully';
@@ -1286,4 +1284,112 @@ class SEn extends S {
 
   @override
   String get open_settings => 'Open Settings';
+
+  @override
+  String get followers => 'Followers';
+
+  @override
+  String get following => 'Following';
+
+  @override
+  String get follow => 'Follow';
+
+  @override
+  String get unfollow => 'Unfollow';
+
+  @override
+  String get joinDate => 'Joined';
+
+  @override
+  String get userNotFound => 'User not found';
+
+  @override
+  String get noPostsYet => 'No posts yet';
+
+  @override
+  String get hasNoPosts => 'has no posts yet';
+
+  @override
+  String get about => 'About';
+
+  @override
+  String get posts => 'Posts';
+
+  @override
+  String get searchUsers => 'Search Users';
+
+  @override
+  String get searchUsersHint => 'Search by name...';
+
+  @override
+  String get searchUsersEmpty => 'Type a name to search';
+
+  @override
+  String get noUsersFound => 'No users found';
+
+  @override
+  String get viewProfile => 'View Profile';
+
+  @override
+  String get postDetails => 'Post Details';
+
+  @override
+  String get postNotFound => 'Post not found';
+
+  @override
+  String get weather_unavailable_title =>
+      'Weather feature is temporarily unavailable.';
+
+  @override
+  String get weather_unavailable_subtitle => 'Please check back later.';
+
+  @override
+  String get community_unavailable_title =>
+      'Community feature is temporarily unavailable.';
+
+  @override
+  String get community_unavailable_subtitle => 'Please check back later.';
+
+  @override
+  String get update_required_title => 'Update Required';
+
+  @override
+  String get update_required_message =>
+      'A new version of Plantie is available. Please update to continue using the app.';
+
+  @override
+  String get update_now => 'Update Now';
+
+  @override
+  String get pendingUploadsTitle => 'Pending uploads';
+
+  @override
+  String pendingUploadsMessage(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'items',
+      one: 'item',
+    );
+    return 'You have $count pending $_temp0 to sync.';
+  }
+
+  @override
+  String get syncNow => 'Sync Now';
+
+  @override
+  String get offlineSyncWait => 'Waiting for connection...';
+
+  @override
+  String get fetchingLocation => 'Fetching location...';
+
+  @override
+  String get unknownLocation => 'Unknown location';
+
+  @override
+  String get chat_unavailable_title => 'AI Chat Unavailable';
+
+  @override
+  String get chat_unavailable_subtitle =>
+      'Chat feature is currently disabled. Please try again later.';
 }

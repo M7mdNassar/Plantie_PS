@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:plantie/config/app_config.dart';
+import 'package:plantie/config/config_manager.dart';
 import 'package:plantie/modules/Home/cubit/cubit.dart';
 import 'package:plantie/modules/Home/cubit/states.dart';
 import 'package:plantie/modules/Home/weather_details_screen.dart';
@@ -25,13 +26,16 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  String _locationName = '';
   late final ScrollController _scrollController;
 
-  // Location permission state
+  // Permission states
   bool _permissionChecked = false;
   bool _permissionGranted = false;
   bool _permissionPermanentlyDenied = false;
+
+  // Weather card states
+  bool _isCheckingWeather = true;
+  bool _isOffline = false; // true when no internet
 
   @override
   void initState() {
@@ -41,6 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
       final cubit = HomeCubit.get(context);
       if (cubit.plants.isEmpty) cubit.loadPlants();
       _checkLocationPermission();
+      _checkWeatherConfig();
     });
   }
 
@@ -50,7 +55,32 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-  // ----- Smart permission check (once) -----
+  // ---------------------- Weather config check (with connectivity) ----------------------
+  Future<void> _checkWeatherConfig() async {
+    setState(() {
+      _isCheckingWeather = true;
+      _isOffline = false;
+    });
+
+    // First check internet
+    final hasInternet = await SupabaseAuthService().isConnectedFast();
+    if (!hasInternet) {
+      setState(() {
+        _isOffline = true;
+        _isCheckingWeather = false;
+      });
+      return;
+    }
+
+    // Online → fetch config (if needed)
+    await ConfigManager().fetchIfNeeded(force: true);
+    setState(() {
+      _isCheckingWeather = false;
+      _isOffline = false;
+    });
+  }
+
+  // ----- Permission check (once) -----
   Future<void> _checkLocationPermission() async {
     if (_permissionChecked) return;
     _permissionChecked = true;
@@ -59,42 +89,40 @@ class _HomeScreenState extends State<HomeScreen> {
     if (permission == LocationPermission.always ||
         permission == LocationPermission.whileInUse) {
       _permissionGranted = true;
-      _fetchLocationName();
     } else if (permission == LocationPermission.deniedForever) {
       _permissionPermanentlyDenied = true;
       _permissionGranted = false;
+      setState(() {});
     } else {
       _permissionGranted = false;
-    }
-    setState(() {});
-  }
-
-  Future<void> _fetchLocationName() async {
-    if (!_permissionGranted) return;
-    try {
-      final position = await Geolocator.getCurrentPosition();
-      final placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
-      if (placemarks.isNotEmpty) {
-        final pm = placemarks.first;
-        setState(() {
-          _locationName = '${pm.locality ?? ''}, ${pm.country ?? ''}';
-        });
-      }
-    } catch (_) {
-      // silent
+      setState(() {});
     }
   }
 
-  // ----- Deferred location permission with explanation -----
+  // ----- Request location with explanation -----
   Future<void> _requestLocationWithExplanation(BuildContext context) async {
     final cubit = context.read<HomeCubit>();
 
-    if (cubit.weatherData != null) {
-      navigateTo(context, WeatherDetailsScreen(weatherData: cubit.weatherData!));
+    // Ensure config is fresh before using weather
+    await ConfigManager().fetchIfNeeded();
+
+    // Check if weather feature is enabled
+    if (!AppConfig.isWeatherEnabled) {
+      _showWeatherUnavailableDialog(context);
       return;
     }
 
-    // Check current permission again
+    if (cubit.weatherData != null) {
+      navigateTo(
+        context,
+        WeatherDetailsScreen(
+          weatherData: cubit.weatherData!,
+          cityName: null, // City name removed
+        ),
+      );
+      return;
+    }
+
     final permission = await Geolocator.checkPermission();
 
     if (permission == LocationPermission.always ||
@@ -102,19 +130,16 @@ class _HomeScreenState extends State<HomeScreen> {
       _permissionGranted = true;
       _permissionPermanentlyDenied = false;
       cubit.getWeatherData();
-      _fetchLocationName();
       return;
     }
 
     if (permission == LocationPermission.deniedForever) {
       _permissionPermanentlyDenied = true;
       _permissionGranted = false;
-      // Show settings dialog
       _showSettingsDialog(context);
       return;
     }
 
-    // Show explanation dialog
     final shouldAsk = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -142,20 +167,34 @@ class _HomeScreenState extends State<HomeScreen> {
     );
 
     if (shouldAsk == true) {
-      // Request permission
       final newPermission = await Geolocator.requestPermission();
       if (newPermission == LocationPermission.always ||
           newPermission == LocationPermission.whileInUse) {
         _permissionGranted = true;
         _permissionPermanentlyDenied = false;
         cubit.getWeatherData();
-        _fetchLocationName();
       } else if (newPermission == LocationPermission.deniedForever) {
         _permissionPermanentlyDenied = true;
         _permissionGranted = false;
         _showSettingsDialog(context);
       }
     }
+  }
+
+  void _showWeatherUnavailableDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(S.of(ctx).weather_unavailable_title),
+        content: Text(S.of(ctx).weather_unavailable_subtitle),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(S.of(ctx).ok),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showSettingsDialog(BuildContext context) {
@@ -205,6 +244,49 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  void _showChatUnavailableDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(S.of(ctx).chat_unavailable_title),
+        content: Text(S.of(ctx).chat_unavailable_subtitle),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(S.of(ctx).ok),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _refreshWeather() async {
+    // Check internet first
+    final hasInternet = await SupabaseAuthService().isConnectedFast();
+    if (!hasInternet) {
+      setState(() => _isOffline = true);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(S.of(context).noInternet),
+          backgroundColor: Colors.grey[800],
+          duration: const Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
+    // Online – re‑check config and refresh
+    await _checkWeatherConfig();
+    if (!AppConfig.isWeatherEnabled) {
+      _showWeatherUnavailableDialog(context);
+      return;
+    }
+
+    final cubit = HomeCubit.get(context);
+    await cubit.refreshWeather();
+  }
+
+  // ---------------------- BUILD ----------------------
   @override
   Widget build(BuildContext context) {
     return BlocListener<HomeCubit, HomeStates>(
@@ -213,6 +295,7 @@ class _HomeScreenState extends State<HomeScreen> {
           final cubit = context.read<HomeCubit>();
           cubit.generateInsights(context);
         }
+        if (state is InsightsUpdatedState) {}
       },
       child: BlocBuilder<HomeCubit, HomeStates>(
         buildWhen: (previous, current) =>
@@ -224,12 +307,14 @@ class _HomeScreenState extends State<HomeScreen> {
             current is LocationPermissionDeniedState ||
             current is LocationPermanentlyDeniedState ||
             current is LocationServicesDisabledState ||
-            current is HomeChangeSelectedIndexState,
+            current is HomeChangeSelectedIndexState ||
+            current is InsightsUpdatedState,
         builder: (context, state) {
           final cubit = HomeCubit.get(context);
           final plants = cubit.plants;
           final hasPlants = plants.isNotEmpty;
           final locale = Localizations.localeOf(context).languageCode;
+          final insights = cubit.insights;
 
           if (state is HomeGetPlantsErrorState && plants.isEmpty) {
             return Scaffold(
@@ -281,111 +366,108 @@ class _HomeScreenState extends State<HomeScreen> {
 
           return Scaffold(
             body: SafeArea(
-              child: CustomScrollView(
-                controller: _scrollController,
-                physics: const BouncingScrollPhysics(),
-                slivers: [
-                  // App bar
-                  SliverAppBar(
-                    backgroundColor: Colors.transparent,
-                    elevation: 0,
-                    pinned: true,
-                    toolbarHeight: 80,
-                    title: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          S.of(context).home,
-                          style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                            fontSize: ResponsiveText.headline(context),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        if (_locationName.isNotEmpty)
+              child: RefreshIndicator(
+                onRefresh: _refreshWeather,
+                color: AppColors.primary,
+                backgroundColor: Theme.of(context).brightness == Brightness.dark
+                    ? AppColors.darkSurface
+                    : Colors.white,
+                edgeOffset: 120,
+                child: CustomScrollView(
+                  controller: _scrollController,
+                  physics: const AlwaysScrollableScrollPhysics(
+                    parent: BouncingScrollPhysics(),
+                  ),
+                  slivers: [
+                    SliverAppBar(
+                      backgroundColor: Colors.transparent,
+                      elevation: 0,
+                      pinned: true,
+                      toolbarHeight: 80,
+                      title: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
                           Text(
-                            _locationName,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Colors.grey[600],
-                              fontSize: ResponsiveText.labelSmall(context),
+                            S.of(context).home,
+                            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                              fontSize: ResponsiveText.headline(context),
+                              fontWeight: FontWeight.bold,
                             ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
                           ),
-                      ],
-                    ),
-                  ),
-
-                  // Weather card
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: _buildWeatherCard(context, state, cubit, _locationName),
-                    ),
-                  ),
-
-                  // Weather insights
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
-                      child: _buildWeatherDescription(context),
-                    ),
-                  ),
-
-                  // Chat AI Button
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      child: _buildChatButton(context),
-                    ),
-                  ),
-
-                  // Plant carousel header
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
-                      child: Text(
-                        S.of(context).choosePlant,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontSize: ResponsiveText.title(context),
-                          fontWeight: FontWeight.w600,
-                        ),
+                        ],
                       ),
                     ),
-                  ),
-
-                  // Plant carousel
-                  SliverToBoxAdapter(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      child: _buildPlantCarousel(context, cubit, locale),
-                    ),
-                  ),
-
-                  // Plant details (with fixed planting time and NPK removed)
-                  if (hasPlants) ...[
+                    // WEATHER CARD
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: _buildPlantDetailCard(context, plants[cubit.selectedIndex], locale),
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                        child: _buildWeatherCard(
+                          context,
+                          state,
+                          cubit,
+                          _permissionGranted,
+                          _permissionPermanentlyDenied,
+                        ),
                       ),
                     ),
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: _PlantDetailsExpandable(
-                          plant: plants[cubit.selectedIndex],
-                          context: context,
+                        padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8),
+                        child: _buildWeatherDescription(context, insights),
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        child: _buildChatButton(context),
+                      ),
+                    ),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
+                        child: Text(
+                          S.of(context).choosePlant,
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontSize: ResponsiveText.title(context),
+                            fontWeight: FontWeight.w600,
+                          ),
                         ),
                       ),
                     ),
-                  ] else
                     SliverToBoxAdapter(
-                      child: _buildLoadingShimmer(),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        child: _buildPlantCarousel(context, cubit, locale),
+                      ),
                     ),
-
-                  const SliverToBoxAdapter(child: SizedBox(height: 20)),
-                ],
+                    if (hasPlants) ...[
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: _buildPlantDetailCard(
+                            context,
+                            plants[cubit.selectedIndex],
+                            locale,
+                          ),
+                        ),
+                      ),
+                      SliverToBoxAdapter(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: _PlantDetailsExpandable(
+                            plant: plants[cubit.selectedIndex],
+                            context: context,
+                          ),
+                        ),
+                      ),
+                    ] else
+                      SliverToBoxAdapter(
+                        child: _buildLoadingShimmer(),
+                      ),
+                    const SliverToBoxAdapter(child: SizedBox(height: 20)),
+                  ],
+                ),
               ),
             ),
           );
@@ -394,10 +476,35 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ============================================================
-  // Weather components
-  // ============================================================
-  Widget _buildWeatherCard(BuildContext context, HomeStates state, HomeCubit cubit, String locationName) {
+  // ---------------------- WEATHER CARD (self-contained logic) ----------------------
+  Widget _buildWeatherCard(
+      BuildContext context,
+      HomeStates state,
+      HomeCubit cubit,
+      bool permissionGranted,
+      bool permissionPermanentlyDenied,
+      ) {
+    // 1. Still checking config? -> show loading
+    if (_isCheckingWeather) {
+      return _buildWeatherLoadingCard(context);
+    }
+
+    // 2. No cached config -> we can't know feature status -> show "No Internet"
+    if (!ConfigManager().hasCachedConfig) {
+      return _buildWeatherConnectivityRequired(context);
+    }
+
+    // 3. Config exists -> check if weather is enabled
+    if (!AppConfig.isWeatherEnabled) {
+      return _buildWeatherDisabledCard(context);
+    }
+
+    // 4. Weather is enabled, but we are offline -> show "No Internet"
+    if (_isOffline) {
+      return _buildWeatherConnectivityRequired(context);
+    }
+
+    // 5. Weather is enabled and online -> normal weather card (cubit handles states)
     final scale = ResponsiveText.getScale(context);
     final minHeight = (140 * scale).clamp(120.0, 180.0);
 
@@ -417,17 +524,156 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        child: _getWeatherContent(state, cubit, context, locationName),
+        child: _getWeatherContent(
+          state,
+          cubit,
+          context,
+          permissionGranted,
+          permissionPermanentlyDenied,
+        ),
       ),
     );
   }
 
-  Widget _getWeatherContent(HomeStates state, HomeCubit cubit, BuildContext context, String locationName) {
+  // Weather card states
+  Widget _buildWeatherLoadingCard(BuildContext context) {
+    final scale = ResponsiveText.getScale(context);
+    return Container(
+      constraints: BoxConstraints(minHeight: (140 * scale).clamp(120.0, 180.0)),
+      padding: EdgeInsets.all(ResponsiveText.padding(context, 16)),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        color: Colors.grey[300],
+      ),
+      child: const Center(child: CircularProgressIndicator()),
+    );
+  }
+
+  Widget _buildWeatherConnectivityRequired(BuildContext context) {
+    final s = S.of(context);
+    final scale = ResponsiveText.getScale(context);
+    return Container(
+      constraints: BoxConstraints(minHeight: (140 * scale).clamp(120.0, 180.0)),
+      padding: EdgeInsets.all(ResponsiveText.padding(context, 16)),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [Colors.grey[400]!, Colors.grey[600]!],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.wifi_off_rounded, color: Colors.white70, size: 40),
+          const SizedBox(height: 8),
+          Text(
+            s.noInternet,
+            style: TextStyle(color: Colors.white, fontSize: ResponsiveText.body(context)),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            s.checkNetwork,
+            style: TextStyle(color: Colors.white70, fontSize: ResponsiveText.labelSmall(context)),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 12),
+          TextButton(
+            onPressed: () async {
+              setState(() => _isCheckingWeather = true);
+              await ConfigManager().fetchIfNeeded(force: true);
+              setState(() {
+                _isCheckingWeather = false;
+                _isOffline = false;
+              });
+            },
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.white.withValues(alpha: 0.2),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: Text(
+              s.retry,
+              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildWeatherDisabledCard(BuildContext context) {
+    final s = S.of(context);
+    final scale = ResponsiveText.getScale(context);
+    return Container(
+      constraints: BoxConstraints(minHeight: (140 * scale).clamp(120.0, 180.0)),
+      padding: EdgeInsets.all(ResponsiveText.padding(context, 16)),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [Colors.grey[400]!, Colors.grey[600]!],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.cloud_off_rounded, color: Colors.white70, size: 40),
+          const SizedBox(height: 8),
+          Text(
+            s.weather_unavailable_title,
+            style: TextStyle(color: Colors.white, fontSize: ResponsiveText.body(context)),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            s.weather_unavailable_subtitle,
+            style: TextStyle(color: Colors.white70, fontSize: ResponsiveText.labelSmall(context)),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  // ======================== WEATHER HELPERS ========================
+  Widget _getWeatherContent(
+      HomeStates state,
+      HomeCubit cubit,
+      BuildContext context,
+      bool permissionGranted,
+      bool permissionPermanentlyDenied,
+      ) {
     if (cubit.weatherData != null) {
-      return _buildWeatherData(cubit.weatherData!, cubit.insights, context, locationName);
+      return _buildWeatherData(cubit.weatherData!, cubit.insights, context);
     }
     if (state is WeatherLoadingState) return _buildLoading(context);
-    if (state is LocationPermissionDeniedState) {
+
+    if (permissionPermanentlyDenied) {
+      return _buildWeatherError(
+        context,
+        icon: Icons.location_off,
+        message: S.of(context).location_permission_denied_forever,
+        buttonText: S.of(context).open_settings,
+        onPressed: () => Geolocator.openAppSettings(),
+      );
+    }
+
+    if (!permissionGranted) {
       return _buildWeatherError(
         context,
         icon: Icons.location_off,
@@ -436,15 +682,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onPressed: () => _requestLocationWithExplanation(context),
       );
     }
-    if (state is LocationPermanentlyDeniedState || _permissionPermanentlyDenied) {
-      return _buildWeatherError(
-        context,
-        icon: Icons.settings,
-        message: S.of(context).permanentDenial,
-        buttonText: S.of(context).openSettings,
-        onPressed: () => Geolocator.openAppSettings(),
-      );
-    }
+
     if (state is LocationServicesDisabledState) {
       return _buildWeatherError(
         context,
@@ -454,7 +692,9 @@ class _HomeScreenState extends State<HomeScreen> {
         onPressed: () => cubit.openLocationSettings(),
       );
     }
+
     if (state is WeatherFetchErrorState) {
+      // Check if offline
       return _buildWeatherError(
         context,
         icon: Icons.error_outline,
@@ -463,7 +703,7 @@ class _HomeScreenState extends State<HomeScreen> {
         onPressed: () => cubit.getWeatherData(),
       );
     }
-    // No weather data yet – show prompt
+
     return _buildWeatherError(
       context,
       icon: Icons.touch_app,
@@ -473,21 +713,24 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildWeatherError(BuildContext context, {
-    required IconData icon,
-    required String message,
-    required String buttonText,
-    required VoidCallback onPressed,
-  }) {
+  Widget _buildWeatherError(
+      BuildContext context, {
+        required IconData icon,
+        required String message,
+        required String buttonText,
+        required VoidCallback onPressed,
+      }) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, color: Colors.white, size: ResponsiveText.iconSizeMedium(context)),
         SizedBox(height: ResponsiveText.padding(context, 8)),
-        Text(message,
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.white, fontSize: ResponsiveText.body(context))),
+        Text(
+          message,
+          textAlign: TextAlign.center,
+          style: TextStyle(color: Colors.white, fontSize: ResponsiveText.body(context)),
+        ),
         SizedBox(height: ResponsiveText.padding(context, 12)),
         TextButton(
           onPressed: onPressed,
@@ -495,15 +738,24 @@ class _HomeScreenState extends State<HomeScreen> {
             backgroundColor: Colors.white.withValues(alpha: 0.2),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
-          child: Text(buttonText,
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold,
-                  fontSize: ResponsiveText.label(context))),
+          child: Text(
+            buttonText,
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              fontSize: ResponsiveText.label(context),
+            ),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildWeatherData(WeatherData weather, List<FarmingInsight> insights, BuildContext context, String locationName) {
+  Widget _buildWeatherData(
+      WeatherData weather,
+      List<FarmingInsight> insights,
+      BuildContext context,
+      ) {
     final scale = ResponsiveText.getScale(context);
     final statusColor = insights.isEmpty
         ? AppColors.success
@@ -514,21 +766,6 @@ class _HomeScreenState extends State<HomeScreen> {
       mainAxisAlignment: MainAxisAlignment.center,
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (locationName.isNotEmpty)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Text(
-              locationName,
-              style: TextStyle(
-                color: Colors.white70,
-                fontSize: ResponsiveText.labelSmall(context),
-                fontWeight: FontWeight.w500,
-                letterSpacing: 0.3,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ),
         Flexible(
           child: Text(
             '${weather.current.temperature.round()}°',
@@ -546,8 +783,11 @@ class _HomeScreenState extends State<HomeScreen> {
             textAlign: TextAlign.center,
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(color: Colors.white, fontSize: ResponsiveText.body(context),
-                fontWeight: FontWeight.w500),
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: ResponsiveText.body(context),
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
         SizedBox(height: ResponsiveText.padding(context, 12)),
@@ -565,7 +805,11 @@ class _HomeScreenState extends State<HomeScreen> {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(width: 6, height: 6, decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle)),
+                Container(
+                  width: 6,
+                  height: 6,
+                  decoration: BoxDecoration(color: statusColor, shape: BoxShape.circle),
+                ),
                 SizedBox(width: ResponsiveText.padding(context, 6)),
                 Flexible(
                   child: Text(
@@ -598,68 +842,64 @@ class _HomeScreenState extends State<HomeScreen> {
       children: [
         CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
         SizedBox(height: ResponsiveText.padding(context, 12)),
-        Text(S.of(context).fetchingWeather,
-            style: TextStyle(color: Colors.white, fontSize: ResponsiveText.bodySmall(context))),
+        Text(
+          S.of(context).fetchingWeather,
+          style: TextStyle(color: Colors.white, fontSize: ResponsiveText.bodySmall(context)),
+        ),
       ],
     );
   }
 
-  // ============================================================
-  // Optimized weather insights
-  // ============================================================
-  Widget _buildWeatherDescription(BuildContext context) {
-    return BlocSelector<HomeCubit, HomeStates, List<FarmingInsight>>(
-      selector: (state) => HomeCubit.get(context).insights,
-      builder: (context, insights) {
-        if (insights.isEmpty) return const SizedBox.shrink();
-        final isDark = Theme.of(context).brightness == Brightness.dark;
-        final topInsight = insights.first;
-        final Color levelColor = topInsight.level == InsightLevel.critical
-            ? AppColors.error
-            : (topInsight.level == InsightLevel.warning ? AppColors.warning : AppColors.success);
-        return Container(
-          padding: EdgeInsets.all(ResponsiveText.padding(context, 12)),
-          decoration: BoxDecoration(
-            color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-            borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: levelColor.withValues(alpha: 0.3)),
-            boxShadow: [
-              BoxShadow(
-                color: levelColor.withValues(alpha: 0.05),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
-              ),
-            ],
+  Widget _buildWeatherDescription(BuildContext context, List<FarmingInsight> insights) {
+    if (insights.isEmpty) return const SizedBox.shrink();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final topInsight = insights.first;
+    final Color levelColor = topInsight.level == InsightLevel.critical
+        ? AppColors.error
+        : (topInsight.level == InsightLevel.warning ? AppColors.warning : AppColors.success);
+    return Container(
+      padding: EdgeInsets.all(ResponsiveText.padding(context, 12)),
+      decoration: BoxDecoration(
+        color: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: levelColor.withValues(alpha: 0.3)),
+        boxShadow: [
+          BoxShadow(
+            color: levelColor.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
           ),
-          child: Row(
-            children: [
-              Icon(topInsight.icon, color: levelColor, size: ResponsiveText.iconSizeSmall(context)),
-              SizedBox(width: ResponsiveText.padding(context, 8)),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(topInsight.title,
-                      style: TextStyle(
-                        fontSize: ResponsiveText.labelSmall(context),
-                        fontWeight: FontWeight.bold,
-                        color: levelColor,
-                      ),
-                    ),
-                    Text(topInsight.message,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        fontSize: ResponsiveText.bodySmall(context),
-                      ),
-                    ),
-                  ],
+        ],
+      ),
+      child: Row(
+        children: [
+          Icon(topInsight.icon, color: levelColor, size: ResponsiveText.iconSizeSmall(context)),
+          SizedBox(width: ResponsiveText.padding(context, 8)),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  topInsight.title,
+                  style: TextStyle(
+                    fontSize: ResponsiveText.labelSmall(context),
+                    fontWeight: FontWeight.bold,
+                    color: levelColor,
+                  ),
                 ),
-              ),
-            ],
+                Text(
+                  topInsight.message,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: ResponsiveText.bodySmall(context),
+                  ),
+                ),
+              ],
+            ),
           ),
-        );
-      },
+        ],
+      ),
     );
   }
 
@@ -677,7 +917,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   LinearGradient _getWeatherGradient(WeatherData? weather) {
     if (weather == null) {
-      return LinearGradient(colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)]);
+      return LinearGradient(
+        colors: [AppColors.primary, AppColors.primary.withValues(alpha: 0.8)],
+      );
     }
     final isSunny = weather.current.weatherCode == 0;
     return isSunny
@@ -693,9 +935,61 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ============================================================
-  // Plant carousel
-  // ============================================================
+  // ---------------------- Chat button (unchanged) ----------------------
+  Widget _buildChatButton(BuildContext context) {
+    return Card(
+      elevation: 2,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: InkWell(
+        onTap: () async {
+          final authService = SupabaseAuthService();
+          final hasInternet = await authService.isConnectedFast();
+          if (!hasInternet) {
+            await _showOfflineChatDialog(context);
+            return;
+          }
+
+          await ConfigManager().fetchIfNeeded();
+          if (!AppConfig.isChatEnabled) {
+            _showChatUnavailableDialog(context);
+            return;
+          }
+
+          navigateTo(context, const AIChatScreen());
+        },
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Row(
+            children: [
+              const Text('👨‍🌾', style: TextStyle(fontSize: 30)),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      S.of(context).askAIAssistant,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    Text(
+                      S.of(context).askAIAssistantSubtitle,
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ======================== PLANT CAROUSEL (unchanged) ========================
   Widget _buildPlantCarousel(BuildContext context, HomeCubit cubit, String locale) {
     final emojiSize = ResponsiveText.emojiSmall(context);
     final carouselHeight = (emojiSize + 32).clamp(110.0, 160.0);
@@ -782,9 +1076,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ============================================================
-  // Plant detail card – NPK removed, planting time fixed
-  // ============================================================
+  // ======================== PLANT DETAIL CARD (unchanged) ========================
   Widget _buildPlantDetailCard(BuildContext context, Plant plant, String locale) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -862,8 +1154,6 @@ class _HomeScreenState extends State<HomeScreen> {
             ],
           ),
           SizedBox(height: ResponsiveText.padding(context, 16)),
-
-          // ── Planting Time (fixed: no maxLines, simple Text) ──
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -879,64 +1169,12 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ],
           ),
-          // ⚠️ NPK line removed as requested
         ],
       ),
     );
   }
 
-  // ============================================================
-  // Chat AI Button
-  // ============================================================
-  Widget _buildChatButton(BuildContext context) {
-    return Card(
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: InkWell(
-        onTap: () async {
-          final authService = SupabaseAuthService();
-          final hasInternet = await authService.isConnectedFast();
-          if (!hasInternet) {
-            await _showOfflineChatDialog(context);
-            return;
-          }
-          navigateTo(context, const AIChatScreen());
-        },
-        borderRadius: BorderRadius.circular(16),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Row(
-            children: [
-              Text('👨‍🌾', style: TextStyle(fontSize: 30)),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      S.of(context).askAIAssistant,
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    Text(
-                      S.of(context).askAIAssistantSubtitle,
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              ),
-              Icon(Icons.arrow_forward_ios, size: 16, color: Colors.grey[400]),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  // ============================================================
-  // Loading shimmer
-  // ============================================================
+  // ======================== LOADING SHIMMER (unchanged) ========================
   Widget _buildLoadingShimmer() {
     return Column(
       children: List.generate(
@@ -1212,17 +1450,47 @@ class _PlantDetailsExpandableState extends State<_PlantDetailsExpandable>
       final nutrition = sectionData as NutritionRecommendations;
       return Column(
         children: [
-          _buildLabeledText(context, S.of(context).nitrogen, nutrition.nitrogen[locale] ?? '', color, isDark),
-          _buildLabeledText(context, S.of(context).phosphorus, nutrition.phosphorus[locale] ?? '', color, isDark),
-          _buildLabeledText(context, S.of(context).potassium, nutrition.potassium[locale] ?? '', color, isDark),
+          _buildLabeledText(
+            context,
+            S.of(context).nitrogen,
+            nutrition.nitrogen[locale] ?? '',
+            color,
+            isDark,
+          ),
+          _buildLabeledText(
+            context,
+            S.of(context).phosphorus,
+            nutrition.phosphorus[locale] ?? '',
+            color,
+            isDark,
+          ),
+          _buildLabeledText(
+            context,
+            S.of(context).potassium,
+            nutrition.potassium[locale] ?? '',
+            color,
+            isDark,
+          ),
         ],
       );
     } else if (index == 2) {
       final storage = sectionData as StorageInfo;
       return Column(
         children: [
-          _buildLabeledText(context, S.of(context).temperature, storage.temperature[locale] ?? '', color, isDark),
-          _buildLabeledText(context, S.of(context).humidity, storage.humidity[locale] ?? '', color, isDark),
+          _buildLabeledText(
+            context,
+            S.of(context).temperature,
+            storage.temperature[locale] ?? '',
+            color,
+            isDark,
+          ),
+          _buildLabeledText(
+            context,
+            S.of(context).humidity,
+            storage.humidity[locale] ?? '',
+            color,
+            isDark,
+          ),
         ],
       );
     } else {
@@ -1280,7 +1548,13 @@ class _PlantDetailsExpandableState extends State<_PlantDetailsExpandable>
     }
   }
 
-  Widget _buildLabeledText(BuildContext context, String label, String value, Color color, bool isDark) {
+  Widget _buildLabeledText(
+      BuildContext context,
+      String label,
+      String value,
+      Color color,
+      bool isDark,
+      ) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: ResponsiveText.padding(context, 8)),
       child: Row(

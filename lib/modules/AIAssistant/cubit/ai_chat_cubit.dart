@@ -1,12 +1,17 @@
 import 'dart:async';
+import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:uuid/uuid.dart';
+import '../../../config/app_config.dart';
 import '../../../config/environment.dart';
 import '../../../models/chat_message.dart';
 import '../../../models/user/user_model.dart';
 import '../../../shared/network/local/chat_history_db.dart';
+import '../../../shared/network/remote/supabase_service.dart';
+import '../../../shared/network/remote/supabase_auth_service.dart';
 import '../ai_chat_service.dart';
 import 'ai_chat_state.dart';
 
@@ -20,14 +25,17 @@ class AIChatCubit extends Cubit<AIChatState> {
 
   // ---------- Ad related ----------
   RewardedAd? _rewardedAd;
-  int _remainingFreeChats = 3;
+  int _remainingFreeChats = 0;
   static const String _prefKey = 'remaining_free_chats';
   bool _isAdLoading = false;
-  bool _isClosed = false; // to prevent emitting after dispose
+  bool _isClosed = false;
+
+  // ✅ Public flag to indicate loading state of remaining chats
+  bool isLoadingRemaining = true;
 
   AIChatCubit({String? sessionId})
       : _sessionId = sessionId ?? const Uuid().v4(),
-        super(const AIChatInitial()) {
+        super(const AIChatInitial(remainingFreeChats: 0)) {
     _loadRemainingChats();
     _loadConversation();
   }
@@ -36,14 +44,72 @@ class AIChatCubit extends Cubit<AIChatState> {
 
   // ---------- Persistence ----------
   Future<void> _loadRemainingChats() async {
+    isLoadingRemaining = true;
     final prefs = await SharedPreferences.getInstance();
-    _remainingFreeChats = prefs.getInt(_prefKey) ?? 3;
+
+    // 1. Load from local cache first (instant)
+    final localCount = prefs.getInt(_prefKey);
+    if (localCount != null) {
+      _remainingFreeChats = localCount;
+      isLoadingRemaining = false;
+      _updateStateWithRemaining();
+    }
+
+    // 2. Fetch from Supabase (source of truth)
+    final user = CurrentUser.user;
+    if (user != null) {
+      try {
+        final data = await supabaseService.client
+            .from('users')
+            .select('free_chat_attempts')
+            .eq('id', user.id)
+            .single();
+
+        final cloudCount = data['free_chat_attempts'] as int?;
+        if (cloudCount != null && cloudCount != _remainingFreeChats) {
+          _remainingFreeChats = cloudCount;
+          await prefs.setInt(_prefKey, cloudCount);
+        }
+        isLoadingRemaining = false;
+        debugPrint('✅ Free chat attempts synced from cloud: $_remainingFreeChats');
+      } catch (e) {
+        debugPrint('⚠️ Failed to fetch free chat attempts from cloud');
+        if (localCount == null) {
+          _remainingFreeChats = 3;
+          isLoadingRemaining = false;
+        }
+      }
+    } else {
+      if (localCount == null) {
+        _remainingFreeChats = 3;
+        isLoadingRemaining = false;
+      }
+    }
+
+    isLoadingRemaining = false;
     _updateStateWithRemaining();
   }
 
   Future<void> _saveRemainingChats(int count) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setInt(_prefKey, count);
+
+    final user = CurrentUser.user;
+    if (user != null) {
+      unawaited(_syncToCloud(count));
+    }
+  }
+
+  Future<void> _syncToCloud(int count) async {
+    try {
+      await supabaseService.client
+          .from('users')
+          .update({'free_chat_attempts': count})
+          .eq('id', CurrentUser.user.id);
+      debugPrint('✅ Free chat attempts synced to cloud: $count');
+    } catch (e) {
+      debugPrint('⚠️ Failed to sync free chat attempts: $e');
+    }
   }
 
   // ---------- Conversation ----------
@@ -67,7 +133,6 @@ class AIChatCubit extends Cubit<AIChatState> {
   void watchAdToGetMore() {
     if (_isAdLoading || _isClosed) return;
     if (_remainingFreeChats > 0) return;
-    // Emit loading state for ad
     _safeEmit(AIChatAdLoading(
       messages: _messages,
       remainingFreeChats: _remainingFreeChats,
@@ -75,13 +140,33 @@ class AIChatCubit extends Cubit<AIChatState> {
     _showRewardedAd();
   }
 
-  // ---------- Core: send message ----------
+  // ---------- Core: send message with offline check ----------
   Future<void> sendMessage(String text) async {
     if (_isClosed) return;
     if (text.trim().isEmpty) return;
 
-    // Check free chats – if none, just return (UI will handle)
+    // Check if chat is enabled (config)
+    if (!AppConfig.isChatEnabled) {
+      _safeEmit(AIChatError(
+        error: 'Chat feature is currently disabled.',
+        messages: _messages,
+        remainingFreeChats: _remainingFreeChats,
+      ));
+      return;
+    }
+
     if (_remainingFreeChats <= 0) {
+      return;
+    }
+
+    // ✅ Check connectivity before sending
+    final hasInternet = await SupabaseAuthService().isConnectedFast();
+    if (!hasInternet) {
+      _safeEmit(AIChatError(
+        error: 'offline_chat',
+        messages: _messages,
+        remainingFreeChats: _remainingFreeChats,
+      ));
       return;
     }
 
@@ -113,7 +198,6 @@ class AIChatCubit extends Cubit<AIChatState> {
 
       _subscription = stream.listen(
             (chunk) {
-          // Insert spaces to avoid word merging
           final index = _messages.indexWhere((m) => m.id == _currentAssistantMessageId);
           if (index != -1) {
             String currentContent = _messages[index].content;
@@ -136,7 +220,6 @@ class AIChatCubit extends Cubit<AIChatState> {
           _subscription?.cancel();
           _subscription = null;
 
-          // Format the final assistant message (Markdown cleanup)
           final assistantIndex = _messages.indexWhere((m) => m.id == _currentAssistantMessageId);
           if (assistantIndex != -1) {
             final rawContent = _messages[assistantIndex].content;
@@ -145,9 +228,6 @@ class AIChatCubit extends Cubit<AIChatState> {
               content: formattedContent,
             );
           }
-
-          // Remove debug print or use logger
-          // print('📦 Full Markdown response: ...');
 
           _saveConversation();
           _safeEmit(AIChatSuccess(
@@ -159,8 +239,12 @@ class AIChatCubit extends Cubit<AIChatState> {
           _subscription?.cancel();
           _subscription = null;
           _messages.removeWhere((m) => m.id == _currentAssistantMessageId);
+          String errorMsg = error.toString();
+          if (error is SocketException || error.toString().contains('SocketException')) {
+            errorMsg = 'network_error';
+          }
           _safeEmit(AIChatError(
-            error: error.toString(),
+            error: errorMsg,
             messages: _messages,
             remainingFreeChats: _remainingFreeChats,
           ));
@@ -168,8 +252,12 @@ class AIChatCubit extends Cubit<AIChatState> {
       );
     } catch (e) {
       _messages.removeWhere((m) => m.id == _currentAssistantMessageId);
+      String errorMsg = e.toString();
+      if (e is SocketException || e.toString().contains('SocketException')) {
+        errorMsg = 'network_error';
+      }
       _safeEmit(AIChatError(
-        error: e.toString(),
+        error: errorMsg,
         messages: _messages,
         remainingFreeChats: _remainingFreeChats,
       ));
@@ -229,7 +317,6 @@ class AIChatCubit extends Cubit<AIChatState> {
               ad.dispose();
               _rewardedAd = null;
               _isAdLoading = false;
-              // Emit a specific error code
               _safeEmit(AIChatError(
                 error: 'ad_failed_to_show',
                 messages: _messages,
@@ -240,7 +327,6 @@ class AIChatCubit extends Cubit<AIChatState> {
         },
         onAdFailedToLoad: (LoadAdError error) {
           _isAdLoading = false;
-          // Emit a specific error code
           _safeEmit(AIChatError(
             error: 'ad_not_available',
             messages: _messages,
@@ -251,14 +337,14 @@ class AIChatCubit extends Cubit<AIChatState> {
     );
   }
 
-  // ---------- Safe emit (guards against emitting after close) ----------
+  // ---------- Safe emit ----------
   void _safeEmit(AIChatState state) {
     if (!_isClosed) {
       emit(state);
     }
   }
 
-  // ---------- Helper to update state with new remaining count ----------
+  // ---------- Helper to update state ----------
   void _updateStateWithRemaining() {
     final currentState = state;
     if (currentState is AIChatInitial) {

@@ -41,6 +41,7 @@ class HomeCubit extends Cubit<HomeStates> {
 
   final WeatherRepository _weatherRepository = WeatherRepository();
   List<FarmingInsight> insights = [];
+  List<FarmingInsight> _cachedInsights = [];
 
   int selectedIndex = 0;
 
@@ -132,16 +133,39 @@ class HomeCubit extends Cubit<HomeStates> {
     }
   }
 
-  // Force refresh (bypass cache) – kept for potential manual refresh
+  // Force refresh (bypass cache)
   Future<void> refreshWeather() async {
     _cache.clear();
     await getWeatherData();
   }
 
+  // ============================================================
+  // INSIGHTS – STABLE LIST REFERENCE (no flicker)
+  // ============================================================
   void generateInsights(BuildContext context) {
-    if (weatherData != null) {
-      insights = FarmingService.getInsights(weatherData!, context);
+    if (weatherData == null) return;
+
+    final newInsights = FarmingService.getInsights(weatherData!, context);
+
+    // Only update if content actually changed
+    if (_insightsChanged(newInsights, _cachedInsights)) {
+      _cachedInsights = newInsights;
+      insights = _cachedInsights;
+      emit(InsightsUpdatedState());
     }
+  }
+
+  bool _insightsChanged(List<FarmingInsight> newList, List<FarmingInsight> oldList) {
+    if (newList.length != oldList.length) return true;
+    for (int i = 0; i < newList.length; i++) {
+      if (newList[i].title != oldList[i].title ||
+          newList[i].message != oldList[i].message ||
+          newList[i].level != oldList[i].level ||
+          newList[i].icon != oldList[i].icon) {
+        return true;
+      }
+    }
+    return false;
   }
 
   Future<void> requestLocationPermission() async {

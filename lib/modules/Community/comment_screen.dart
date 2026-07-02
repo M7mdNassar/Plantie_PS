@@ -5,9 +5,11 @@ import 'package:plantie/shared/network/remote/supabase_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../generated/l10n.dart';
 import '../../models/user/user_model.dart';
+import '../../shared/components/components.dart';
+import '../../shared/network/remote/supabase_auth_service.dart';
 import '../../shared/styles/app_colors.dart';
 import '../../shared/styles/icon_broken.dart';
-import '../../shared/network/remote/supabase_auth_service.dart';
+import '../UserView/user_profile_screen.dart';
 import 'cubit/cubit.dart';
 
 class CommentScreen extends StatefulWidget {
@@ -419,41 +421,69 @@ class _CommentScreenState extends State<CommentScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: AppColors.primary.withOpacity(0.2),
-            backgroundImage: (comment.userImage?.isNotEmpty ?? false)
-                ? NetworkImage(comment.userImage!)
-                : const AssetImage('assets/images/default_avatar.png') as ImageProvider,
+          GestureDetector(
+            onTap: () {
+              navigateTo(
+                context,
+                UserProfileScreen(
+                  userId: comment.userId,
+                  userName: comment.userName,
+                ),
+              );
+            },
+            child: CircleAvatar(
+              radius: 20,
+              backgroundColor: AppColors.primary.withOpacity(0.2),
+              backgroundImage: (comment.userImage?.isNotEmpty ?? false)
+                  ? NetworkImage(comment.userImage!)
+                  : const AssetImage('assets/images/default_avatar.png') as ImageProvider,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.grey[800] : Colors.grey[200],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(comment.userName,
-                          style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 4),
-                      Text(comment.text, style: Theme.of(context).textTheme.bodyMedium),
-                    ],
+                GestureDetector(
+                  onTap: () {
+                    navigateTo(
+                      context,
+                      UserProfileScreen(
+                        userId: comment.userId,
+                        userName: comment.userName,
+                      ),
+                    );
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[800] : Colors.grey[200],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          comment.userName,
+                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(comment.text, style: Theme.of(context).textTheme.bodyMedium),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 6),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Text(_getRelativeTime(context, comment.timestamp),
-                      style: Theme.of(context).textTheme.labelSmall
-                          ?.copyWith(color: Colors.grey[600])),
+                  child: Text(
+                    _getRelativeTime(context, comment.timestamp),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Colors.grey[600],
+                    ),
+                  ),
                 ),
               ],
             ),
