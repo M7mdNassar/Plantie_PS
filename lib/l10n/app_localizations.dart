@@ -2676,6 +2676,54 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Chat feature is currently disabled. Please try again later.'**
   String get chat_unavailable_subtitle;
+
+  /// No description provided for @pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get pending;
+
+  /// No description provided for @commentsNotAvailableForPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Comments are not available for pending posts.'**
+  String get commentsNotAvailableForPending;
+
+  /// No description provided for @pendingPostExistsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Post Exists'**
+  String get pendingPostExistsTitle;
+
+  /// No description provided for @pendingPostExistsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have a pending post. Please wait for it to sync or delete it before creating a new one.'**
+  String get pendingPostExistsMessage;
+
+  /// No description provided for @positionTheLeaf.
+  ///
+  /// In en, this message translates to:
+  /// **'Position the leaf in the center of the frame'**
+  String get positionTheLeaf;
+
+  /// No description provided for @steadyShot.
+  ///
+  /// In en, this message translates to:
+  /// **'Steady your hand'**
+  String get steadyShot;
+
+  /// No description provided for @avoidBlur.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold still to avoid blur'**
+  String get avoidBlur;
+
+  /// No description provided for @plantName.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant'**
+  String get plantName;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

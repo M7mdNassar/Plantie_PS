@@ -9,33 +9,54 @@ import 'package:plantie/modules/Home/cubit/states.dart';
 import 'package:plantie/modules/Home/data/weather_repository.dart';
 import 'package:plantie/modules/Home/domain/farming_insight.dart';
 import 'package:plantie/modules/Home/domain/farming_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../models/plant.dart';
 import '../../../models/weather_model.dart';
 
 // =====================================================================
-// WEATHER CACHE CLASS
+// PERSISTENT WEATHER CACHE (SharedPreferences)
 // =====================================================================
-class _WeatherCache {
-  WeatherData? data;
-  DateTime? timestamp;
+class _PersistentWeatherCache {
+  static const String _cacheKey = 'cached_weather_data';
   static const Duration ttl = Duration(minutes: 30);
 
-  bool get isValid => data != null && timestamp != null &&
-      DateTime.now().difference(timestamp!) < ttl;
-
-  void set(WeatherData weather) {
-    data = weather;
-    timestamp = DateTime.now();
+  static Future<void> save(WeatherData weather) async {
+    final prefs = await SharedPreferences.getInstance();
+    final data = {
+      'weather': weather.toJson(),
+      'timestamp': DateTime.now().toIso8601String(),
+    };
+    await prefs.setString(_cacheKey, jsonEncode(data));
   }
 
-  void clear() {
-    data = null;
-    timestamp = null;
+  static Future<WeatherData?> load() async {
+    final prefs = await SharedPreferences.getInstance();
+    final raw = prefs.getString(_cacheKey);
+    if (raw == null) return null;
+    try {
+      final json = jsonDecode(raw);
+      final timestamp = DateTime.parse(json['timestamp']);
+      if (DateTime.now().difference(timestamp) > ttl) {
+        // Expired – clear it
+        await prefs.remove(_cacheKey);
+        return null;
+      }
+      return WeatherData.fromJson(json['weather']);
+    } catch (e) {
+      return null;
+    }
+  }
+
+  static Future<void> clear() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove(_cacheKey);
   }
 }
 
 class HomeCubit extends Cubit<HomeStates> {
-  HomeCubit() : super(HomeInitialState());
+  HomeCubit() : super(HomeInitialState()) {
+    _loadCachedWeather();
+  }
 
   static HomeCubit get(context) => BlocProvider.of(context);
 
@@ -69,19 +90,28 @@ class HomeCubit extends Cubit<HomeStates> {
   }
 
   // ------------------------------------------------------------------
-  // Weather
+  // Weather – with persistent cache
   // ------------------------------------------------------------------
-  final _WeatherCache _cache = _WeatherCache();
-
   WeatherData? weatherData;
   bool _isRequestingLocation = false;
+
+  /// Load cached weather from SharedPreferences on startup
+  Future<void> _loadCachedWeather() async {
+    final cached = await _PersistentWeatherCache.load();
+    if (cached != null) {
+      weatherData = cached;
+      emit(WeatherLoadedState());
+      debugPrint('✅ Weather loaded from persistent cache');
+    }
+  }
 
   Future<void> getWeatherData() async {
     if (_isRequestingLocation) return;
 
-    // Check cache
-    if (_cache.isValid) {
-      weatherData = _cache.data;
+    // Check persistent cache first
+    final cached = await _PersistentWeatherCache.load();
+    if (cached != null) {
+      weatherData = cached;
       emit(WeatherLoadedState());
       return;
     }
@@ -123,7 +153,8 @@ class HomeCubit extends Cubit<HomeStates> {
         position.longitude,
       );
 
-      _cache.set(weatherData!);
+      // Save to persistent cache
+      await _PersistentWeatherCache.save(weatherData!);
       emit(WeatherLoadedState());
     } catch (e) {
       log("Weather Error: $e");
@@ -135,7 +166,7 @@ class HomeCubit extends Cubit<HomeStates> {
 
   // Force refresh (bypass cache)
   Future<void> refreshWeather() async {
-    _cache.clear();
+    await _PersistentWeatherCache.clear(); // clear cached
     await getWeatherData();
   }
 
@@ -147,7 +178,6 @@ class HomeCubit extends Cubit<HomeStates> {
 
     final newInsights = FarmingService.getInsights(weatherData!, context);
 
-    // Only update if content actually changed
     if (_insightsChanged(newInsights, _cachedInsights)) {
       _cachedInsights = newInsights;
       insights = _cachedInsights;

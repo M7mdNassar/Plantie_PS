@@ -159,15 +159,15 @@ class HistoryDBHelper {
           ''');
         }
 
-        if (oldVersion < 5) {
-          await db.execute('''
-    CREATE TABLE IF NOT EXISTS chat_history (
-      session_id TEXT PRIMARY KEY,
-      messages TEXT NOT NULL,
-      updated_at TEXT NOT NULL
-    )
-  ''');
-        }
+  //       if (oldVersion < 5) {
+  //         await db.execute('''
+  //   CREATE TABLE IF NOT EXISTS chat_history (
+  //     session_id TEXT PRIMARY KEY,
+  //     messages TEXT NOT NULL,
+  //     updated_at TEXT NOT NULL
+  //   )
+  // ''');
+  //       }
       },
     );
   }

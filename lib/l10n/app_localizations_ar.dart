@@ -1382,4 +1382,30 @@ class SAr extends S {
   @override
   String get chat_unavailable_subtitle =>
       'خدمة المحادثة معطلة حالياً. يرجى المحاولة لاحقاً.';
+
+  @override
+  String get pending => 'جاري النشر';
+
+  @override
+  String get commentsNotAvailableForPending =>
+      'التعليقات غير متاحة للمنشورات الجاري نشرها.';
+
+  @override
+  String get pendingPostExistsTitle => 'يوجد منشور قيد النشر';
+
+  @override
+  String get pendingPostExistsMessage =>
+      'لديك منشور قيد النشر بالفعل. يرجى الانتظار حتى يتم مزامنته أو حذفه قبل إنشاء منشور جديد.';
+
+  @override
+  String get positionTheLeaf => 'ضع الورقة في وسط الإطار';
+
+  @override
+  String get steadyShot => 'ثبت يدك';
+
+  @override
+  String get avoidBlur => 'لا تحرك الكاميرا لتجنب التشويش';
+
+  @override
+  String get plantName => 'النبتة';
 }

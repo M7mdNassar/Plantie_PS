@@ -107,6 +107,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "avatar": MessageLookupByLibrary.simpleMessage("الصورة الشخصية"),
     "avoid": MessageLookupByLibrary.simpleMessage("تجنب"),
+    "avoidBlur": MessageLookupByLibrary.simpleMessage(
+      "لا تحرك الكاميرا لتجنب التشويش",
+    ),
     "avoidBlurred": MessageLookupByLibrary.simpleMessage(
       "تجنب الصور الضبابية أو المائلة",
     ),
@@ -183,6 +186,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "لم يتم نشر التعليق. يرجى المحاولة مرة أخرى.",
     ),
     "comments": MessageLookupByLibrary.simpleMessage("التعليقات"),
+    "commentsNotAvailableForPending": MessageLookupByLibrary.simpleMessage(
+      "التعليقات غير متاحة للمنشورات الجاري نشرها.",
+    ),
     "community": MessageLookupByLibrary.simpleMessage("المجتمع"),
     "community_unavailable_subtitle": MessageLookupByLibrary.simpleMessage(
       "يرجى العودة لاحقاً.",
@@ -446,8 +452,24 @@ class MessageLookup extends MessageLookupByLibrary {
       "جاري تحميل المزيد...",
     ),
     "locationDenied": MessageLookupByLibrary.simpleMessage("تم رفض إذن الموقع"),
+    "locationDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "الرجاء منح صلاحية الموقع للعثور على أقرب متجر.",
+    ),
+    "locationDeniedTitle": MessageLookupByLibrary.simpleMessage("الموقع مرفوض"),
     "locationError": m9,
+    "locationPermanentlyDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "تم رفض صلاحية الموقع نهائياً. يرجى تفعيلها من إعدادات التطبيق.",
+    ),
+    "locationPermanentlyDeniedTitle": MessageLookupByLibrary.simpleMessage(
+      "الموقع مرفوض نهائياً",
+    ),
     "locationRequired": MessageLookupByLibrary.simpleMessage("يطلب إذن الموقع"),
+    "locationServicesDisabledMessage": MessageLookupByLibrary.simpleMessage(
+      "يرجى تفعيل خدمات الموقع للعثور على أقرب متجر.",
+    ),
+    "locationServicesDisabledTitle": MessageLookupByLibrary.simpleMessage(
+      "خدمات الموقع معطلة",
+    ),
     "location_permission_denied_forever": MessageLookupByLibrary.simpleMessage(
       "تم رفض صلاحية الموقع بشكل دائم. يرجى تمكينها من إعدادات الجهاز لاستخدام ميزات الطقس.",
     ),
@@ -535,6 +557,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "offlineCommentError": MessageLookupByLibrary.simpleMessage(
       "لا يوجد اتصال بالإنترنت. سيتم حفظ تعليقك عند عودة الاتصال.",
     ),
+    "offlineDeleteMessage": MessageLookupByLibrary.simpleMessage(
+      "لا يوجد اتصال بالإنترنت. يرجى الاتصال لحذف هذا المنشور.",
+    ),
     "offlineLikeError": MessageLookupByLibrary.simpleMessage(
       "لا يوجد اتصال بالإنترنت. سيتم حفظ الإعجاب عند عودة الاتصال.",
     ),
@@ -543,6 +568,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "offlineLoadMoreError": MessageLookupByLibrary.simpleMessage(
       "لا يوجد اتصال بالإنترنت. لا يمكن تحميل المزيد من المنشورات.",
+    ),
+    "offlineMapMessage": MessageLookupByLibrary.simpleMessage(
+      "لا يوجد اتصال بالإنترنت. يرجى الاتصال لفتح الخريطة.",
     ),
     "offlinePostMessage": MessageLookupByLibrary.simpleMessage(
       "أنت غير متصل بالإنترنت حاليًا. سيتم حفظ مشاركتك وتحميلها عندما تستعيد الاتصال.",
@@ -595,6 +623,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "partlyCloudy": MessageLookupByLibrary.simpleMessage("غائم جزئياً"),
     "password": MessageLookupByLibrary.simpleMessage("كلمة المرور"),
+    "pending": MessageLookupByLibrary.simpleMessage("جاري النشر"),
+    "pendingPostExistsMessage": MessageLookupByLibrary.simpleMessage(
+      "لديك منشور قيد النشر بالفعل. يرجى الانتظار حتى يتم مزامنته أو حذفه قبل إنشاء منشور جديد.",
+    ),
+    "pendingPostExistsTitle": MessageLookupByLibrary.simpleMessage(
+      "يوجد منشور قيد النشر",
+    ),
     "pendingUploadsMessage": m10,
     "pendingUploadsTitle": MessageLookupByLibrary.simpleMessage(
       "مرفوعات معلقة",
@@ -614,12 +649,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "phosphorus": MessageLookupByLibrary.simpleMessage("الفوسفور"),
     "photos": MessageLookupByLibrary.simpleMessage("الصور"),
     "plantDiagnosis": MessageLookupByLibrary.simpleMessage("تشخيص النباتات"),
+    "plantName": MessageLookupByLibrary.simpleMessage("النبتة"),
     "plantType": m11,
     "plantingTime": MessageLookupByLibrary.simpleMessage("وقت الزراعة"),
     "pleaseWait": MessageLookupByLibrary.simpleMessage(
       "يرجى الانتظار بينما يكتشف الذكاء الاصطناعي...",
     ),
     "popular": MessageLookupByLibrary.simpleMessage("الأكثر شهرة"),
+    "positionTheLeaf": MessageLookupByLibrary.simpleMessage(
+      "ضع الورقة في وسط الإطار",
+    ),
     "positioningTip1": MessageLookupByLibrary.simpleMessage(
       "التقط الصورة في إضاءة طبيعية جيدة",
     ),
@@ -731,6 +770,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ssp": MessageLookupByLibrary.simpleMessage("سوبر فوسفات"),
     "startDetection": MessageLookupByLibrary.simpleMessage("ابدأ الكشف"),
     "startScan": MessageLookupByLibrary.simpleMessage("بدء الفحص"),
+    "steadyShot": MessageLookupByLibrary.simpleMessage("ثبت يدك"),
     "storage": MessageLookupByLibrary.simpleMessage("التخزين"),
     "submit": MessageLookupByLibrary.simpleMessage("إرسال"),
     "successTitle": MessageLookupByLibrary.simpleMessage("تم بنجاح"),

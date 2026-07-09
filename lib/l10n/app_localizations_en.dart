@@ -1392,4 +1392,30 @@ class SEn extends S {
   @override
   String get chat_unavailable_subtitle =>
       'Chat feature is currently disabled. Please try again later.';
+
+  @override
+  String get pending => 'Pending';
+
+  @override
+  String get commentsNotAvailableForPending =>
+      'Comments are not available for pending posts.';
+
+  @override
+  String get pendingPostExistsTitle => 'Pending Post Exists';
+
+  @override
+  String get pendingPostExistsMessage =>
+      'You already have a pending post. Please wait for it to sync or delete it before creating a new one.';
+
+  @override
+  String get positionTheLeaf => 'Position the leaf in the center of the frame';
+
+  @override
+  String get steadyShot => 'Steady your hand';
+
+  @override
+  String get avoidBlur => 'Hold still to avoid blur';
+
+  @override
+  String get plantName => 'Plant';
 }

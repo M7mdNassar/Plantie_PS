@@ -1,3 +1,4 @@
+// lib/modules/Community/new_post_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:plantie/models/user/user_model.dart';
@@ -75,7 +76,6 @@ class _NewPostScreenState extends State<NewPostScreen> {
         }
       },
       builder: (context, state) {
-        // ✅ Use the boolean flag for instant loading feedback
         final isLoading = cubit.isCreatingPost;
         final isDark = Theme.of(context).brightness == Brightness.dark;
 
@@ -379,7 +379,7 @@ class _NewPostScreenState extends State<NewPostScreen> {
     );
   }
 
-  // ✅ Consistent offline retry dialog (matches the one in community_screen)
+  // ✅ Localized offline retry dialog
   void _showOfflineRetryDialog(BuildContext context, VoidCallback onRetry) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
@@ -414,7 +414,7 @@ class _NewPostScreenState extends State<NewPostScreen> {
     );
   }
 
-
+  // ✅ Localized pending post dialog
   void _showPendingPostDialog(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
@@ -422,10 +422,8 @@ class _NewPostScreenState extends State<NewPostScreen> {
       builder: (ctx) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
         backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
-        title: Text('Pending Post Exists'),
-        content: Text(
-          'You already have a pending post. Please wait for it to sync or delete it before creating a new one.',
-        ),
+        title: Text(S.of(ctx).pendingPostExistsTitle),
+        content: Text(S.of(ctx).pendingPostExistsMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),

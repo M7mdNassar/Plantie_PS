@@ -573,5 +573,21 @@
   "fetchingLocation": "جاري جلب الموقع...",
   "unknownLocation": "موقع غير معروف",
   "chat_unavailable_title": "المساعد الذكي غير متاح",
-  "chat_unavailable_subtitle": "خدمة المحادثة معطلة حالياً. يرجى المحاولة لاحقاً."
+  "chat_unavailable_subtitle": "خدمة المحادثة معطلة حالياً. يرجى المحاولة لاحقاً.",
+  "pending": "جاري النشر",
+  "commentsNotAvailableForPending": "التعليقات غير متاحة للمنشورات الجاري نشرها.",
+  "pendingPostExistsTitle": "يوجد منشور قيد النشر",
+  "pendingPostExistsMessage": "لديك منشور قيد النشر بالفعل. يرجى الانتظار حتى يتم مزامنته أو حذفه قبل إنشاء منشور جديد.",
+  "positionTheLeaf": "ضع الورقة في وسط الإطار",
+  "steadyShot": "ثبت يدك",
+  "avoidBlur": "لا تحرك الكاميرا لتجنب التشويش",
+  "plantName": "النبتة",
+  "offlineDeleteMessage": "لا يوجد اتصال بالإنترنت. يرجى الاتصال لحذف هذا المنشور.",
+  "locationServicesDisabledTitle": "خدمات الموقع معطلة",
+  "locationServicesDisabledMessage": "يرجى تفعيل خدمات الموقع للعثور على أقرب متجر.",
+  "locationDeniedTitle": "الموقع مرفوض",
+  "locationDeniedMessage": "الرجاء منح صلاحية الموقع للعثور على أقرب متجر.",
+  "locationPermanentlyDeniedTitle": "الموقع مرفوض نهائياً",
+  "locationPermanentlyDeniedMessage": "تم رفض صلاحية الموقع نهائياً. يرجى تفعيلها من إعدادات التطبيق.",
+  "offlineMapMessage": "لا يوجد اتصال بالإنترنت. يرجى الاتصال لفتح الخريطة."
 }

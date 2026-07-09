@@ -17,7 +17,7 @@ import 'ai_chat_state.dart';
 
 class AIChatCubit extends Cubit<AIChatState> {
   final AIChatService _service = AIChatService();
-  final ChatHistoryDB _db = ChatHistoryDB();
+  // final ChatHistoryDB _db = ChatHistoryDB();
   final String _sessionId;
   List<ChatMessage> _messages = [];
   StreamSubscription<String>? _subscription;
@@ -37,7 +37,7 @@ class AIChatCubit extends Cubit<AIChatState> {
       : _sessionId = sessionId ?? const Uuid().v4(),
         super(const AIChatInitial(remainingFreeChats: 0)) {
     _loadRemainingChats();
-    _loadConversation();
+    // _loadConversation();
   }
 
   String get sessionId => _sessionId;
@@ -113,21 +113,21 @@ class AIChatCubit extends Cubit<AIChatState> {
   }
 
   // ---------- Conversation ----------
-  Future<void> _loadConversation() async {
-    final saved = await _db.getConversation(_sessionId);
-    if (saved != null) {
-      _messages = saved;
-      _safeEmit(AIChatInitial(
-        messages: _messages,
-        sessionId: _sessionId,
-        remainingFreeChats: _remainingFreeChats,
-      ));
-    }
-  }
-
-  Future<void> _saveConversation() async {
-    await _db.saveConversation(_sessionId, _messages);
-  }
+  // Future<void> _loadConversation() async {
+  //   final saved = await _db.getConversation(_sessionId);
+  //   if (saved != null) {
+  //     _messages = saved;
+  //     _safeEmit(AIChatInitial(
+  //       messages: _messages,
+  //       sessionId: _sessionId,
+  //       remainingFreeChats: _remainingFreeChats,
+  //     ));
+  //   }
+  // }
+  //
+  // Future<void> _saveConversation() async {
+  //   await _db.saveConversation(_sessionId, _messages);
+  // }
 
   // ---------- Public: watch ad to get more attempts ----------
   void watchAdToGetMore() {
@@ -229,7 +229,7 @@ class AIChatCubit extends Cubit<AIChatState> {
             );
           }
 
-          _saveConversation();
+          // _saveConversation();
           _safeEmit(AIChatSuccess(
             messages: _messages,
             remainingFreeChats: _remainingFreeChats,
@@ -289,15 +289,24 @@ class AIChatCubit extends Cubit<AIChatState> {
 
     final String adUnitId = Environment.rewardedAdUnitId;
 
+    // Log which Ad Unit ID we're using (mask the last 4 characters)
+    final maskedId = adUnitId.length > 8
+        ? '${adUnitId.substring(0, adUnitId.length - 4)}****'
+        : adUnitId;
+    print('📢 [AdMob] Requesting rewarded ad with unit ID: $maskedId');
+    print('📢 [AdMob] Environment isProduction: ${const bool.fromEnvironment('dart.vm.product')}');
+
     RewardedAd.load(
       adUnitId: adUnitId,
       request: const AdRequest(),
       rewardedAdLoadCallback: RewardedAdLoadCallback(
         onAdLoaded: (RewardedAd ad) {
+          print('✅ [AdMob] Ad loaded successfully');
           _rewardedAd = ad;
           _isAdLoading = false;
           _rewardedAd?.show(
             onUserEarnedReward: (ad, reward) {
+              print('🎉 [AdMob] User earned reward: ${reward.amount} ${reward.type}');
               _remainingFreeChats += 1;
               _saveRemainingChats(_remainingFreeChats);
               _updateStateWithRemaining();
@@ -309,11 +318,16 @@ class AIChatCubit extends Cubit<AIChatState> {
           );
           _rewardedAd?.fullScreenContentCallback = FullScreenContentCallback(
             onAdDismissedFullScreenContent: (ad) {
+              print('ℹ️ [AdMob] Ad dismissed by user');
               ad.dispose();
               _rewardedAd = null;
               _updateStateWithRemaining();
             },
             onAdFailedToShowFullScreenContent: (ad, error) {
+              print('❌ [AdMob] Failed to show full-screen content');
+              print('   Error code: ${error.code}');
+              print('   Error message: ${error.message}');
+              print('   Error details: ${error.toString()}');
               ad.dispose();
               _rewardedAd = null;
               _isAdLoading = false;
@@ -326,6 +340,11 @@ class AIChatCubit extends Cubit<AIChatState> {
           );
         },
         onAdFailedToLoad: (LoadAdError error) {
+          print('❌ [AdMob] Ad failed to load');
+          print('   Error code: ${error.code}');
+          print('   Error message: ${error.message}');
+          print('   Error details: ${error.toString()}');
+          print('   Ad unit ID was: $maskedId');
           _isAdLoading = false;
           _safeEmit(AIChatError(
             error: 'ad_not_available',
@@ -334,8 +353,17 @@ class AIChatCubit extends Cubit<AIChatState> {
           ));
         },
       ),
-    );
+    ).catchError((error) {
+      print('❌ [AdMob] Exception during ad load: $error');
+      _isAdLoading = false;
+      _safeEmit(AIChatError(
+        error: 'ad_not_available',
+        messages: _messages,
+        remainingFreeChats: _remainingFreeChats,
+      ));
+    });
   }
+
 
   // ---------- Safe emit ----------
   void _safeEmit(AIChatState state) {
@@ -392,7 +420,7 @@ class AIChatCubit extends Cubit<AIChatState> {
     _subscription?.cancel();
     _subscription = null;
     _messages.clear();
-    await _db.deleteConversation(_sessionId);
+    // await _db.deleteConversation(_sessionId);
     _safeEmit(AIChatInitial(
       messages: [],
       sessionId: _sessionId,
@@ -413,7 +441,7 @@ class AIChatCubit extends Cubit<AIChatState> {
   Future<void> close() {
     _isClosed = true;
     _subscription?.cancel();
-    _saveConversation();
+    // _saveConversation();
     _rewardedAd?.dispose();
     return super.close();
   }

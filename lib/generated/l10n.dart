@@ -3678,6 +3678,156 @@ class S {
       args: [],
     );
   }
+
+  /// `Pending`
+  String get pending {
+    return Intl.message('Pending', name: 'pending', desc: '', args: []);
+  }
+
+  /// `Comments are not available for pending posts.`
+  String get commentsNotAvailableForPending {
+    return Intl.message(
+      'Comments are not available for pending posts.',
+      name: 'commentsNotAvailableForPending',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pending Post Exists`
+  String get pendingPostExistsTitle {
+    return Intl.message(
+      'Pending Post Exists',
+      name: 'pendingPostExistsTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You already have a pending post. Please wait for it to sync or delete it before creating a new one.`
+  String get pendingPostExistsMessage {
+    return Intl.message(
+      'You already have a pending post. Please wait for it to sync or delete it before creating a new one.',
+      name: 'pendingPostExistsMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Position the leaf in the center of the frame`
+  String get positionTheLeaf {
+    return Intl.message(
+      'Position the leaf in the center of the frame',
+      name: 'positionTheLeaf',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Steady your hand`
+  String get steadyShot {
+    return Intl.message(
+      'Steady your hand',
+      name: 'steadyShot',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hold still to avoid blur`
+  String get avoidBlur {
+    return Intl.message(
+      'Hold still to avoid blur',
+      name: 'avoidBlur',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Plant`
+  String get plantName {
+    return Intl.message('Plant', name: 'plantName', desc: '', args: []);
+  }
+
+  /// `No internet connection. Please connect to delete this post.`
+  String get offlineDeleteMessage {
+    return Intl.message(
+      'No internet connection. Please connect to delete this post.',
+      name: 'offlineDeleteMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Location Services Disabled`
+  String get locationServicesDisabledTitle {
+    return Intl.message(
+      'Location Services Disabled',
+      name: 'locationServicesDisabledTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please enable location services to find the nearest store.`
+  String get locationServicesDisabledMessage {
+    return Intl.message(
+      'Please enable location services to find the nearest store.',
+      name: 'locationServicesDisabledMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Location Denied`
+  String get locationDeniedTitle {
+    return Intl.message(
+      'Location Denied',
+      name: 'locationDeniedTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please grant location permission to find the nearest store.`
+  String get locationDeniedMessage {
+    return Intl.message(
+      'Please grant location permission to find the nearest store.',
+      name: 'locationDeniedMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Location Permanently Denied`
+  String get locationPermanentlyDeniedTitle {
+    return Intl.message(
+      'Location Permanently Denied',
+      name: 'locationPermanentlyDeniedTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Location permission is permanently denied. Please enable it in app settings.`
+  String get locationPermanentlyDeniedMessage {
+    return Intl.message(
+      'Location permission is permanently denied. Please enable it in app settings.',
+      name: 'locationPermanentlyDeniedMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No internet connection. Please connect to open maps.`
+  String get offlineMapMessage {
+    return Intl.message(
+      'No internet connection. Please connect to open maps.',
+      name: 'offlineMapMessage',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

@@ -5,6 +5,7 @@ import 'package:plantie/models/user/user_model.dart';
 import 'package:plantie/shared/components/components.dart';
 import 'package:plantie/shared/styles/app_colors.dart';
 import 'package:plantie/shared/utils/animations.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import '../../generated/l10n.dart';
 import '../../layout/cubit/cubit.dart';
 import '../../layout/cubit/states.dart';
@@ -22,6 +23,44 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  // ─────────────────── Full-Screen Avatar Viewer ───────────────────
+  void _showFullScreenAvatar(String imageUrl) {
+    final heroTag = 'profile_avatar_${CurrentUser.user.id}';
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            iconTheme: const IconThemeData(color: Colors.white),
+            elevation: 0,
+          ),
+          body: Center(
+            child: Hero(
+              tag: heroTag,
+              child: InteractiveViewer(
+                minScale: 0.8,
+                maxScale: 4.0,
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  fit: BoxFit.contain,
+                  placeholder: (context, url) => const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
+                  errorWidget: (context, url, error) => Image.asset(
+                    'assets/images/default_avatar.png',
+                    fit: BoxFit.contain,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocListener<ProfileCubit, ProfileStates>(
@@ -35,6 +74,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           final appCubit = AppCubit.get(context);
           final isDark = appCubit.isDark;
           final user = CurrentUser.user;
+          final imageUrl = user.image ?? '';
 
           return Scaffold(
             backgroundColor: isDark ? AppColors.darkBackground : HexColor("F8F9FA"),
@@ -142,20 +182,49 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             padding: const EdgeInsets.all(24),
                             child: Column(
                               children: [
-                                Container(
-                                  padding: const EdgeInsets.all(4),
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.all(
-                                      color: (isDark ? AppColors.primaryLight : AppColors.primary).withOpacity(0.25),
-                                      width: 2,
+                                // ─── Avatar with tap to enlarge ───
+                                GestureDetector(
+                                  onTap: () {
+                                    if (imageUrl.isNotEmpty) {
+                                      _showFullScreenAvatar(imageUrl);
+                                    }
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      border: Border.all(
+                                        color: (isDark ? AppColors.primaryLight : AppColors.primary).withOpacity(0.25),
+                                        width: 2,
+                                      ),
                                     ),
-                                  ),
-                                  child: buildAvatar(
-                                    radius: 52,
-                                    localImage: null,
-                                    networkImage: user.image,
-                                    placeholderAsset: 'assets/images/default_avatar.png',
+                                    child: ClipOval(
+                                      child: imageUrl.isNotEmpty
+                                          ? Hero(
+                                        tag: 'profile_avatar_${user.id}',
+                                        child: CachedNetworkImage(
+                                          imageUrl: imageUrl,
+                                          width: 104,
+                                          height: 104,
+                                          fit: BoxFit.cover,
+                                          placeholder: (context, url) => Container(
+                                            color: isDark ? Colors.grey[800] : Colors.grey[300],
+                                          ),
+                                          errorWidget: (context, url, error) => Image.asset(
+                                            'assets/images/default_avatar.png',
+                                            width: 104,
+                                            height: 104,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      )
+                                          : Image.asset(
+                                        'assets/images/default_avatar.png',
+                                        width: 104,
+                                        height: 104,
+                                        fit: BoxFit.cover,
+                                      ),
+                                    ),
                                   ),
                                 ),
                                 const SizedBox(height: 18),

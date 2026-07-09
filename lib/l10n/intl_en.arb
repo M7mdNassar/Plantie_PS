@@ -572,8 +572,23 @@
   "fetchingLocation": "Fetching location...",
   "unknownLocation": "Unknown location",
   "chat_unavailable_title": "AI Chat Unavailable",
-  "chat_unavailable_subtitle": "Chat feature is currently disabled. Please try again later."
-
+  "chat_unavailable_subtitle": "Chat feature is currently disabled. Please try again later.",
+  "pending": "Pending",
+  "commentsNotAvailableForPending": "Comments are not available for pending posts.",
+  "pendingPostExistsTitle": "Pending Post Exists",
+  "pendingPostExistsMessage": "You already have a pending post. Please wait for it to sync or delete it before creating a new one.",
+  "positionTheLeaf": "Position the leaf in the center of the frame",
+  "steadyShot": "Steady your hand",
+  "avoidBlur": "Hold still to avoid blur",
+  "plantName": "Plant",
+  "offlineDeleteMessage": "No internet connection. Please connect to delete this post.",
+  "locationServicesDisabledTitle": "Location Services Disabled",
+  "locationServicesDisabledMessage": "Please enable location services to find the nearest store.",
+  "locationDeniedTitle": "Location Denied",
+  "locationDeniedMessage": "Please grant location permission to find the nearest store.",
+  "locationPermanentlyDeniedTitle": "Location Permanently Denied",
+  "locationPermanentlyDeniedMessage": "Location permission is permanently denied. Please enable it in app settings.",
+  "offlineMapMessage": "No internet connection. Please connect to open maps."
 
 
 

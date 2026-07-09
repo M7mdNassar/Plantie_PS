@@ -175,6 +175,43 @@ class _UserProfileScreenState extends State<UserProfileScreen>
     }
   }
 
+  // ─────────────────── Full-Screen Avatar Viewer ───────────────────
+  void _showFullScreenAvatar(String imageUrl) {
+    final heroTag = 'avatar_${widget.userId}';
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => Scaffold(
+          backgroundColor: Colors.black,
+          appBar: AppBar(
+            backgroundColor: Colors.black,
+            iconTheme: const IconThemeData(color: Colors.white),
+            elevation: 0,
+          ),
+          body: Center(
+            child: Hero(
+              tag: heroTag,
+              child: InteractiveViewer(
+                minScale: 0.8,
+                maxScale: 4.0,
+                child: CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  fit: BoxFit.contain,
+                  placeholder: (context, url) => const Center(
+                    child: CircularProgressIndicator(color: Colors.white),
+                  ),
+                  errorWidget: (context, url, error) => const Center(
+                    child: Icon(Icons.broken_image_outlined, color: Colors.white70),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -307,47 +344,59 @@ class _UserProfileScreenState extends State<UserProfileScreen>
 
   Widget _buildProfileHeader(BuildContext context, bool isDark) {
     final s = S.of(context);
+    final imageUrl = _user!.image ?? '';
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       child: Row(
         children: [
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              gradient: LinearGradient(
-                colors: [AppColors.primary, AppColors.primary.withOpacity(0.6)],
+          // ─── Avatar with tap to enlarge ───
+          GestureDetector(
+            onTap: () {
+              if (imageUrl.isNotEmpty) {
+                _showFullScreenAvatar(imageUrl);
+              }
+            },
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                gradient: LinearGradient(
+                  colors: [AppColors.primary, AppColors.primary.withOpacity(0.6)],
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withOpacity(0.2),
+                    blurRadius: 12,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
               ),
-              boxShadow: [
-                BoxShadow(
-                  color: AppColors.primary.withOpacity(0.2),
-                  blurRadius: 12,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: ClipOval(
-              child: (_user!.image != null && _user!.image!.isNotEmpty)
-                  ? CachedNetworkImage(
-                imageUrl: _user!.image!,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => const Icon(
+              child: ClipOval(
+                child: imageUrl.isNotEmpty
+                    ? Hero(
+                  tag: 'avatar_${widget.userId}',
+                  child: CachedNetworkImage(
+                    imageUrl: imageUrl,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => const Icon(
+                      Icons.person,
+                      size: 40,
+                      color: Colors.white,
+                    ),
+                    errorWidget: (context, url, error) => const Icon(
+                      Icons.person,
+                      size: 40,
+                      color: Colors.white,
+                    ),
+                  ),
+                )
+                    : const Icon(
                   Icons.person,
                   size: 40,
                   color: Colors.white,
                 ),
-                errorWidget: (context, url, error) => const Icon(
-                  Icons.person,
-                  size: 40,
-                  color: Colors.white,
-                ),
-              )
-                  : const Icon(
-                Icons.person,
-                size: 40,
-                color: Colors.white,
               ),
             ),
           ),

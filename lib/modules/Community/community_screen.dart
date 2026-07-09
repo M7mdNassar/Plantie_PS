@@ -15,8 +15,8 @@ import 'package:plantie/shared/styles/responsive_text.dart';
 import '../../generated/l10n.dart';
 import '../../shared/styles/app_colors.dart';
 import '../../shared/styles/icon_broken.dart';
-import '../../shared/network/local/social_upload_service.dart';
 import '../../shared/network/remote/supabase_auth_service.dart';
+import 'comment_screen.dart';
 
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
@@ -25,31 +25,90 @@ class CommunityScreen extends StatefulWidget {
   State<CommunityScreen> createState() => _CommunityScreenState();
 }
 
-class _CommunityScreenState extends State<CommunityScreen> {
+class _CommunityScreenState extends State<CommunityScreen>
+    with SingleTickerProviderStateMixin {
   final ValueNotifier<bool> _showCreatePostButton = ValueNotifier<bool>(true);
   int _lastPrefetchedPostCount = 0;
   bool _isFiltering = false;
 
-  // Config check state (only for the posts area)
   bool _isCheckingConfig = true;
+  bool _isOffline = false;
+
+  static DateTime? _lastConfigFetch;
+
+  double _bottomPadding = 140.0;
+
+  late AnimationController _pulseController;
+  late Animation<double> _pulseAnimation;
 
   @override
   void initState() {
     super.initState();
+
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    )..repeat(reverse: true);
+    _pulseAnimation = CurvedAnimation(
+      parent: _pulseController,
+      curve: Curves.easeInOut,
+    );
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final cubit = CommunityCubit.get(context);
       if (cubit.posts.isEmpty) {
-        cubit.getPosts(); // will load cached or fetch
+        cubit.getPosts();
       }
       _checkCommunityConfig();
+      _calculateBottomPadding();
     });
   }
 
-  // ---------------------- Community config check (non‑blocking) ----------------------
+  void _calculateBottomPadding() {
+    final bottomSafeArea = MediaQuery.of(context).padding.bottom;
+    const bottomNavHeight = 80.0;
+    const extraSpace = 40.0;
+    _bottomPadding = bottomSafeArea + bottomNavHeight + extraSpace;
+  }
+
+  @override
+  void dispose() {
+    _showCreatePostButton.dispose();
+    _pulseController.dispose();
+    super.dispose();
+  }
+
   Future<void> _checkCommunityConfig() async {
-    setState(() => _isCheckingConfig = true);
+    if (_lastConfigFetch != null &&
+        DateTime.now().difference(_lastConfigFetch!) < const Duration(minutes: 10)) {
+      final hasInternet = await SupabaseAuthService().isConnectedFast();
+      setState(() {
+        _isOffline = !hasInternet;
+        _isCheckingConfig = false;
+      });
+      return;
+    }
+
+    setState(() {
+      _isCheckingConfig = true;
+      _isOffline = false;
+    });
+
+    final hasInternet = await SupabaseAuthService().isConnectedFast();
+    if (!hasInternet) {
+      setState(() {
+        _isOffline = true;
+        _isCheckingConfig = false;
+      });
+      return;
+    }
+
     await ConfigManager().fetchIfNeeded(force: true);
-    setState(() => _isCheckingConfig = false);
+    _lastConfigFetch = DateTime.now();
+    setState(() {
+      _isCheckingConfig = false;
+      _isOffline = false;
+    });
   }
 
   void _setCreatePostButtonVisible(bool visible) {
@@ -57,7 +116,6 @@ class _CommunityScreenState extends State<CommunityScreen> {
     _showCreatePostButton.value = visible;
   }
 
-  // ---------------------- Feed Sort Bar (Filters ALWAYS enabled) ----------------------
   PreferredSizeWidget _buildFeedSortBar(
       BuildContext context,
       CommunityCubit cubit,
@@ -111,7 +169,6 @@ class _CommunityScreenState extends State<CommunityScreen> {
                   child: ChoiceChip(
                     label: Text(entry.value),
                     selected: isSelected,
-                    // ✅ ALWAYS enabled – the cubit handles offline check
                     onSelected: (selected) {
                       if (selected) {
                         setState(() => _isFiltering = true);
@@ -151,15 +208,9 @@ class _CommunityScreenState extends State<CommunityScreen> {
   Future<void> _refreshPosts() async {
     final cubit = CommunityCubit.get(context);
     _lastPrefetchedPostCount = 0;
-    // Re‑check config, then refresh posts
+    _lastConfigFetch = null;
     await _checkCommunityConfig();
-    await cubit.getPosts(refresh: true);
-  }
-
-  @override
-  void dispose() {
-    _showCreatePostButton.dispose();
-    super.dispose();
+    await cubit.forceRefresh();
   }
 
   void _prefetchUpcomingImages(BuildContext context, CommunityCubit cubit) {
@@ -255,7 +306,72 @@ class _CommunityScreenState extends State<CommunityScreen> {
     );
   }
 
-  // ---------------------- BUILD ----------------------
+  Widget _buildPendingBadge(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _pulseAnimation,
+      builder: (context, child) {
+        final opacity = 0.6 + (0.4 * _pulseAnimation.value);
+        return Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [
+                Colors.orange,
+                Colors.orange.withOpacity(0.7),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.orange.withOpacity(opacity * 0.5),
+                blurRadius: 8,
+                spreadRadius: 1,
+              ),
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(opacity),
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                S.of(context).pending,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  void _navigateToComments(BuildContext context, String postId) {
+    if (postId.startsWith('pending_')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(S.of(context).commentsNotAvailableForPending),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+    navigateTo(context, CommentScreen(postId: postId));
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<CommunityCubit, CommunityStates>(
@@ -276,6 +392,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
           final cubit = CommunityCubit.get(context);
           setState(() => _isFiltering = false);
 
+          // ─── Offline actions: show dialog instead of SnackBar ───
           if (state.error == 'offline_like') {
             _showOfflineMessage(context, S.of(context).offlineLikeMessage);
             return;
@@ -284,14 +401,21 @@ class _CommunityScreenState extends State<CommunityScreen> {
             _showOfflineMessage(context, S.of(context).offlinePostMessage);
             return;
           }
-
-          if (state.error == 'offline_filter') {
-            _showOfflineRetryDialog(context, () {
-              cubit.setSortFilter(cubit.feedSort);
-            });
+          if (state.error == 'offline_delete') {
+            _showOfflineMessage(context, S.of(context).offlineDeleteMessage);
+            return;
+          }
+          if (state.error == 'comments_not_allowed_on_pending') {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(S.of(context).commentsNotAvailableForPending),
+                backgroundColor: Colors.orange,
+              ),
+            );
             return;
           }
 
+          // Any other error – show SnackBar only if there are posts
           if (cubit.posts.isNotEmpty) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(state.error), backgroundColor: Colors.red),
@@ -305,6 +429,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
         final s = S.of(context);
         final posts = cubit.posts;
         final hasPosts = posts.isNotEmpty;
+        final pendingCount = cubit.pendingPostCount;
 
         return Scaffold(
           backgroundColor: isDark ? HexColor("0F0F0F") : Colors.grey[50],
@@ -342,23 +467,20 @@ class _CommunityScreenState extends State<CommunityScreen> {
                     physics: const AlwaysScrollableScrollPhysics(
                         parent: BouncingScrollPhysics()),
                     slivers: [
-                      _buildSliverAppBar(context, cubit, isDark),
+                      _buildSliverAppBar(context, cubit, isDark, pendingCount),
 
-                      // ---------------------- POSTS AREA (new priority logic) ----------------------
-                      // Priority 1: Still checking config -> show loading
+                      // ---------------------- POSTS AREA ----------------------
                       if (_isCheckingConfig)
                         const SliverFillRemaining(
                           hasScrollBody: false,
                           child: Center(child: CircularProgressIndicator()),
                         )
-                      // Priority 2: Config exists and community is disabled -> show unavailable
                       else if (ConfigManager().hasCachedConfig &&
                           !AppConfig.isCommunityEnabled)
                         SliverFillRemaining(
                           hasScrollBody: false,
                           child: _buildCommunityUnavailable(context),
                         )
-                      // Priority 3: We have posts -> show them
                       else if (hasPosts)
                           SliverPadding(
                             padding: EdgeInsets.symmetric(
@@ -368,18 +490,31 @@ class _CommunityScreenState extends State<CommunityScreen> {
                             sliver: SliverList(
                               delegate: SliverChildBuilderDelegate(
                                     (context, index) {
-                                  return Padding(
-                                    padding: EdgeInsets.only(
-                                        bottom: ResponsiveText.padding(
-                                            context, 14)),
-                                    child: buildPostItem(posts[index], context, index),
+                                  final post = posts[index];
+                                  final isPending = post.postId.startsWith('pending_');
+                                  return RepaintBoundary(
+                                    key: ValueKey('post_${post.postId}'),
+                                    child: Stack(
+                                      children: [
+                                        Padding(
+                                          padding: EdgeInsets.only(
+                                              bottom: ResponsiveText.padding(context, 14)),
+                                          child: buildPostItem(post, context, index),
+                                        ),
+                                        if (isPending)
+                                          Positioned(
+                                            top: 12,
+                                            right: 12,
+                                            child: _buildPendingBadge(context),
+                                          ),
+                                      ],
+                                    ),
                                   );
                                 },
                                 childCount: posts.length,
                               ),
                             ),
                           )
-                        // Priority 4: No posts -> show appropriate placeholder based on state
                         else if (state is CommunityOfflineState)
                             SliverFillRemaining(
                               hasScrollBody: false,
@@ -402,79 +537,17 @@ class _CommunityScreenState extends State<CommunityScreen> {
                                     child: _buildEmptyState(context),
                                   )
                                 else
-                                // Fallback: show empty state
                                   SliverFillRemaining(
                                     hasScrollBody: false,
                                     child: _buildEmptyState(context),
                                   ),
+
+                      SliverToBoxAdapter(
+                        child: SizedBox(
+                          height: _bottomPadding,
+                        ),
+                      ),
                     ],
-                  ),
-                  // Sync Status Banner (unchanged)
-                  Positioned(
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    child: ValueListenableBuilder<int>(
-                      valueListenable: socialUploadService.pendingCount,
-                      builder: (context, count, _) {
-                        if (count == 0) return const SizedBox.shrink();
-                        return Container(
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                          color: Colors.orange[100],
-                          child: Row(
-                            children: [
-                              const Icon(Icons.cloud_upload_rounded,
-                                  color: Colors.orange, size: 20),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    Text(
-                                      S.of(context).pendingUploadsTitle,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black87,
-                                      ),
-                                    ),
-                                    Text(
-                                      S.of(context).pendingUploadsMessage(count),
-                                      style: const TextStyle(
-                                        fontSize: 12,
-                                        color: Colors.black54,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              FutureBuilder<bool>(
-                                future: SupabaseAuthService().isConnectedFast(),
-                                builder: (context, snapshot) {
-                                  final isOnline = snapshot.data ?? false;
-                                  return TextButton(
-                                    onPressed: isOnline
-                                        ? () => socialUploadService.attemptPendingUploads()
-                                        : null,
-                                    child: Text(
-                                      isOnline
-                                          ? S.of(context).syncNow
-                                          : S.of(context).offlineSyncWait,
-                                      style: TextStyle(
-                                        color: isOnline ? Colors.orange : Colors.grey[500],
-                                        fontWeight: isOnline ? FontWeight.bold : FontWeight.normal,
-                                      ),
-                                    ),
-                                  );
-                                },
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
                   ),
                   if (state is CommunityLoadingMoreState)
                     Positioned(
@@ -533,54 +606,8 @@ class _CommunityScreenState extends State<CommunityScreen> {
     );
   }
 
-  // ---------------------- Posts area placeholder widgets ----------------------
-  Widget _buildCommunityUnavailable(BuildContext context) {
-    final s = S.of(context);
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.people_outline_rounded, size: 64, color: Colors.grey[400]),
-            const SizedBox(height: 16),
-            Text(
-              s.community_unavailable_title,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              s.community_unavailable_subtitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: isDark ? Colors.grey[400] : Colors.grey[500],
-              ),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: _refreshPosts,
-              icon: const Icon(Icons.refresh_rounded, size: 18),
-              label: Text(s.retry),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  // ---------------------- SLIVER APP BAR (unchanged) ----------------------
   Widget _buildSliverAppBar(
-      BuildContext context, CommunityCubit cubit, bool isDark) {
+      BuildContext context, CommunityCubit cubit, bool isDark, int pendingCount) {
     final s = S.of(context);
     return SliverAppBar(
       toolbarHeight: 72,
@@ -625,6 +652,25 @@ class _CommunityScreenState extends State<CommunityScreen> {
               color: isDark ? Colors.white : Colors.black,
             ),
           ),
+          if (pendingCount > 0)
+            Padding(
+              padding: const EdgeInsets.only(left: 8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(
+                  color: Colors.orange,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  '$pendingCount',
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
       actions: [
@@ -657,7 +703,6 @@ class _CommunityScreenState extends State<CommunityScreen> {
     );
   }
 
-  // ---------------------- FLOATING ACTION BUTTON (unchanged) ----------------------
   Widget _buildFloatingActionButton(
       BuildContext context, CommunityCubit cubit) {
     final s = S.of(context);
@@ -746,7 +791,50 @@ class _CommunityScreenState extends State<CommunityScreen> {
     );
   }
 
-  // ---------------------- POSTS LIST STATE WIDGETS (unchanged) ----------------------
+  Widget _buildCommunityUnavailable(BuildContext context) {
+    final s = S.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.people_outline_rounded, size: 64, color: Colors.grey[400]),
+            const SizedBox(height: 16),
+            Text(
+              s.community_unavailable_title,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w800,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              s.community_unavailable_subtitle,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: isDark ? Colors.grey[400] : Colors.grey[500],
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+            ElevatedButton.icon(
+              onPressed: _refreshPosts,
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: Text(s.retry),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildEmptyState(BuildContext context) {
     final s = S.of(context);
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -897,7 +985,7 @@ class _CommunityScreenState extends State<CommunityScreen> {
             ),
             SizedBox(height: ResponsiveText.padding(context, 20)),
             ElevatedButton.icon(
-              onPressed: () => cubit.getPosts(refresh: true),
+              onPressed: () => cubit.forceRefresh(),
               icon: const Icon(Icons.refresh_rounded, size: 18),
               label: Text(s.retry),
               style: ElevatedButton.styleFrom(

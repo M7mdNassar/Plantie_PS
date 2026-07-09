@@ -106,6 +106,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "avatar": MessageLookupByLibrary.simpleMessage("avatar"),
     "avoid": MessageLookupByLibrary.simpleMessage("Avoid"),
+    "avoidBlur": MessageLookupByLibrary.simpleMessage(
+      "Hold still to avoid blur",
+    ),
     "avoidBlurred": MessageLookupByLibrary.simpleMessage(
       "Avoid blurred or tilted photos",
     ),
@@ -186,6 +189,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "Could not post comment. Please try again.",
     ),
     "comments": MessageLookupByLibrary.simpleMessage("Comments"),
+    "commentsNotAvailableForPending": MessageLookupByLibrary.simpleMessage(
+      "Comments are not available for pending posts.",
+    ),
     "community": MessageLookupByLibrary.simpleMessage("Community"),
     "community_unavailable_subtitle": MessageLookupByLibrary.simpleMessage(
       "Please check back later.",
@@ -477,9 +483,27 @@ class MessageLookup extends MessageLookupByLibrary {
     "locationDenied": MessageLookupByLibrary.simpleMessage(
       "Location permission denied",
     ),
+    "locationDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Please grant location permission to find the nearest store.",
+    ),
+    "locationDeniedTitle": MessageLookupByLibrary.simpleMessage(
+      "Location Denied",
+    ),
     "locationError": m9,
+    "locationPermanentlyDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Location permission is permanently denied. Please enable it in app settings.",
+    ),
+    "locationPermanentlyDeniedTitle": MessageLookupByLibrary.simpleMessage(
+      "Location Permanently Denied",
+    ),
     "locationRequired": MessageLookupByLibrary.simpleMessage(
       "Location permission required",
+    ),
+    "locationServicesDisabledMessage": MessageLookupByLibrary.simpleMessage(
+      "Please enable location services to find the nearest store.",
+    ),
+    "locationServicesDisabledTitle": MessageLookupByLibrary.simpleMessage(
+      "Location Services Disabled",
     ),
     "location_permission_denied_forever": MessageLookupByLibrary.simpleMessage(
       "Location permission has been permanently denied. Please enable it in your device settings to use weather features.",
@@ -566,6 +590,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "offlineCommentError": MessageLookupByLibrary.simpleMessage(
       "No internet connection. Your comment will be saved when you\'re back online.",
     ),
+    "offlineDeleteMessage": MessageLookupByLibrary.simpleMessage(
+      "No internet connection. Please connect to delete this post.",
+    ),
     "offlineLikeError": MessageLookupByLibrary.simpleMessage(
       "No internet connection. Like will be saved when you\'re back online.",
     ),
@@ -574,6 +601,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "offlineLoadMoreError": MessageLookupByLibrary.simpleMessage(
       "No internet connection. Cannot load more posts.",
+    ),
+    "offlineMapMessage": MessageLookupByLibrary.simpleMessage(
+      "No internet connection. Please connect to open maps.",
     ),
     "offlinePostMessage": MessageLookupByLibrary.simpleMessage(
       "You are currently offline. Your post will be saved and uploaded when you regain internet connection.",
@@ -624,6 +654,13 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "partlyCloudy": MessageLookupByLibrary.simpleMessage("Partly Cloudy"),
     "password": MessageLookupByLibrary.simpleMessage("Password"),
+    "pending": MessageLookupByLibrary.simpleMessage("Pending"),
+    "pendingPostExistsMessage": MessageLookupByLibrary.simpleMessage(
+      "You already have a pending post. Please wait for it to sync or delete it before creating a new one.",
+    ),
+    "pendingPostExistsTitle": MessageLookupByLibrary.simpleMessage(
+      "Pending Post Exists",
+    ),
     "pendingUploadsMessage": m10,
     "pendingUploadsTitle": MessageLookupByLibrary.simpleMessage(
       "Pending uploads",
@@ -647,12 +684,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "phosphorus": MessageLookupByLibrary.simpleMessage("Phosphorus"),
     "photos": MessageLookupByLibrary.simpleMessage("Photos"),
     "plantDiagnosis": MessageLookupByLibrary.simpleMessage("Plant Diagnosis"),
+    "plantName": MessageLookupByLibrary.simpleMessage("Plant"),
     "plantType": m11,
     "plantingTime": MessageLookupByLibrary.simpleMessage("Planting Time"),
     "pleaseWait": MessageLookupByLibrary.simpleMessage(
       "Please wait while AI detects...",
     ),
     "popular": MessageLookupByLibrary.simpleMessage("Popular"),
+    "positionTheLeaf": MessageLookupByLibrary.simpleMessage(
+      "Position the leaf in the center of the frame",
+    ),
     "positioningTip1": MessageLookupByLibrary.simpleMessage(
       "Capture in good natural lighting",
     ),
@@ -764,6 +805,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "ssp": MessageLookupByLibrary.simpleMessage("SSP"),
     "startDetection": MessageLookupByLibrary.simpleMessage("Start Detection"),
     "startScan": MessageLookupByLibrary.simpleMessage("Start Scan"),
+    "steadyShot": MessageLookupByLibrary.simpleMessage("Steady your hand"),
     "storage": MessageLookupByLibrary.simpleMessage("Storage"),
     "submit": MessageLookupByLibrary.simpleMessage("Submit"),
     "successTitle": MessageLookupByLibrary.simpleMessage("Success"),
