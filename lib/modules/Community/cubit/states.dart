@@ -44,4 +44,3 @@ class CommunitySearchResultsState extends CommunityStates {
 }
 
 class CommunityEmptyState extends CommunityStates {}
-

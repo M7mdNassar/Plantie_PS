@@ -1,4 +1,3 @@
-import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../models/user/user_model.dart';
@@ -7,10 +6,7 @@ class SupabaseService {
   static final SupabaseService _instance = SupabaseService._internal();
   late final SupabaseClient _client;
 
-  factory SupabaseService() {
-    return _instance;
-  }
-
+  factory SupabaseService() => _instance;
   SupabaseService._internal();
 
   SupabaseClient get client => _client;
@@ -21,35 +17,13 @@ class SupabaseService {
 
   // ==================== AUTH METHODS ====================
 
-  /// Get current authenticated user
-  User? getCurrentUser() {
-    return _client.auth.currentUser;
-  }
-
-  /// Get current session
-  Session? getCurrentSession() {
-    return _client.auth.currentSession;
-  }
-
-  /// Check if user is authenticated
-  bool isAuthenticated() {
-    return _client.auth.currentUser != null;
-  }
-
-  /// Sign out user
-  Future<void> signOut() async {
-    await _client.auth.signOut();
-  }
-
-  // ==================== PHONE OTP AUTH METHODS ====================
-  // DEPRECATED: Removed as part of auth overhaul
-  // - sendPhoneOtp() - no longer used
-  // - verifyPhoneOtp() - no longer used
-  // - signInAnonymously() - still available for background sync if needed
+  User? getCurrentUser() => _client.auth.currentUser;
+  Session? getCurrentSession() => _client.auth.currentSession;
+  bool isAuthenticated() => _client.auth.currentUser != null;
+  Future<void> signOut() async => await _client.auth.signOut();
 
   // ==================== USER METHODS ====================
 
-  /// Get user data from users table
   Future<UserModel?> getUserData(String userId) async {
     try {
       final response = await _client
@@ -57,10 +31,7 @@ class SupabaseService {
           .select()
           .eq('id', userId)
           .single()
-          .timeout(
-            const Duration(seconds: 10),
-          );
-
+          .timeout(const Duration(seconds: 10));
       return UserModel.fromJson(response);
     } catch (e) {
       debugPrint('Error fetching user: $e');
@@ -68,21 +39,9 @@ class SupabaseService {
     }
   }
 
-  /// Create user in users table
-  Future<void> createUser({
-    required String id,
-    required String name,
-    String? phone,
-    String? image,
-  }) async {
+  Future<void> createUser({required String id, required String name, String? phone, String? image}) async {
     try {
-      final userModel = UserModel(
-        id: id,
-        name: name,
-        phone: phone,
-        image: image,
-      );
-
+      final userModel = UserModel(id: id, name: name, phone: phone, image: image);
       await _client.from('users').insert(userModel.toMap());
     } catch (e) {
       debugPrint('Error creating user: $e');
@@ -90,7 +49,6 @@ class SupabaseService {
     }
   }
 
-  /// Update user profile
   Future<void> updateUserProfile({
     required String id,
     String? name,
@@ -109,25 +67,18 @@ class SupabaseService {
         'updated_at': DateTime.now().toIso8601String(),
       };
 
-      // 1. Try a standard update, returning the updated rows
       final response = await _client.from('users').update(updates).eq('id', id).select();
-
-      // 2. If response is empty, the user row doesn't exist (offline registration)
       if (response.isEmpty) {
         final localUser = CurrentUser.getUser();
         if (localUser != null) {
           debugPrint('ℹ️ User row not found in Supabase. Creating row from local data...');
-          
-          // Full insert to create the user
           final dataToInsert = localUser.toMap();
           dataToInsert.removeWhere((key, value) => value == null);
           await _client.from('users').insert(dataToInsert);
-          
-          // Retry the specific update if we had specific fields to change
           await _client.from('users').update(updates).eq('id', id);
           debugPrint('✅ User row created and updated successfully');
         } else {
-          throw Exception('User row does not exist in Supabase and no local user found to sync.');
+          throw Exception('User row does not exist and no local user found.');
         }
       }
     } catch (e) {
@@ -136,56 +87,109 @@ class SupabaseService {
     }
   }
 
-  // ==================== STORAGE METHODS ====================
+  // ==================== FOLLOWERS ====================
 
-  /// Upload file to storage
+  Future<bool> isFollowing(String followerId, String followingId) async {
+    try {
+      final response = await _client
+          .from('followers')
+          .select('id')
+          .eq('follower_id', followerId)
+          .eq('following_id', followingId)
+          .maybeSingle();
+      return response != null;
+    } catch (e) {
+      debugPrint('Error checking follow: $e');
+      return false;
+    }
+  }
+
+  Future<void> followUser(String followerId, String followingId) async {
+    await _client.from('followers').insert({
+      'follower_id': followerId,
+      'following_id': followingId,
+    });
+  }
+
+  Future<void> unfollowUser(String followerId, String followingId) async {
+    await _client
+        .from('followers')
+        .delete()
+        .eq('follower_id', followerId)
+        .eq('following_id', followingId);
+  }
+
+  // ✅ SIMPLE FIX: fetch all and return length (no 'count' parameter)
+  Future<int> getFollowersCount(String userId) async {
+    try {
+      final response = await _client
+          .from('followers')
+          .select('id')
+          .eq('following_id', userId);
+      return response.length;
+    } catch (e) {
+      debugPrint('Error getting followers count: $e');
+      return 0;
+    }
+  }
+
+  Future<int> getFollowingCount(String userId) async {
+    try {
+      final response = await _client
+          .from('followers')
+          .select('id')
+          .eq('follower_id', userId);
+      return response.length;
+    } catch (e) {
+      debugPrint('Error getting following count: $e');
+      return 0;
+    }
+  }
+
+  // ==================== USER SEARCH ====================
+
+  Future<List<UserModel>> searchUsers(String query, {int limit = 20}) async {
+    if (query.trim().isEmpty) return [];
+    try {
+      final response = await _client
+          .from('users')
+          .select()
+          .ilike('name', '%$query%')
+          .limit(limit);
+      return response.map((json) => UserModel.fromJson(json)).toList();
+    } catch (e) {
+      debugPrint('Error searching users: $e');
+      return [];
+    }
+  }
+
+  // ==================== STORAGE ====================
+
   Future<String> uploadFile({
     required String bucket,
     required String path,
     required Uint8List fileBytes,
     required String fileName,
   }) async {
-    try {
-      final fullPath = '$path/$fileName';
-      await _client.storage.from(bucket).uploadBinary(
-            fullPath,
-            fileBytes,
-            fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
-          );
-
-      // Return public URL
-      final publicUrl = _client.storage.from(bucket).getPublicUrl(fullPath);
-      return publicUrl;
-    } catch (e) {
-      debugPrint('Error uploading file: $e');
-      rethrow;
-    }
+    final fullPath = '$path/$fileName';
+    await _client.storage.from(bucket).uploadBinary(
+      fullPath,
+      fileBytes,
+      fileOptions: const FileOptions(cacheControl: '3600', upsert: false),
+    );
+    return _client.storage.from(bucket).getPublicUrl(fullPath);
   }
 
-  /// Delete file from storage
-  Future<void> deleteFile({
-    required String bucket,
-    required String path,
-  }) async {
-    try {
-      await _client.storage.from(bucket).remove([path]);
-    } catch (e) {
-      debugPrint('Error deleting file: $e');
-      rethrow;
-    }
+  Future<void> deleteFile({required String bucket, required String path}) async {
+    await _client.storage.from(bucket).remove([path]);
   }
 
-  /// Get public URL for a file
-  String getPublicUrl({
-    required String bucket,
-    required String path,
-  }) {
+  String getPublicUrl({required String bucket, required String path}) {
     return _client.storage.from(bucket).getPublicUrl(path);
   }
 
-  // ==================== DETECTION RESULTS METHODS ====================
+  // ==================== DETECTION ====================
 
-  /// Insert a detection result to the cloud detection_results table
   Future<void> insertDetectionResult({
     required String userId,
     required String plantType,
@@ -195,35 +199,22 @@ class SupabaseService {
     required String imageUrl,
     required DateTime detectedAt,
   }) async {
-    try {
-      await _client.from('detection_results').insert({
-        'user_id': userId,
-        'plant_type': plantType,
-        'predicted_class': predictedClass,
-        'confidence_score': confidenceScore,
-        'user_corrected_label': userCorrectedLabel,
-        'image_url': imageUrl,
-        'detected_at': detectedAt.toIso8601String(),
-      });
-      debugPrint('✅ Detection result inserted successfully');
-    } catch (e) {
-      debugPrint('❌ Error inserting detection result: $e');
-      rethrow;
-    }
+    await _client.from('detection_results').insert({
+      'user_id': userId,
+      'plant_type': plantType,
+      'predicted_class': predictedClass,
+      'confidence_score': confidenceScore,
+      'user_corrected_label': userCorrectedLabel,
+      'image_url': imageUrl,
+      'detected_at': detectedAt.toIso8601String(),
+    });
   }
 
-  // ==================== STREAM METHODS ====================
+  // ==================== STREAMS ====================
 
-  /// Listen to auth state changes
-  Stream<AuthState> authStateChanges() {
-    return _client.auth.onAuthStateChange;
-  }
-
-  /// Listen to user data changes
-  Stream<List<Map<String, dynamic>>> userDataStream(String uid) {
-    return _client.from('users').stream(primaryKey: ['id']).eq('uid', uid);
-  }
+  Stream<AuthState> authStateChanges() => _client.auth.onAuthStateChange;
+  Stream<List<Map<String, dynamic>>> userDataStream(String uid) =>
+      _client.from('users').stream(primaryKey: ['id']).eq('uid', uid);
 }
 
-// Global instance
 final supabaseService = SupabaseService();

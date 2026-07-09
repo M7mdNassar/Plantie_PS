@@ -193,7 +193,6 @@
    },
    "settings": "Settings",
    "logoutConfirm": "Are you sure you want to logout?",
-   "cancel": "Cancel",
     "refresh": "Refresh",
 
 
@@ -392,16 +391,12 @@
   "whatsYourName": "What should we call you?",
   "nameHint": "Your name",
   "letsStart": "Let's Start 🌱",
-  "nameRequired": "Please enter your name",
   "nameTooShort": "Name must be at least 2 characters",
   "lettersAndSpacesOnly": "Letters and spaces only",
   "noAccountNeeded": "No account or password needed",
-  "welcomeToPlantie": "Welcome to Plantie!",
-  "discoverPlantCare": "Discover expert plant care tips and join a community of plant lovers",
   "offlineTitle": "No Internet Connection",
   "offlineSubtitle": "Please check your network status and try refreshing.",
   "retryButton": "Retry",
-  "editProfile": "Edit Profile",
   "aboutMe": "About Me",
   "contactInfo": "Contact Details",
   "bioPlaceholder": "Add a short bio to let people know you...",
@@ -411,8 +406,7 @@
   "bioField": "Bio",
   "phoneField": "Phone Number",
   "countryField": "Country",
-  "saveChanges": "Save Changes",
-  "nameRequired": "Name cannot be left empty",
+
   "gallerySource": "Choose from Gallery",
   "cameraSource": "Take a Photo",
   "completeProfilePrompt": "Complete Your Profile!",
@@ -424,14 +418,9 @@
   "successTitle": "Success",
   "profileUpdatedMsg": "Your profile information has been securely updated.",
   "errorTitle": "Error Occurred",
-  "confirmLogout": "Confirm Sign Out",
-  "logoutMessage": "Are you sure you want to log out of your account?",
-  "cancel": "Cancel",
-  "logout": "Log Out",
-  "successTitle": "Success",
+
   "profileUpdatedSuccess": "Profile updated successfully",
-  "errorTitle": "Error",
-  "cancel": "Cancel",
+
   "saveAvatar": "Save Avatar",
 
 
@@ -445,7 +434,6 @@
   "viewDetails": "View Details",
   "scanAnother": "Scan Another",
   "noHistoryYet": "No history yet",
-  "today": "Today",
   "yesterday": "Yesterday",
   "daysAgo": "days ago",
 
@@ -455,7 +443,6 @@
   "showMore": "Show more",
   "showLess": "Show less",
   "likes": "likes",
-  "comments": "Comments",
   "comment": "Comment",
   "like": "Like",
   "writeComment": "Write comment",
@@ -467,18 +454,14 @@
   "deletePost": "Delete Post",
   "deletePostQuestion": "Delete Post?",
   "deletePostConfirmation": "Are you sure you want to delete this post? This action cannot be undone.",
-  "cancel": "Cancel",
-  "delete": "Delete",
+
 
   "retry": "Retry",
   "noInternet": "No Internet Connection",
   "checkNetwork": "Please check your network status and try refreshing.",
   "errorLoadingPosts": "Error loading posts",
 
-  "createPost": "Create Post",
-  "whatsOnMind": "What's on your mind?",
-  "addPhotos": "Add Photos",
-  "postButton": "Post",
+
   "photos": "Photos",
   "postCreatedSuccessfully": "Post created successfully!",
   "userDataNotFound": "User data not found. Please log in again.",
@@ -520,7 +503,93 @@
   "typeMessage": "Type a message...",
   "clearChat": "Clear Chat",
   "clearChatConfirmation": "Are you sure you want to clear this conversation?",
-  "clear" : "Clear"
+  "clear" : "Clear",
+
+  "noFreeMessages": "No free messages left.",
+  "noFreeMessagesShort": "0 free",
+  "watchAdButton": "Watch Ad",
+  "freeCount": "{count} free",
+  "@freeCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "rewardReceived": "🎉 +1 free chat! You now have {count} remaining.",
+  "@rewardReceived": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+
+  "adFailedToShow": "Ad failed to show. Please try again.",
+  "adNotAvailable": "Ad not available. Please try again later.",
+
+  "offlineLikeMessage": "You are offline. Please try again when you have a connection.",
+
+  "chatOfflineTitle": "No Internet Connection",
+  "chatOfflineMessage": "The AI Assistant needs an internet connection to work. Please connect and try again.",
+  "askAIAssistant": "Ask AI Assistant",
+  "askAIAssistantSubtitle": "Get instant farming advice",
+  "weather_permission_title": "Weather for Your Farm",
+  "weather_permission_message": "We need your location to show accurate weather and farming advice for your area.",
+  "notNow": "Not now",
+  "allow_access": "Allow",
+  "tapToGetWeather": "Tap to get weather",
+
+  "permission_required": "Permission Required",
+  "location_permission_denied_forever": "Location permission has been permanently denied. Please enable it in your device settings to use weather features.",
+  "open_settings": "Open Settings",
+
+
+  "followers": "Followers",
+  "following": "Following",
+  "follow": "Follow",
+  "unfollow": "Unfollow",
+  "joinDate": "Joined",
+  "userNotFound": "User not found",
+  "noPostsYet": "No posts yet",
+  "hasNoPosts": "has no posts yet",
+  "about": "About",
+  "posts": "Posts",
+  "searchUsers": "Search Users",
+  "searchUsersHint": "Search by name...",
+  "searchUsersEmpty": "Type a name to search",
+  "noUsersFound": "No users found",
+  "viewProfile": "View Profile",
+  "postDetails": "Post Details",
+  "postNotFound": "Post not found",
+  "weather_unavailable_title": "Weather feature is temporarily unavailable.",
+  "weather_unavailable_subtitle": "Please check back later.",
+  "community_unavailable_title": "Community feature is temporarily unavailable.",
+  "community_unavailable_subtitle": "Please check back later.",
+  "update_required_title": "Update Required",
+  "update_required_message": "A new version of Plantie is available. Please update to continue using the app.",
+  "update_now": "Update Now",
+  "pendingUploadsTitle": "Pending uploads",
+  "pendingUploadsMessage": "You have {count} pending {count, plural, one{item} other{items}} to sync.",
+  "syncNow": "Sync Now",
+  "offlineSyncWait": "Waiting for connection...",
+  "fetchingLocation": "Fetching location...",
+  "unknownLocation": "Unknown location",
+  "chat_unavailable_title": "AI Chat Unavailable",
+  "chat_unavailable_subtitle": "Chat feature is currently disabled. Please try again later.",
+  "pending": "Pending",
+  "commentsNotAvailableForPending": "Comments are not available for pending posts.",
+  "pendingPostExistsTitle": "Pending Post Exists",
+  "pendingPostExistsMessage": "You already have a pending post. Please wait for it to sync or delete it before creating a new one.",
+  "positionTheLeaf": "Position the leaf in the center of the frame",
+  "steadyShot": "Steady your hand",
+  "avoidBlur": "Hold still to avoid blur",
+  "plantName": "Plant",
+  "offlineDeleteMessage": "No internet connection. Please connect to delete this post.",
+  "locationServicesDisabledTitle": "Location Services Disabled",
+  "locationServicesDisabledMessage": "Please enable location services to find the nearest store.",
+  "locationDeniedTitle": "Location Denied",
+  "locationDeniedMessage": "Please grant location permission to find the nearest store.",
+  "locationPermanentlyDeniedTitle": "Location Permanently Denied",
+  "locationPermanentlyDeniedMessage": "Location permission is permanently denied. Please enable it in app settings.",
+  "offlineMapMessage": "No internet connection. Please connect to open maps."
+
 
 
 }

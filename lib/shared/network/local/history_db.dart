@@ -159,15 +159,15 @@ class HistoryDBHelper {
           ''');
         }
 
-        if (oldVersion < 5) {
-          await db.execute('''
-    CREATE TABLE IF NOT EXISTS chat_history (
-      session_id TEXT PRIMARY KEY,
-      messages TEXT NOT NULL,
-      updated_at TEXT NOT NULL
-    )
-  ''');
-        }
+  //       if (oldVersion < 5) {
+  //         await db.execute('''
+  //   CREATE TABLE IF NOT EXISTS chat_history (
+  //     session_id TEXT PRIMARY KEY,
+  //     messages TEXT NOT NULL,
+  //     updated_at TEXT NOT NULL
+  //   )
+  // ''');
+  //       }
       },
     );
   }
@@ -303,5 +303,26 @@ class HistoryDBHelper {
   Future<void> clearCachedPosts() async {
     final db = await database;
     await db.delete(cachedPostsTable);
+  }
+
+
+
+  Future<int> getPendingUploadQueueItemsCount() async {
+    final db = await database;
+    final result = await db.query(
+      uploadQueueTableName,
+      where: '$uploadQueueColumnUploaded = 0 AND $uploadQueueColumnUploadAttempts < 3',
+    );
+    return result.length;
+  }
+
+  Future<int> getPendingOfflineActionsCount() async {
+    final db = await database;
+    final result = await db.query(
+      offlineTableName,
+      where: '$offlineColumnStatus = ? AND $offlineColumnAttempts < 3',
+      whereArgs: ['pending'],
+    );
+    return result.length;
   }
 }

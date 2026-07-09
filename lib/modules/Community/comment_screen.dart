@@ -5,8 +5,11 @@ import 'package:plantie/shared/network/remote/supabase_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../generated/l10n.dart';
 import '../../models/user/user_model.dart';
+import '../../shared/components/components.dart';
+import '../../shared/network/remote/supabase_auth_service.dart';
 import '../../shared/styles/app_colors.dart';
 import '../../shared/styles/icon_broken.dart';
+import '../UserView/user_profile_screen.dart';
 import 'cubit/cubit.dart';
 
 class CommentScreen extends StatefulWidget {
@@ -24,7 +27,7 @@ class _CommentScreenState extends State<CommentScreen> {
   final ValueNotifier<List<CommentModel>> _commentsNotifier = ValueNotifier([]);
   bool _isSubmitting = false;
   bool _isLoadingComments = true;
-  bool _isOffline = false;                     // ← new flag for offline state
+  bool _isOffline = false;
   RealtimeChannel? _commentsChannel;
 
   @override
@@ -34,11 +37,26 @@ class _CommentScreenState extends State<CommentScreen> {
     _loadInitialComments();
   }
 
+  // --- UPDATED: quick connectivity check ---
   Future<void> _loadInitialComments() async {
     setState(() {
       _isLoadingComments = true;
       _isOffline = false;
     });
+
+    // ✅ Quick connectivity check first
+    final authService = SupabaseAuthService();
+    final hasInternet = await authService.isConnectedFast();
+    if (!hasInternet) {
+      if (mounted) {
+        setState(() {
+          _isLoadingComments = false;
+          _isOffline = true;
+        });
+      }
+      return;
+    }
+
     try {
       final response = await supabaseService.client
           .from('comments')
@@ -59,7 +77,7 @@ class _CommentScreenState extends State<CommentScreen> {
       }).toList();
 
       _commentsNotifier.value = comments;
-      _subscribeToCommentChanges();            // only subscribe after successful load
+      _subscribeToCommentChanges();
       if (mounted) setState(() => _isLoadingComments = false);
     } catch (e) {
       debugPrint('❌ Load comments error: $e');
@@ -403,41 +421,69 @@ class _CommentScreenState extends State<CommentScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: AppColors.primary.withOpacity(0.2),
-            backgroundImage: (comment.userImage?.isNotEmpty ?? false)
-                ? NetworkImage(comment.userImage!)
-                : const AssetImage('assets/images/default_avatar.png') as ImageProvider,
+          GestureDetector(
+            onTap: () {
+              navigateTo(
+                context,
+                UserProfileScreen(
+                  userId: comment.userId,
+                  userName: comment.userName,
+                ),
+              );
+            },
+            child: CircleAvatar(
+              radius: 20,
+              backgroundColor: AppColors.primary.withOpacity(0.2),
+              backgroundImage: (comment.userImage?.isNotEmpty ?? false)
+                  ? NetworkImage(comment.userImage!)
+                  : const AssetImage('assets/images/default_avatar.png') as ImageProvider,
+            ),
           ),
           const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  decoration: BoxDecoration(
-                    color: isDark ? Colors.grey[800] : Colors.grey[200],
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(comment.userName,
-                          style: Theme.of(context).textTheme.labelLarge
-                              ?.copyWith(fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 4),
-                      Text(comment.text, style: Theme.of(context).textTheme.bodyMedium),
-                    ],
+                GestureDetector(
+                  onTap: () {
+                    navigateTo(
+                      context,
+                      UserProfileScreen(
+                        userId: comment.userId,
+                        userName: comment.userName,
+                      ),
+                    );
+                  },
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: isDark ? Colors.grey[800] : Colors.grey[200],
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          comment.userName,
+                          style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(comment.text, style: Theme.of(context).textTheme.bodyMedium),
+                      ],
+                    ),
                   ),
                 ),
                 const SizedBox(height: 6),
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: Text(_getRelativeTime(context, comment.timestamp),
-                      style: Theme.of(context).textTheme.labelSmall
-                          ?.copyWith(color: Colors.grey[600])),
+                  child: Text(
+                    _getRelativeTime(context, comment.timestamp),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: Colors.grey[600],
+                    ),
+                  ),
                 ),
               ],
             ),
@@ -468,7 +514,6 @@ class _CommentScreenState extends State<CommentScreen> {
       _focusNode.unfocus();
     });
 
-    // Add optimistic to UI
     _commentsNotifier.value = [optimistic, ..._commentsNotifier.value];
 
     try {
@@ -479,9 +524,7 @@ class _CommentScreenState extends State<CommentScreen> {
         userName: currentUser.name,
         userImage: currentUser.image,
       );
-      // Real-time event will replace the optimistic comment automatically
     } catch (e) {
-      // Remove optimistic on failure
       _commentsNotifier.value = _commentsNotifier.value
           .where((c) => !c.commentId.startsWith('temp-'))
           .toList();
@@ -494,7 +537,6 @@ class _CommentScreenState extends State<CommentScreen> {
           _showOfflineDialog(() => _submitComment(context, cubit, currentUser));
         }
       } else {
-        // Generic error – show SnackBar
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(

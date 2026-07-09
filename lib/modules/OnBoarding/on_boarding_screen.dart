@@ -1,3 +1,4 @@
+// lib/modules/OnBoarding/on_boarding_screen.dart
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import '../../generated/l10n.dart';
@@ -26,7 +27,7 @@ class OnBoardingScreen extends StatefulWidget {
 }
 
 class OnBoardingScreenState extends State<OnBoardingScreen> {
-  var boardController = PageController();
+  final PageController boardController = PageController();
   late List<BoardingModel> boarding;
   bool isLast = false;
 
@@ -34,6 +35,8 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     boarding = _buildBoardingItems(context);
+    // ✅ Pre-cache all images to avoid loading delays when swiping
+    _precacheImages();
   }
 
   List<BoardingModel> _buildBoardingItems(BuildContext context) {
@@ -59,6 +62,12 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
         body: S.of(context).onboardingBody4,
       ),
     ];
+  }
+
+  void _precacheImages() {
+    for (final item in boarding) {
+      precacheImage(AssetImage(item.image), context);
+    }
   }
 
   void submit() {
@@ -95,6 +104,8 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
               child: PageView.builder(
                 physics: const BouncingScrollPhysics(),
                 controller: boardController,
+                // ✅ Pre‑build adjacent pages to reduce loading delay
+                allowImplicitScrolling: true,
                 onPageChanged: (int index) {
                   setState(() {
                     isLast = index == boarding.length - 1;
@@ -110,7 +121,7 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
               children: [
                 SmoothPageIndicator(
                   controller: boardController,
-                  effect: ExpandingDotsEffect(
+                  effect: const ExpandingDotsEffect(
                     dotColor: Colors.grey,
                     activeDotColor: AppColors.primary,
                     dotHeight: 10,
@@ -134,7 +145,7 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
                       );
                     }
                   },
-                  child: Icon(
+                  child: const Icon(
                     Icons.arrow_forward_ios,
                     color: Colors.white,
                   ),
@@ -148,23 +159,28 @@ class OnBoardingScreenState extends State<OnBoardingScreen> {
     );
   }
 
-  Widget buildBoardingItem(BoardingModel model) => Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Image(image: AssetImage(model.image)),
+  Widget buildBoardingItem(BoardingModel model) => RepaintBoundary(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: Image(
+            image: AssetImage(model.image),
+            fit: BoxFit.cover,
           ),
-          const SizedBox(height: 16.0),
-          Text(
-            model.title,
-            style: const TextStyle(fontSize: 28.0),
-          ),
-          const SizedBox(height: 15.0),
-          Text(
-            model.body,
-            style: const TextStyle(fontSize: 18.0),
-          ),
-          const SizedBox(height: 30.0),
-        ],
-      );
+        ),
+        const SizedBox(height: 16.0),
+        Text(
+          model.title,
+          style: const TextStyle(fontSize: 28.0),
+        ),
+        const SizedBox(height: 15.0),
+        Text(
+          model.body,
+          style: const TextStyle(fontSize: 18.0),
+        ),
+        const SizedBox(height: 30.0),
+      ],
+    ),
+  );
 }

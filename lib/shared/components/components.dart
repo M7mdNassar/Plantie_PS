@@ -11,6 +11,7 @@ import '../../models/user/user_model.dart';
 import '../../modules/Community/comment_screen.dart';
 import '../../modules/Community/cubit/cubit.dart';
 import '../../modules/Community/image_carousel.dart';
+import '../../modules/UserView/user_profile_screen.dart';
 import '../styles/app_colors.dart';
 import '../styles/icon_broken.dart';
 import '../services/notification_service.dart';
@@ -418,9 +419,16 @@ Widget _buildPostHeader(
     height: 58,
     child: Row(
       children: [
-        Semantics(
-          image: true,
-          label: '${authorName} ${S.of(context).avatar}',
+        GestureDetector(
+          onTap: () {
+            navigateTo(
+              context,
+              UserProfileScreen(
+                userId: post.uId,
+                userName: authorName,
+              ),
+            );
+          },
           child: Container(
             padding: const EdgeInsets.all(2),
             decoration: BoxDecoration(
@@ -458,67 +466,72 @@ Widget _buildPostHeader(
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                authorName,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontWeight: FontWeight.w800,
-                  fontSize: 15.5,
-                  color: isDark ? Colors.white : Colors.black,
+          child: GestureDetector(
+            onTap: () {
+              navigateTo(
+                context,
+                UserProfileScreen(
+                  userId: post.uId,
+                  userName: authorName,
                 ),
-                semanticsLabel: '${S.of(context).postedBy} $authorName',
-              ),
-              const SizedBox(height: 2),
-              Text(
-                DateFormat.yMMMMEEEEd(
-                  Localizations.localeOf(context).toString(),
-                ).add_jm().format(post.dateTime),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontSize: 11.5,
-                  color: isDark ? Colors.grey[400] : Colors.grey[600],
-                  fontWeight: FontWeight.w500,
+              );
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  authorName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 15.5,
+                    color: isDark ? Colors.white : Colors.black,
+                  ),
+                  semanticsLabel: '${S.of(context).postedBy} $authorName',
                 ),
-              ),
-            ],
-          ),
-        ),
-        if (isOwner)
-          Semantics(
-            button: true,
-            enabled: true,
-            label: S.of(context).moreOptions,
-            onTap: () => _showPostMenu(context, post, cubit),
-            child: PopupMenuButton<String>(
-              icon: Icon(
-                Icons.more_horiz,
-                color: isDark ? Colors.white70 : Colors.black54,
-              ),
-              tooltip: S.of(context).postOptions,
-              onSelected: (value) {
-                if (value == 'delete') {
-                  _showDeleteConfirmation(context, post, cubit);
-                }
-              },
-              itemBuilder: (context) => [
-                PopupMenuItem<String>(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      const Icon(Icons.delete_outline, size: 20),
-                      const SizedBox(width: 12),
-                      Text(S.of(context).deletePost),
-                    ],
+                const SizedBox(height: 2),
+                Text(
+                  DateFormat.yMMMMEEEEd(
+                    Localizations.localeOf(context).toString(),
+                  ).add_jm().format(post.dateTime),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 11.5,
+                    color: isDark ? Colors.grey[400] : Colors.grey[600],
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
             ),
+          ),
+        ),
+        if (isOwner)
+          PopupMenuButton<String>(
+            icon: Icon(
+              Icons.more_horiz,
+              color: isDark ? Colors.white70 : Colors.black54,
+            ),
+            tooltip: S.of(context).postOptions,
+            onSelected: (value) {
+              if (value == 'delete') {
+                _showDeleteConfirmation(context, post, cubit);
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem<String>(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    const Icon(Icons.delete_outline, size: 20),
+                    const SizedBox(width: 12),
+                    Text(S.of(context).deletePost),
+                  ],
+                ),
+              ),
+            ],
           ),
       ],
     ),

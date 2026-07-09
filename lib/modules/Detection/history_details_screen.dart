@@ -13,6 +13,7 @@ import '../../models/plant_store.dart';
 import '../../models/store_service.dart';
 import '../../shared/components/components.dart';
 import '../../shared/network/local/location_service.dart';
+import '../../shared/network/remote/supabase_auth_service.dart';
 import '../../shared/styles/app_colors.dart';
 
 class HistoryDetailScreen extends StatefulWidget {
@@ -49,8 +50,13 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
   @override
   Widget build(BuildContext context) {
     final isDark = AppCubit.get(context).isDark;
-    final diseaseData = DiseaseInfo.data[widget.item.diseaseKey];
-    final isHealthy = widget.item.diseaseKey.toLowerCase().contains('healthy');
+    final diseaseKey = widget.item.diseaseKey;
+    final diseaseData = DiseaseInfo.getData(diseaseKey);
+    final isHealthy = widget.item.isHealthy;
+    final languageCode = Localizations.localeOf(context).languageCode;
+
+    // ─── Localized plant name ──────────────────────────────────
+    final plantName = widget.item.getPlantDisplayName(languageCode);
 
     return Scaffold(
       backgroundColor: isDark ? AppColors.darkBackground : AppColors.lightBackground,
@@ -58,10 +64,13 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
       body: FadeTransition(
         opacity: _fadeController.view,
         child: SingleChildScrollView(
+          physics: const BouncingScrollPhysics(),
           child: Column(
             children: [
               _buildImageSection(context, isDark),
-              _buildContentSection(context, isDark, diseaseData, isHealthy),
+              _buildContentSection(context, isDark, diseaseData, isHealthy, plantName),
+              // Extra bottom space to ensure content clears bottom bar
+              const SizedBox(height: 40),
             ],
           ),
         ),
@@ -70,6 +79,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
   }
 
   PreferredSizeWidget _buildCustomAppBar(BuildContext context, bool isDark) {
+    final languageCode = Localizations.localeOf(context).languageCode;
     return AppBar(
       elevation: 0,
       backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
@@ -81,7 +91,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
-        widget.item.title,
+        widget.item.getLocalizedName(languageCode),
         style: Theme.of(context).textTheme.headlineSmall?.copyWith(
           fontWeight: FontWeight.w600,
         ),
@@ -98,7 +108,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
   }
 
   Widget _buildImageSection(BuildContext context, bool isDark) {
-    final isHealthy = widget.item.diseaseKey.toLowerCase().contains('healthy');
+    final isHealthy = widget.item.isHealthy;
 
     return Stack(
       children: [
@@ -132,26 +142,25 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
             ],
           ),
         ),
-        // Status Badge
-         Positioned(
-           top: 24,
-           right: 24,
-           child: Container(
-             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-             decoration: BoxDecoration(
-               color: isHealthy
-                   ? AppColors.success.withValues(alpha: 0.85)
-                   : AppColors.warning.withValues(alpha: 0.85),
-               borderRadius: BorderRadius.circular(20),
-               boxShadow: [
-                 BoxShadow(
-                   color: (isHealthy ? AppColors.success : AppColors.warning)
-                       .withValues(alpha: 0.3),
-                   blurRadius: 8,
-                   spreadRadius: 2,
-                 )
-               ],
-             ),
+        Positioned(
+          top: 24,
+          right: 24,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: isHealthy
+                  ? AppColors.success.withValues(alpha: 0.85)
+                  : AppColors.warning.withValues(alpha: 0.85),
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: (isHealthy ? AppColors.success : AppColors.warning)
+                      .withValues(alpha: 0.3),
+                  blurRadius: 8,
+                  spreadRadius: 2,
+                )
+              ],
+            ),
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
@@ -177,8 +186,15 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
     );
   }
 
-  Widget _buildContentSection(BuildContext context, bool isDark,
-      DiseaseData? diseaseData, bool isHealthy) {
+  Widget _buildContentSection(
+      BuildContext context,
+      bool isDark,
+      DiseaseData? diseaseData,
+      bool isHealthy,
+      String plantName,
+      ) {
+    final languageCode = Localizations.localeOf(context).languageCode;
+
     return Container(
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkBackground : AppColors.lightBackground,
@@ -188,44 +204,56 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-             // Disease Name Card
-             _buildInfoCard(
-               context,
-               isDark,
-               icon: Icons.healing,
-               title: S.of(context).detectionResult,
-               subtitle: diseaseData?.name ?? widget.item.title,
-               iconColor: isHealthy ? AppColors.success : AppColors.warning,
-             ),
+            // ─── Plant Name ───
+            if (plantName.isNotEmpty)
+              _buildInfoCard(
+                context,
+                isDark,
+                icon: Icons.eco,
+                title: S.of(context).plantName,
+                subtitle: plantName,
+                iconColor: AppColors.primary,
+              ),
+            if (plantName.isNotEmpty) const SizedBox(height: 16),
+
+            // ─── Disease Name ───
+            _buildInfoCard(
+              context,
+              isDark,
+              icon: Icons.healing,
+              title: S.of(context).detectionResult,
+              subtitle: widget.item.getLocalizedName(languageCode),
+              iconColor: isHealthy ? AppColors.success : AppColors.warning,
+            ),
             const SizedBox(height: 16),
 
-             // Treatment Card
-             if (!isHealthy) ...[
-               _buildExpandableCard(
-                 context,
-                 isDark,
-                 icon: Icons.medication,
-                 title: S.of(context).recommendedTreatment,
-                 content: diseaseData?.treatment ?? 'No treatment found',
-                 iconColor: AppColors.primary,
-               ),
-               const SizedBox(height: 16),
-             ],
+            // ─── Treatment ───
+            if (!isHealthy) ...[
+              _buildExpandableCard(
+                context,
+                isDark,
+                icon: Icons.medication,
+                title: S.of(context).recommendedTreatment,
+                content: widget.item.treatment,
+                iconColor: AppColors.primary,
+              ),
+              const SizedBox(height: 16),
+            ],
 
-            // Tips Card
+            // ─── Tips ───
             if (!isHealthy) ...[
               _buildExpandableCard(
                 context,
                 isDark,
                 icon: Icons.lightbulb,
                 title: S.of(context).expertAdvice,
-                content: diseaseData?.tips ?? 'No tips available',
+                content: widget.item.getLocalizedTips(languageCode),
                 iconColor: AppColors.tertiary,
               ),
               const SizedBox(height: 16),
             ],
 
-            // Date Card
+            // ─── Date ───
             _buildInfoCard(
               context,
               isDark,
@@ -236,7 +264,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
             ),
             const SizedBox(height: 24),
 
-            // Find Store Button
+            // ─── Find Store Button (only if not healthy) ───
             if (!isHealthy) ...[
               _buildFindStoreButton(context),
               const SizedBox(height: 16),
@@ -248,13 +276,13 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
   }
 
   Widget _buildInfoCard(
-    BuildContext context,
-    bool isDark, {
-    required IconData icon,
-    required String title,
-    required String subtitle,
-    required Color iconColor,
-  }) {
+      BuildContext context,
+      bool isDark, {
+        required IconData icon,
+        required String title,
+        required String subtitle,
+        required Color iconColor,
+      }) {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
@@ -315,13 +343,13 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
   }
 
   Widget _buildExpandableCard(
-    BuildContext context,
-    bool isDark, {
-    required IconData icon,
-    required String title,
-    required String content,
-    required Color iconColor,
-  }) {
+      BuildContext context,
+      bool isDark, {
+        required IconData icon,
+        required String title,
+        required String content,
+        required Color iconColor,
+      }) {
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: 1),
       duration: const Duration(milliseconds: 500),
@@ -391,43 +419,59 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
     );
   }
 
-   Widget _buildFindStoreButton(BuildContext context) {
-     return Material(
-       child: InkWell(
-         onTap: () => _openNearestStore(context),
-         borderRadius: BorderRadius.circular(14),
-         child: Container(
-           width: double.infinity,
-           padding: const EdgeInsets.symmetric(vertical: 16),
-           decoration: BoxDecoration(
-             borderRadius: BorderRadius.circular(14),
-             gradient: AppColors.greenGradient,
-             boxShadow: [
-               BoxShadow(
-                 color: AppColors.primary.withValues(alpha: 0.3),
-                 blurRadius: 12,
-                 spreadRadius: 2,
-               )
-             ],
-           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.location_on, color: Colors.white, size: 22),
-              const SizedBox(width: 8),
-              Text(
-                S.of(context).findNearestStore,
-                style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                  color: Colors.white,
-                  fontWeight: FontWeight.w700,
-                ),
+  // ─── Enhanced Find Store Button ────────────────────────────────
+
+  Widget _buildFindStoreButton(BuildContext context) {
+    final s = S.of(context);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Column(
+      children: [
+        Material(
+          child: InkWell(
+            onTap: () => _openNearestStore(context),
+            borderRadius: BorderRadius.circular(14),
+            splashColor: Colors.white.withOpacity(0.2),
+            highlightColor: Colors.white.withOpacity(0.1),
+            child: Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(14),
+                gradient: AppColors.greenGradient,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.3),
+                    blurRadius: 12,
+                    spreadRadius: 2,
+                  )
+                ],
               ),
-            ],
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.storefront_outlined, color: Colors.white, size: 22),
+                  const SizedBox(width: 8),
+                  Text(
+                    s.findNearestStore,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const Icon(Icons.arrow_forward_ios, color: Colors.white, size: 14),
+                ],
+              ),
+            ),
           ),
         ),
-      ),
+        // Extra space below the button to prevent clipping
+        const SizedBox(height: 12),
+      ],
     );
   }
+
+  // ─── Other methods ─────────────────────────────────────────────
 
   Widget _buildImagePlaceholder() {
     return Container(
@@ -494,7 +538,6 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Warning Icon with animation
               TweenAnimationBuilder<double>(
                 tween: Tween(begin: 0, end: 1),
                 duration: const Duration(milliseconds: 600),
@@ -518,8 +561,6 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
                 },
               ),
               const SizedBox(height: 24),
-
-              // Title
               Text(
                 S.of(context).confirmDelete,
                 style: Theme.of(context).textTheme.headlineSmall?.copyWith(
@@ -528,10 +569,8 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
-
-              // Description
               Text(
-                '${S.of(context).deleteConfirmation}\n\n"${widget.item.title}"',
+                '${S.of(context).deleteConfirmation}\n\n"${widget.item.getLocalizedName(Localizations.localeOf(context).languageCode)}"',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: isDark
                       ? AppColors.darkTextSecondary
@@ -540,11 +579,8 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 32),
-
-              // Buttons row
               Row(
                 children: [
-                  // Cancel Button
                   Expanded(
                     child: Material(
                       child: InkWell(
@@ -576,8 +612,6 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
                     ),
                   ),
                   const SizedBox(width: 12),
-
-                  // Delete Button with danger styling
                   Expanded(
                     child: Material(
                       child: InkWell(
@@ -595,8 +629,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
                             ),
                             boxShadow: [
                               BoxShadow(
-                                color:
-                                    AppColors.error.withValues(alpha: 0.3),
+                                color: AppColors.error.withValues(alpha: 0.3),
                                 blurRadius: 8,
                                 spreadRadius: 1,
                               )
@@ -627,10 +660,7 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
   }
 
   void _deleteWithAnimation(BuildContext context) {
-    // Close bottom sheet first
     Navigator.pop(context);
-
-    // Show loading state
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -641,31 +671,22 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
       ),
     );
 
-    // Execute deletion
     DetectionCubit.get(context)
         .deleteHistoryItem(widget.item.id, widget.item.imagePath)
         .then((_) {
-      // Close loading dialog
       if (context.mounted) {
         Navigator.pop(context);
-
-        // Show success feedback
         showToast(
           text: S.of(context).deletedSuccessfully,
           state: ToastStates.success,
         );
-
-        // Navigate back to detection screen
         if (context.mounted) {
           Navigator.pop(context);
         }
       }
     }).catchError((error) {
-      // Close loading dialog
       if (context.mounted) {
         Navigator.pop(context);
-
-        // Show error feedback
         showToast(
           text: S.of(context).errorOccurred(error.toString()),
           state: ToastStates.error,
@@ -676,20 +697,75 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
 
   String _formatDate(BuildContext context, DateTime date) {
     return DateFormat.yMMMMEEEEd(
-        Localizations.localeOf(context).toString())
-        .format(date);
+      Localizations.localeOf(context).toString(),
+    ).format(date);
   }
 
+  // ─── Enhanced store locator with permission handling ──────────
+
   Future<void> _openNearestStore(BuildContext context) async {
+    final s = S.of(context);
+
     try {
-      await locationService.checkLocationPermission();
-      final Position position = await locationService.getCurrentPosition();
+      // Check if location services are enabled
+      final serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        _showLocationSettingsDialog(
+          context,
+          title: S.of(context).locationServicesDisabledTitle,
+          message: S.of(context).locationServicesDisabledMessage,
+          buttonText: S.of(context).openSettings,
+          onPressed: () => Geolocator.openLocationSettings(),
+        );
+        return;
+      }
+
+      // Check permission
+      final permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        final newPermission = await Geolocator.requestPermission();
+        if (newPermission == LocationPermission.denied) {
+          _showLocationSettingsDialog(
+            context,
+            title: S.of(context).locationDeniedTitle,
+            message: S.of(context).locationDeniedMessage,
+            buttonText: S.of(context).openSettings,
+            onPressed: () => Geolocator.openAppSettings(),
+          );
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        _showLocationSettingsDialog(
+          context,
+          title: S.of(context).locationPermanentlyDeniedTitle,
+          message: S.of(context).locationPermanentlyDeniedMessage,
+          buttonText: S.of(context).openSettings,
+          onPressed: () => Geolocator.openAppSettings(),
+        );
+        return;
+      }
+
+      // Permission granted – get position
+      final Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          distanceFilter: 100,
+        ),
+      );
 
       final nearest = await storeService.findNearestStore(position);
 
       if (!context.mounted) return;
 
       if (nearest != null) {
+        // ✅ Check internet before launching maps
+        final hasInternet = await SupabaseAuthService().isConnectedFast();
+        if (!hasInternet) {
+          _showOfflineDialog(context);
+          return;
+        }
         _launchMaps(nearest, position, context);
       } else {
         showToast(
@@ -704,6 +780,79 @@ class _HistoryDetailScreenState extends State<HistoryDetailScreen>
         state: ToastStates.error,
       );
     }
+  }
+
+  void _showLocationSettingsDialog(
+      BuildContext context, {
+        required String title,
+        required String message,
+        required String buttonText,
+        required VoidCallback onPressed,
+      }) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
+        title: Row(
+          children: [
+            Icon(Icons.location_off, color: AppColors.error),
+            const SizedBox(width: 12),
+            Text(
+              title,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(S.of(context).cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              onPressed();
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.primary,
+              foregroundColor: Colors.white,
+            ),
+            child: Text(buttonText),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showOfflineDialog(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
+        title: Row(
+          children: [
+            Icon(Icons.wifi_off_rounded, color: Colors.grey[600]),
+            const SizedBox(width: 12),
+            Text(S.of(ctx).noInternetConnection),
+          ],
+        ),
+        content: Text(S.of(ctx).offlineMapMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(S.of(ctx).ok),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _launchMaps(PlantStore store, Position userPosition, BuildContext context) async {

@@ -25,6 +25,17 @@ class WeatherData {
       daily: DailyWeather.fromJson(json['daily']),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'latitude': latitude,
+      'longitude': longitude,
+      'timezone': timezone,
+      'current': current.toJson(),
+      'hourly': hourly.toJson(),
+      'daily': daily.toJson(),
+    };
+  }
 }
 
 class CurrentWeather {
@@ -57,6 +68,18 @@ class CurrentWeather {
       isDay: (json['is_day'] as num).toInt(),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'time': time,
+      'temperature_2m': temperature,
+      'relative_humidity_2m': relativeHumidity,
+      'precipitation': precipitation,
+      'weather_code': weatherCode,
+      'wind_speed_10m': windSpeed,
+      'is_day': isDay,
+    };
+  }
 }
 
 class HourlyWeather {
@@ -86,6 +109,17 @@ class HourlyWeather {
       soilTemperature: List<double>.from(json['soil_temperature_0cm'].map((e) => (e as num).toDouble())),
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'time': time,
+      'temperature_2m': temperature,
+      'relative_humidity_2m': relativeHumidity,
+      'precipitation': precipitation,
+      'wind_speed_10m': windSpeed,
+      'soil_temperature_0cm': soilTemperature,
+    };
+  }
 }
 
 class DailyWeather {
@@ -114,5 +148,16 @@ class DailyWeather {
       precipitationSum: List<double>.from(json['precipitation_sum'].map((e) => (e as num).toDouble())),
       evapotranspiration: List<double>.from(json['et0_fao_evapotranspiration'].map((e) => (e as num).toDouble())),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'time': time,
+      'weather_code': weatherCode,
+      'temperature_2m_max': temperatureMax,
+      'temperature_2m_min': temperatureMin,
+      'precipitation_sum': precipitationSum,
+      'et0_fao_evapotranspiration': evapotranspiration,
+    };
   }
 }

@@ -38,4 +38,19 @@ class LocalUserStorage {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_userKey);
   }
+
+  static Future<UserModel?> loadUserById(String id) async {
+    final prefs = await SharedPreferences.getInstance();
+    final jsonString = prefs.getString(_userKey);
+    if (jsonString == null) return null;
+    try {
+      final json = jsonDecode(jsonString);
+      final user = UserModel.fromJson(json);
+      if (user.id == id) return user;
+      return null;
+    } catch (e) {
+      debugPrint('Error loading user by id: $e');
+      return null;
+    }
+  }
 }

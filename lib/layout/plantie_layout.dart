@@ -2,10 +2,11 @@ import 'package:animated_bottom_navigation_bar/animated_bottom_navigation_bar.da
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hexcolor/hexcolor.dart';
-import 'package:plantie/shared/network/local/upload_queue_service.dart';
 import 'package:plantie/shared/styles/icon_broken.dart';
 import '../generated/l10n.dart';
 import '../shared/styles/app_colors.dart';
+import '../shared/network/local/detection_upload_service.dart';
+import '../shared/network/local/social_upload_service.dart';
 import 'cubit/cubit.dart';
 import 'cubit/states.dart';
 
@@ -34,9 +35,10 @@ class _AppLayoutState extends State<AppLayout> with WidgetsBindingObserver {
     super.didChangeAppLifecycleState(state);
 
     if (state == AppLifecycleState.resumed) {
-      // App resumed from background - attempt pending uploads
+      // App resumed from background – attempt pending uploads for both services
       debugPrint('📱 App resumed, attempting pending uploads...');
-      uploadQueueService.attemptPendingUploads();
+      detectionUploadService.attemptPendingUploads();
+      socialUploadService.attemptPendingUploads();
     }
   }
 
@@ -57,7 +59,7 @@ class _AppLayoutState extends State<AppLayout> with WidgetsBindingObserver {
           body: cubit.screens[cubit.currentIndex],
           floatingActionButton: _buildCameraFAB(context),
           floatingActionButtonLocation:
-              FloatingActionButtonLocation.centerDocked,
+          FloatingActionButtonLocation.centerDocked,
           bottomNavigationBar: _buildBottomNavBar(cubit, context),
         );
       },

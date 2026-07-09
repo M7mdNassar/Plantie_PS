@@ -350,10 +350,10 @@ class SAr extends S {
   String get logout => 'تسجيل الخروج';
 
   @override
-  String get confirmLogout => 'تأكيد تسجيل الخروج';
+  String get confirmLogout => 'تأكيد الخروج';
 
   @override
-  String get logoutMessage => 'هل أنت متأكد من أنك تريد تسجيل الخروج من حسابك؟';
+  String get logoutMessage => 'هل أنت متأكد من رغبتك في تسجيل الخروج؟';
 
   @override
   String get editProfile => 'تعديل الملف الشخصي';
@@ -377,7 +377,7 @@ class SAr extends S {
   String get saveChanges => 'حفظ التغييرات';
 
   @override
-  String get nameRequired => 'لا يمكن ترك حقل الاسم فارغاً';
+  String get nameRequired => 'الاسم مطلوب';
 
   @override
   String get bioRequired => 'السيرة الذاتية مطلوبة';
@@ -527,7 +527,7 @@ class SAr extends S {
   String get postButton => 'نشر';
 
   @override
-  String get whatsOnMind => 'ما الذي يخطر ببالك؟';
+  String get whatsOnMind => 'ما الذي يدور في ذهنك؟';
 
   @override
   String get addPhotos => 'إضافة صور';
@@ -995,7 +995,7 @@ class SAr extends S {
   String get profileUpdatedMsg => 'تم تحديث بيانات ملفك الشخصي بأمان.';
 
   @override
-  String get errorTitle => 'خطأ في التحديث';
+  String get errorTitle => 'حدث خطأ ما';
 
   @override
   String get profileUpdatedSuccess => 'تم تحديث الملف الشخصي بنجاح';
@@ -1208,4 +1208,204 @@ class SAr extends S {
 
   @override
   String get clear => 'مسح';
+
+  @override
+  String get noFreeMessages => 'لا توجد رسائل مجانية متبقية.';
+
+  @override
+  String get noFreeMessagesShort => '0 مجانية';
+
+  @override
+  String get watchAdButton => 'شاهد الإعلان';
+
+  @override
+  String freeCount(int count) {
+    return '$count مجانية';
+  }
+
+  @override
+  String rewardReceived(int count) {
+    return '🎉 +1 رسالة مجانية! الآن لديك $count متبقية.';
+  }
+
+  @override
+  String get adFailedToShow => 'فشل عرض الإعلان. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get adNotAvailable => 'الإعلان غير متوفر. يرجى المحاولة لاحقاً.';
+
+  @override
+  String get offlineLikeMessage =>
+      'أنت غير متصل. يرجى المحاولة مرة أخرى عند توفر الاتصال.';
+
+  @override
+  String get chatOfflineTitle => 'غير متصل بالإنترنت';
+
+  @override
+  String get chatOfflineMessage =>
+      'المساعد الذكي يحتاج إلى اتصال بالإنترنت للعمل. يرجى الاتصال والمحاولة مرة أخرى.';
+
+  @override
+  String get askAIAssistant => 'اسأل المساعد الذكي';
+
+  @override
+  String get askAIAssistantSubtitle => 'احصل على نصائح زراعية فورية';
+
+  @override
+  String get weather_permission_title => 'الطقس لمزرعتك';
+
+  @override
+  String get weather_permission_message =>
+      'نحتاج إلى موقعك لعرض الطقس الدقيق ونصائح الزراعة لمنطقتك.';
+
+  @override
+  String get notNow => 'ليس الآن';
+
+  @override
+  String get allow_access => 'السماح';
+
+  @override
+  String get tapToGetWeather => 'اضغط للحصول على الطقس';
+
+  @override
+  String get permission_required => 'الصلاحية مطلوبة';
+
+  @override
+  String get location_permission_denied_forever =>
+      'تم رفض صلاحية الموقع بشكل دائم. يرجى تمكينها من إعدادات الجهاز لاستخدام ميزات الطقس.';
+
+  @override
+  String get open_settings => 'فتح الإعدادات';
+
+  @override
+  String get followers => 'المتابعون';
+
+  @override
+  String get following => 'المتابعة';
+
+  @override
+  String get follow => 'متابعة';
+
+  @override
+  String get unfollow => 'إلغاء المتابعة';
+
+  @override
+  String get joinDate => 'تاريخ الانضمام';
+
+  @override
+  String get userNotFound => 'المستخدم غير موجود';
+
+  @override
+  String get noPostsYet => 'لا توجد منشورات بعد';
+
+  @override
+  String get hasNoPosts => 'ليس لديه منشورات بعد';
+
+  @override
+  String get about => 'عن';
+
+  @override
+  String get posts => 'المنشورات';
+
+  @override
+  String get searchUsers => 'بحث عن مستخدمين';
+
+  @override
+  String get searchUsersHint => 'ابحث بالاسم...';
+
+  @override
+  String get searchUsersEmpty => 'اكتب اسماً للبحث';
+
+  @override
+  String get noUsersFound => 'لم يتم العثور على مستخدمين';
+
+  @override
+  String get viewProfile => 'عرض الملف';
+
+  @override
+  String get postDetails => 'تفاصيل المنشور';
+
+  @override
+  String get postNotFound => 'المنشور غير موجود';
+
+  @override
+  String get weather_unavailable_title => 'ميزة الطقس غير متاحة مؤقتاً.';
+
+  @override
+  String get weather_unavailable_subtitle => 'يرجى العودة لاحقاً.';
+
+  @override
+  String get community_unavailable_title => 'ميزة المجتمع غير متاحة مؤقتاً.';
+
+  @override
+  String get community_unavailable_subtitle => 'يرجى العودة لاحقاً.';
+
+  @override
+  String get update_required_title => 'تحديث مطلوب';
+
+  @override
+  String get update_required_message =>
+      'يتوفر إصدار جديد من Plantie. يرجى التحديث لمواصلة استخدام التطبيق.';
+
+  @override
+  String get update_now => 'تحديث الآن';
+
+  @override
+  String get pendingUploadsTitle => 'مرفوعات معلقة';
+
+  @override
+  String pendingUploadsMessage(num count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'عناصر',
+      one: 'عنصر',
+    );
+    return 'لديك $count $_temp0 معلقة للمزامنة.';
+  }
+
+  @override
+  String get syncNow => 'مزامنة الآن';
+
+  @override
+  String get offlineSyncWait => 'في انتظار الاتصال...';
+
+  @override
+  String get fetchingLocation => 'جاري جلب الموقع...';
+
+  @override
+  String get unknownLocation => 'موقع غير معروف';
+
+  @override
+  String get chat_unavailable_title => 'المساعد الذكي غير متاح';
+
+  @override
+  String get chat_unavailable_subtitle =>
+      'خدمة المحادثة معطلة حالياً. يرجى المحاولة لاحقاً.';
+
+  @override
+  String get pending => 'جاري النشر';
+
+  @override
+  String get commentsNotAvailableForPending =>
+      'التعليقات غير متاحة للمنشورات الجاري نشرها.';
+
+  @override
+  String get pendingPostExistsTitle => 'يوجد منشور قيد النشر';
+
+  @override
+  String get pendingPostExistsMessage =>
+      'لديك منشور قيد النشر بالفعل. يرجى الانتظار حتى يتم مزامنته أو حذفه قبل إنشاء منشور جديد.';
+
+  @override
+  String get positionTheLeaf => 'ضع الورقة في وسط الإطار';
+
+  @override
+  String get steadyShot => 'ثبت يدك';
+
+  @override
+  String get avoidBlur => 'لا تحرك الكاميرا لتجنب التشويش';
+
+  @override
+  String get plantName => 'النبتة';
 }

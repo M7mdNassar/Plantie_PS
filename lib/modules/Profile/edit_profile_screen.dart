@@ -1,3 +1,4 @@
+// lib/modules/Profile/edit_profile_screen.dart
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -47,6 +48,42 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     super.dispose();
   }
 
+  // ─── Show offline dialog ────────────────────────────────────
+
+  void _showOfflineDialog(BuildContext context, VoidCallback onRetry) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        backgroundColor: isDark ? AppColors.darkSurface : Colors.white,
+        title: Row(
+          children: [
+            Icon(Icons.wifi_off_rounded, color: Colors.grey[600]),
+            const SizedBox(width: 12),
+            Text(S.of(ctx).noInternetConnection),
+          ],
+        ),
+        content: Text(S.of(ctx).offlineSaveError),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: Text(S.of(ctx).cancel),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(ctx);
+              onRetry();
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            child: Text(S.of(ctx).retry),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -67,16 +104,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             phoneController.text = updatedUser.phone ?? '';
           }
         } else if (state is ProfileUpdateErrorState) {
-          final message = state.error == 'offline_save_error'
-              ? S.of(context).offlineSaveError
-              : state.error;
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(message),
-              backgroundColor: Colors.red,
-              duration: const Duration(seconds: 3),
-            ),
-          );
+          // ✅ No SnackBar – show a dialog instead
+          final isOffline = state.error == 'offline_save_error';
+          if (isOffline) {
+            _showOfflineDialog(context, () {
+              // Retry: if we have image changes, call updateAvatar, else updateProfileFields
+              if (cubit.hasImageChanges) {
+                cubit.updateAvatar();
+              } else if (cubit.hasFieldChanges) {
+                cubit.updateProfileFields();
+              }
+            });
+          } else {
+            // For other errors, show a simple dialog or snackbar
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.error),
+                backgroundColor: Colors.red,
+                duration: const Duration(seconds: 3),
+              ),
+            );
+          }
         }
       },
       builder: (context, state) {
@@ -108,7 +156,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           children: [
                             _buildAvatarSection(context, cubit, isDark),
                             const SizedBox(height: 32),
-                            
+
                             Text(
                               Localizations.localeOf(context).languageCode == 'ar' ? "المعلومات الشخصية" : "Personal Information",
                               style: TextStyle(
@@ -118,7 +166,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               ),
                             ),
                             const SizedBox(height: 16),
-                            
+
                             _buildModernTextField(
                               controller: nameController,
                               label: S.of(context).nameField,
@@ -157,7 +205,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                               enabled: !cubit.isSavingFields,
                               onChanged: (val) => cubit.trackFieldChange('country', val),
                             ),
-                            
+
                             // Extra padding at bottom for scrolling past keyboard
                             const SizedBox(height: 60),
                           ],
@@ -200,16 +248,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             onPressed: cubit.isAnyLoading
                 ? null
                 : () async {
-                    if (cubit.hasUnsavedChanges) {
-                      final leave = await _showUnsavedChangesWarning();
-                      if (leave && context.mounted) {
-                        cubit.resetChanges();
-                        Navigator.pop(context);
-                      }
-                    } else {
-                      Navigator.pop(context);
-                    }
-                  },
+              if (cubit.hasUnsavedChanges) {
+                final leave = await _showUnsavedChangesWarning();
+                if (leave && context.mounted) {
+                  cubit.resetChanges();
+                  Navigator.pop(context);
+                }
+              } else {
+                Navigator.pop(context);
+              }
+            },
           ),
         ),
       ),
@@ -239,52 +287,52 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: FadeTransition(opacity: animation, child: child)),
                     child: cubit.isUploadingImage
                         ? Container(
-                            key: const ValueKey('uploading'),
-                            width: 120,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: isDark ? Colors.grey[800] : Colors.grey[200],
-                              border: Border.all(color: primaryColor, width: 2),
-                            ),
-                            child: Center(
-                              child: CircularProgressIndicator(
-                                strokeWidth: 3,
-                                color: primaryColor,
-                              ),
-                            ),
-                          )
+                      key: const ValueKey('uploading'),
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: isDark ? Colors.grey[800] : Colors.grey[200],
+                        border: Border.all(color: primaryColor, width: 2),
+                      ),
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          strokeWidth: 3,
+                          color: primaryColor,
+                        ),
+                      ),
+                    )
                         : Container(
-                            key: const ValueKey('idle'),
-                            width: 120,
-                            height: 120,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              border: Border.all(
-                                color: primaryColor.withValues(alpha: 0.5),
-                                width: 3,
-                              ),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: primaryColor.withValues(alpha: 0.2),
-                                  blurRadius: 20,
-                                  offset: const Offset(0, 8),
-                                ),
-                              ],
-                            ),
-                            child: ClipOval(
-                              child: cubit.pickedImageFile != null
-                                  ? Image.file(cubit.pickedImageFile!, fit: BoxFit.cover)
-                                  : (currentUser?.image != null && currentUser!.image!.isNotEmpty)
-                                      ? CachedNetworkImage(
-                                          imageUrl: currentUser.image!,
-                                          fit: BoxFit.cover,
-                                          placeholder: (context, url) => Container(color: Colors.grey[300]),
-                                          errorWidget: (context, url, error) => Image.asset('assets/images/default_avatar.png', fit: BoxFit.cover),
-                                        )
-                                      : Image.asset('assets/images/default_avatar.png', fit: BoxFit.cover),
-                            ),
+                      key: const ValueKey('idle'),
+                      width: 120,
+                      height: 120,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        border: Border.all(
+                          color: primaryColor.withValues(alpha: 0.5),
+                          width: 3,
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: primaryColor.withValues(alpha: 0.2),
+                            blurRadius: 20,
+                            offset: const Offset(0, 8),
                           ),
+                        ],
+                      ),
+                      child: ClipOval(
+                        child: cubit.pickedImageFile != null
+                            ? Image.file(cubit.pickedImageFile!, fit: BoxFit.cover)
+                            : (currentUser?.image != null && currentUser!.image!.isNotEmpty)
+                            ? CachedNetworkImage(
+                          imageUrl: currentUser.image!,
+                          fit: BoxFit.cover,
+                          placeholder: (context, url) => Container(color: Colors.grey[300]),
+                          errorWidget: (context, url, error) => Image.asset('assets/images/default_avatar.png', fit: BoxFit.cover),
+                        )
+                            : Image.asset('assets/images/default_avatar.png', fit: BoxFit.cover),
+                      ),
+                    ),
                   ),
                   Positioned(
                     bottom: 4,
@@ -310,45 +358,45 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
             ),
           ),
-          
+
           // Image Save/Cancel Buttons
           AnimatedSwitcher(
             duration: const Duration(milliseconds: 300),
             transitionBuilder: (child, animation) => SizeTransition(sizeFactor: animation, axisAlignment: -1.0, child: child),
             child: cubit.hasImageChanges && !cubit.isUploadingImage
                 ? Padding(
-                    key: const ValueKey('buttons'),
-                    padding: const EdgeInsets.only(top: 20),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        TextButton(
-                          onPressed: () => cubit.cancelImageChange(),
-                          style: TextButton.styleFrom(
-                            foregroundColor: Colors.grey,
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                          ),
-                          child: Text(S.of(context).cancel, style: const TextStyle(fontWeight: FontWeight.bold)),
-                        ),
-                        const SizedBox(width: 12),
-                        ElevatedButton.icon(
-                          onPressed: () => cubit.updateAvatar(),
-                          icon: const Icon(Icons.cloud_upload_rounded, size: 18, color: Colors.white),
-                          label: Text(S.of(context).saveAvatar, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primaryColor,
-                            foregroundColor: Colors.white,
-                            elevation: 4,
-                            shadowColor: primaryColor.withValues(alpha: 0.5),
-                            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                            minimumSize: const Size(0, 48),
-                          ),
-                        ),
-                      ],
+              key: const ValueKey('buttons'),
+              padding: const EdgeInsets.only(top: 20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  TextButton(
+                    onPressed: () => cubit.cancelImageChange(),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.grey,
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                     ),
-                  )
+                    child: Text(S.of(context).cancel, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  ),
+                  const SizedBox(width: 12),
+                  ElevatedButton.icon(
+                    onPressed: () => cubit.updateAvatar(),
+                    icon: const Icon(Icons.cloud_upload_rounded, size: 18, color: Colors.white),
+                    label: Text(S.of(context).saveAvatar, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: primaryColor,
+                      foregroundColor: Colors.white,
+                      elevation: 4,
+                      shadowColor: primaryColor.withValues(alpha: 0.5),
+                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      minimumSize: const Size(0, 48),
+                    ),
+                  ),
+                ],
+              ),
+            )
                 : const SizedBox.shrink(key: ValueKey('empty')),
           ),
         ],
@@ -361,69 +409,69 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   // ─────────────────────────────────────────────
   Widget _buildStickyBottomBar(BuildContext context, ProfileCubit cubit, bool isDark) {
     final primaryColor = isDark ? AppColors.primaryLight : AppColors.primary;
-    
+
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 300),
       transitionBuilder: (child, animation) => SizeTransition(sizeFactor: animation, axisAlignment: 1.0, child: child),
       child: cubit.hasFieldChanges || cubit.isSavingFields
           ? Container(
-              key: const ValueKey('bottomBar'),
-              padding: EdgeInsets.only(
-                left: 24,
-                right: 24,
-                top: 16,
-                bottom: MediaQuery.of(context).padding.bottom + 16,
-              ),
-              decoration: BoxDecoration(
-                color: isDark ? AppColors.darkSurface : Colors.white,
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
-                    blurRadius: 20,
-                    offset: const Offset(0, -5),
-                  )
-                ],
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
-              ),
-              child: SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    foregroundColor: Colors.white,
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                    disabledBackgroundColor: primaryColor.withValues(alpha: 0.6),
-                  ),
-                  onPressed: cubit.isSavingFields
-                      ? null
-                      : () {
-                          if (_formKey.currentState!.validate()) {
-                            cubit.updateProfileFields();
-                          }
-                        },
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 200),
-                    child: cubit.isSavingFields
-                        ? const SizedBox(
-                            key: ValueKey('loading'),
-                            height: 24,
-                            width: 24,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2.5,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                        : Text(
-                            S.of(context).saveChanges,
-                            key: const ValueKey('text'),
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5),
-                          ),
-                  ),
-                ),
-              ),
+        key: const ValueKey('bottomBar'),
+        padding: EdgeInsets.only(
+          left: 24,
+          right: 24,
+          top: 16,
+          bottom: MediaQuery.of(context).padding.bottom + 16,
+        ),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.darkSurface : Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 20,
+              offset: const Offset(0, -5),
             )
+          ],
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(30)),
+        ),
+        child: SizedBox(
+          width: double.infinity,
+          height: 56,
+          child: ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primaryColor,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              disabledBackgroundColor: primaryColor.withValues(alpha: 0.6),
+            ),
+            onPressed: cubit.isSavingFields
+                ? null
+                : () {
+              if (_formKey.currentState!.validate()) {
+                cubit.updateProfileFields();
+              }
+            },
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 200),
+              child: cubit.isSavingFields
+                  ? const SizedBox(
+                key: ValueKey('loading'),
+                height: 24,
+                width: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                ),
+              )
+                  : Text(
+                S.of(context).saveChanges,
+                key: const ValueKey('text'),
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, letterSpacing: 0.5),
+              ),
+            ),
+          ),
+        ),
+      )
           : const SizedBox.shrink(key: ValueKey('emptyBar')),
     );
   }
@@ -453,12 +501,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         boxShadow: enabled
             ? []
             : [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.02),
-                  blurRadius: 5,
-                  spreadRadius: 1,
-                )
-              ],
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 5,
+            spreadRadius: 1,
+          )
+        ],
       ),
       child: TextFormField(
         controller: controller,
@@ -562,30 +610,30 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   Future<bool> _showUnsavedChangesWarning() async {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return await showDialog<bool>(
-          context: context,
-          builder: (ctx) => AlertDialog(
-            title: Text(S.of(ctx).unsavedChangesTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
-            content: Text(S.of(ctx).unsavedChangesMsg),
-            backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(ctx, false),
-                child: Text(S.of(ctx).keepEditing, style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w600)),
-              ),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.error,
-                  foregroundColor: Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                onPressed: () => Navigator.pop(ctx, true),
-                child: Text(S.of(ctx).discard, style: const TextStyle(fontWeight: FontWeight.bold)),
-              ),
-            ],
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(S.of(ctx).unsavedChangesTitle, style: const TextStyle(fontWeight: FontWeight.bold)),
+        content: Text(S.of(ctx).unsavedChangesMsg),
+        backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(S.of(ctx).keepEditing, style: const TextStyle(color: Colors.grey, fontWeight: FontWeight.w600)),
           ),
-        ) ??
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.error,
+              foregroundColor: Colors.white,
+              elevation: 0,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(S.of(ctx).discard, style: const TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    ) ??
         false;
   }
 }

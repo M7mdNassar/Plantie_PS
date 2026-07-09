@@ -30,3 +30,5 @@ class WeatherFetchErrorState extends HomeStates {
 
   WeatherFetchErrorState(this.msg);
 }
+
+class InsightsUpdatedState extends HomeStates {}

@@ -730,19 +730,19 @@ abstract class S {
   /// No description provided for @logout.
   ///
   /// In en, this message translates to:
-  /// **'Log Out'**
+  /// **'Logout'**
   String get logout;
 
   /// No description provided for @confirmLogout.
   ///
   /// In en, this message translates to:
-  /// **'Confirm Sign Out'**
+  /// **'Confirm Logout'**
   String get confirmLogout;
 
   /// No description provided for @logoutMessage.
   ///
   /// In en, this message translates to:
-  /// **'Are you sure you want to log out of your account?'**
+  /// **'Are you sure you want to log out?'**
   String get logoutMessage;
 
   /// No description provided for @editProfile.
@@ -790,7 +790,7 @@ abstract class S {
   /// No description provided for @nameRequired.
   ///
   /// In en, this message translates to:
-  /// **'Name cannot be left empty'**
+  /// **'Name must not be empty'**
   String get nameRequired;
 
   /// No description provided for @bioRequired.
@@ -1744,13 +1744,13 @@ abstract class S {
   /// No description provided for @welcomeToPlantie.
   ///
   /// In en, this message translates to:
-  /// **'Welcome to Plantie!'**
+  /// **'Welcome to Plantie'**
   String get welcomeToPlantie;
 
   /// No description provided for @discoverPlantCare.
   ///
   /// In en, this message translates to:
-  /// **'Discover expert plant care tips and join a community of plant lovers'**
+  /// **'Discover the art of plant care'**
   String get discoverPlantCare;
 
   /// No description provided for @getOtpCode.
@@ -1966,7 +1966,7 @@ abstract class S {
   /// No description provided for @errorTitle.
   ///
   /// In en, this message translates to:
-  /// **'Error'**
+  /// **'Error Occurred'**
   String get errorTitle;
 
   /// No description provided for @profileUpdatedSuccess.
@@ -2364,6 +2364,366 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Clear'**
   String get clear;
+
+  /// No description provided for @noFreeMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'No free messages left.'**
+  String get noFreeMessages;
+
+  /// No description provided for @noFreeMessagesShort.
+  ///
+  /// In en, this message translates to:
+  /// **'0 free'**
+  String get noFreeMessagesShort;
+
+  /// No description provided for @watchAdButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Watch Ad'**
+  String get watchAdButton;
+
+  /// No description provided for @freeCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} free'**
+  String freeCount(int count);
+
+  /// No description provided for @rewardReceived.
+  ///
+  /// In en, this message translates to:
+  /// **'🎉 +1 free chat! You now have {count} remaining.'**
+  String rewardReceived(int count);
+
+  /// No description provided for @adFailedToShow.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad failed to show. Please try again.'**
+  String get adFailedToShow;
+
+  /// No description provided for @adNotAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Ad not available. Please try again later.'**
+  String get adNotAvailable;
+
+  /// No description provided for @offlineLikeMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You are offline. Please try again when you have a connection.'**
+  String get offlineLikeMessage;
+
+  /// No description provided for @chatOfflineTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No Internet Connection'**
+  String get chatOfflineTitle;
+
+  /// No description provided for @chatOfflineMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'The AI Assistant needs an internet connection to work. Please connect and try again.'**
+  String get chatOfflineMessage;
+
+  /// No description provided for @askAIAssistant.
+  ///
+  /// In en, this message translates to:
+  /// **'Ask AI Assistant'**
+  String get askAIAssistant;
+
+  /// No description provided for @askAIAssistantSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Get instant farming advice'**
+  String get askAIAssistantSubtitle;
+
+  /// No description provided for @weather_permission_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Weather for Your Farm'**
+  String get weather_permission_title;
+
+  /// No description provided for @weather_permission_message.
+  ///
+  /// In en, this message translates to:
+  /// **'We need your location to show accurate weather and farming advice for your area.'**
+  String get weather_permission_message;
+
+  /// No description provided for @notNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get notNow;
+
+  /// No description provided for @allow_access.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get allow_access;
+
+  /// No description provided for @tapToGetWeather.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to get weather'**
+  String get tapToGetWeather;
+
+  /// No description provided for @permission_required.
+  ///
+  /// In en, this message translates to:
+  /// **'Permission Required'**
+  String get permission_required;
+
+  /// No description provided for @location_permission_denied_forever.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission has been permanently denied. Please enable it in your device settings to use weather features.'**
+  String get location_permission_denied_forever;
+
+  /// No description provided for @open_settings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get open_settings;
+
+  /// No description provided for @followers.
+  ///
+  /// In en, this message translates to:
+  /// **'Followers'**
+  String get followers;
+
+  /// No description provided for @following.
+  ///
+  /// In en, this message translates to:
+  /// **'Following'**
+  String get following;
+
+  /// No description provided for @follow.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow'**
+  String get follow;
+
+  /// No description provided for @unfollow.
+  ///
+  /// In en, this message translates to:
+  /// **'Unfollow'**
+  String get unfollow;
+
+  /// No description provided for @joinDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined'**
+  String get joinDate;
+
+  /// No description provided for @userNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'User not found'**
+  String get userNotFound;
+
+  /// No description provided for @noPostsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No posts yet'**
+  String get noPostsYet;
+
+  /// No description provided for @hasNoPosts.
+  ///
+  /// In en, this message translates to:
+  /// **'has no posts yet'**
+  String get hasNoPosts;
+
+  /// No description provided for @about.
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get about;
+
+  /// No description provided for @posts.
+  ///
+  /// In en, this message translates to:
+  /// **'Posts'**
+  String get posts;
+
+  /// No description provided for @searchUsers.
+  ///
+  /// In en, this message translates to:
+  /// **'Search Users'**
+  String get searchUsers;
+
+  /// No description provided for @searchUsersHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name...'**
+  String get searchUsersHint;
+
+  /// No description provided for @searchUsersEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Type a name to search'**
+  String get searchUsersEmpty;
+
+  /// No description provided for @noUsersFound.
+  ///
+  /// In en, this message translates to:
+  /// **'No users found'**
+  String get noUsersFound;
+
+  /// No description provided for @viewProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'View Profile'**
+  String get viewProfile;
+
+  /// No description provided for @postDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Post Details'**
+  String get postDetails;
+
+  /// No description provided for @postNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Post not found'**
+  String get postNotFound;
+
+  /// No description provided for @weather_unavailable_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Weather feature is temporarily unavailable.'**
+  String get weather_unavailable_title;
+
+  /// No description provided for @weather_unavailable_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check back later.'**
+  String get weather_unavailable_subtitle;
+
+  /// No description provided for @community_unavailable_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Community feature is temporarily unavailable.'**
+  String get community_unavailable_title;
+
+  /// No description provided for @community_unavailable_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Please check back later.'**
+  String get community_unavailable_subtitle;
+
+  /// No description provided for @update_required_title.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Required'**
+  String get update_required_title;
+
+  /// No description provided for @update_required_message.
+  ///
+  /// In en, this message translates to:
+  /// **'A new version of Plantie is available. Please update to continue using the app.'**
+  String get update_required_message;
+
+  /// No description provided for @update_now.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Now'**
+  String get update_now;
+
+  /// No description provided for @pendingUploadsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending uploads'**
+  String get pendingUploadsTitle;
+
+  /// No description provided for @pendingUploadsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You have {count} pending {count, plural, one{item} other{items}} to sync.'**
+  String pendingUploadsMessage(num count);
+
+  /// No description provided for @syncNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync Now'**
+  String get syncNow;
+
+  /// No description provided for @offlineSyncWait.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for connection...'**
+  String get offlineSyncWait;
+
+  /// No description provided for @fetchingLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Fetching location...'**
+  String get fetchingLocation;
+
+  /// No description provided for @unknownLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown location'**
+  String get unknownLocation;
+
+  /// No description provided for @chat_unavailable_title.
+  ///
+  /// In en, this message translates to:
+  /// **'AI Chat Unavailable'**
+  String get chat_unavailable_title;
+
+  /// No description provided for @chat_unavailable_subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Chat feature is currently disabled. Please try again later.'**
+  String get chat_unavailable_subtitle;
+
+  /// No description provided for @pending.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending'**
+  String get pending;
+
+  /// No description provided for @commentsNotAvailableForPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Comments are not available for pending posts.'**
+  String get commentsNotAvailableForPending;
+
+  /// No description provided for @pendingPostExistsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Post Exists'**
+  String get pendingPostExistsTitle;
+
+  /// No description provided for @pendingPostExistsMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You already have a pending post. Please wait for it to sync or delete it before creating a new one.'**
+  String get pendingPostExistsMessage;
+
+  /// No description provided for @positionTheLeaf.
+  ///
+  /// In en, this message translates to:
+  /// **'Position the leaf in the center of the frame'**
+  String get positionTheLeaf;
+
+  /// No description provided for @steadyShot.
+  ///
+  /// In en, this message translates to:
+  /// **'Steady your hand'**
+  String get steadyShot;
+
+  /// No description provided for @avoidBlur.
+  ///
+  /// In en, this message translates to:
+  /// **'Hold still to avoid blur'**
+  String get avoidBlur;
+
+  /// No description provided for @plantName.
+  ///
+  /// In en, this message translates to:
+  /// **'Plant'**
+  String get plantName;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

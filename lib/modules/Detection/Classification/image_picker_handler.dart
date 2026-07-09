@@ -4,7 +4,6 @@ import 'package:hexcolor/hexcolor.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../generated/l10n.dart';
 import '../../../layout/cubit/cubit.dart';
-import '../../../models/disease_info.dart';
 import '../../../shared/components/components.dart';
 import '../../../shared/network/local/image_storage_helper.dart';
 import '../../../shared/styles/app_colors.dart';
@@ -12,30 +11,26 @@ import '../cubit/cubit.dart';
 import 'plant_disease_pipeline.dart';
 
 class ImagePickerHandler {
-  static String _text(BuildContext context, {required String en, required String ar}) {
-    return Localizations.localeOf(context).languageCode == 'ar' ? ar : en;
-  }
 
   static Future<void> processImage(BuildContext context) async {
     print('🎯 [Handler] processImage started');
     final cubit = DetectionCubit.get(context);
 
-    // Pre‑fetch the language direction once before any modals close
     final isArabic = Localizations.localeOf(context).languageCode == 'ar';
     final notAPlantMessage = isArabic ? 'ليست نبتة' : 'Not a plant';
 
     try {
       // 1. Select image source
-      print('📱 [Handler] Showing image source selector');
-      final imageSource = await _showImageSourceSelector(context);
+      print('📱 [Handler] Showing enhanced image source selector');
+      final imageSource = await _showImageSourceSheet(context);
       if (imageSource == null) {
         print('⚠️ [Handler] Image source not selected');
         return;
       }
       print('📸 [Handler] Source selected: $imageSource');
 
-      // 2. Show capture guidance
-      print('📖 [Handler] Showing capture guidance');
+      // 2. Show enhanced capture guidance with illustration
+      print('📖 [Handler] Showing enhanced capture guidance');
       final confirmed = await _showImageGuidance(context);
       if (!confirmed) {
         print('⚠️ [Handler] User cancelled guidance');
@@ -57,7 +52,7 @@ class ImagePickerHandler {
       cubit.startDetectionLoading(originalImage);
       print('✅ [Handler] startDetectionLoading completed');
 
-      // 5. Analyze plant disease (with built-in timeout)
+      // 5. Analyze plant disease
       print('🔬 [Handler] Starting plant disease analysis...');
       final analysis = await PlantDiseasePipeline.analyzePlantDisease(originalImage);
       print('✅ [Handler] Analysis completed');
@@ -68,12 +63,10 @@ class ImagePickerHandler {
       print('   - isUncertain: ${analysis.isUncertain}');
       print('   - plantName: ${analysis.plantName}');
 
-      // 6. Store confidence & uncertainty
       cubit.detectionConfidence = analysis.confidence;
       cubit.detectionUncertain = analysis.isUncertain;
       print('📊 [Handler] Stored confidence: ${analysis.confidence}');
 
-      // 7. Handle non‑plant case
       if (analysis.rejected) {
         print('🚫 [Handler] Image rejected – not a plant');
         cubit.setNonPlantResult(originalImage, notAPlantMessage, analysis.confidence);
@@ -81,21 +74,15 @@ class ImagePickerHandler {
         return;
       }
 
-      // 8. It is a plant – save permanently and add to history
       print('🌱 [Handler] Image is a plant – saving permanently');
       final permanentImage = await ImageStorageHelper.saveImagePermanently(originalImage);
       print('💾 [Handler] Permanent image saved at: ${permanentImage.path}');
       final diseaseKey = analysis.diseaseLabel!;
       cubit.currentPlantName = analysis.plantName;
-      final diseaseInfo = DiseaseInfo.data[diseaseKey] ??
-          DiseaseData(
-            isArabic ? "مرض غير معروف" : "Unknown Disease",
-            isArabic ? "لا توجد تفاصيل" : "No details",
-            isArabic ? "لم يتم اكتشاف المرض" : "Disease not detected",
-          );
 
       await cubit.addDetectionToHistory(permanentImage, diseaseKey);
-      cubit.setDetectionResult(permanentImage, diseaseInfo.name);
+      cubit.setDetectionResult(permanentImage, diseaseKey);
+
       print('✅ [Handler] Detection result set, process complete');
     } catch (e, stack) {
       print('❌ [Handler] Exception caught: $e');
@@ -110,8 +97,6 @@ class ImagePickerHandler {
       print('🏁 [Handler] Error handling complete');
     }
   }
-
-
 
   static String _getUserFriendlyErrorMessage(dynamic e, bool isArabic) {
     final errorStr = e.toString().toLowerCase();
@@ -140,20 +125,92 @@ class ImagePickerHandler {
         ? "حدث خطأ ما. يرجى المحاولة مرة أخرى."
         : "Something went wrong. Please try again.";
   }
+
+  // ─────────────────────────────────────────────────────────────
+  //  ENHANCED IMAGE SOURCE SHEET (same as edit profile)
+  // ─────────────────────────────────────────────────────────────
+  static Future<ImageSource?> _showImageSourceSheet(BuildContext context) {
+    final isDark = AppCubit.get(context).isDark;
+
+    return showModalBottomSheet<ImageSource>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (_) => Container(
+        margin: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: isDark ? AppColors.darkSurface : Colors.white,
+          borderRadius: BorderRadius.circular(24),
+        ),
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: isDark ? Colors.grey[700] : Colors.grey[300],
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.photo_library_rounded,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  title: Text(
+                    S.of(context).gallerySource,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  onTap: () => Navigator.pop(context, ImageSource.gallery),
+                ),
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: AppColors.secondary.withValues(alpha: 0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(
+                      Icons.camera_enhance_rounded,
+                      color: AppColors.secondary,
+                    ),
+                  ),
+                  title: Text(
+                    S.of(context).cameraSource,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  onTap: () => Navigator.pop(context, ImageSource.camera),
+                ),
+                const SizedBox(height: 8),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  //  ENHANCED CAPTURE GUIDANCE MODAL (with illustration)
+  // ─────────────────────────────────────────────────────────────
   static Future<bool> _showImageGuidance(BuildContext context) async {
     return await showModalBottomSheet<bool>(
       context: context,
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
-      builder: (context) => const _ConciseCaptureGuideModal(),
+      builder: (context) => const _EnhancedCaptureGuideModal(),
     ) ?? false;
-  }
-
-  static Future<ImageSource?> _showImageSourceSelector(BuildContext context) {
-    return showModalBottomSheet<ImageSource>(
-      context: context,
-      builder: (context) => const _ImageSourceSelector(),
-    );
   }
 
   static Future<File?> _pickImage(BuildContext context, ImageSource source) {
@@ -175,56 +232,37 @@ class ImagePickerHandler {
   }
 }
 
-// ─────────────────────────────────────────────
-//  Image source selector modal (unchanged)
-// ─────────────────────────────────────────────
-class _ImageSourceSelector extends StatelessWidget {
-  const _ImageSourceSelector();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        ListTile(
-          leading: Icon(Icons.camera_alt, color: AppColors.primary),
-          title: Text(S.of(context).takePhoto, style: Theme.of(context).textTheme.labelLarge),
-          onTap: () => Navigator.pop(context, ImageSource.camera),
-        ),
-        const SizedBox(height: 8),
-        ListTile(
-          leading: Icon(Icons.photo_library, color: AppColors.primary),
-          title: Text(S.of(context).chooseFromGallery, style: Theme.of(context).textTheme.labelLarge),
-          onTap: () => Navigator.pop(context, ImageSource.gallery),
-        ),
-        const SizedBox(height: 35),
-      ],
-    );
-  }
-}
-
-// ─────────────────────────────────────────────
-//  Capture guidance modal (unchanged)
-// ─────────────────────────────────────────────
-class _ConciseCaptureGuideModal extends StatelessWidget {
-  const _ConciseCaptureGuideModal();
+// ─────────────────────────────────────────────────────────────
+//  ENHANCED CAPTURE GUIDE MODAL (with illustration)
+// ─────────────────────────────────────────────────────────────
+class _EnhancedCaptureGuideModal extends StatelessWidget {
+  const _EnhancedCaptureGuideModal();
 
   @override
   Widget build(BuildContext context) {
     final isDark = AppCubit.get(context).isDark;
+    final s = S.of(context);
 
     return Container(
       decoration: BoxDecoration(
         color: isDark ? HexColor("1C1C1E") : Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(isDark ? 0.4 : 0.1),
+            blurRadius: 24,
+            offset: const Offset(0, -8),
+          ),
+        ],
       ),
       child: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Handle
               Center(
                 child: Container(
                   width: 48,
@@ -236,6 +274,8 @@ class _ConciseCaptureGuideModal extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
+
+              // ─── Header ───
               Row(
                 children: [
                   Container(
@@ -245,22 +285,25 @@ class _ConciseCaptureGuideModal extends StatelessWidget {
                       gradient: LinearGradient(
                         colors: [AppColors.primary, AppColors.primary.withOpacity(0.7)],
                       ),
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     child: const Icon(Icons.camera_alt, color: Colors.white, size: 28),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 16),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          S.of(context).captureGuidelines,
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
+                          s.captureGuidelines,
+                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
+                            fontSize: 20,
+                          ),
                         ),
                         Text(
-                          S.of(context).quickTipsForBestResults,
-                          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          s.quickTipsForBestResults,
+                          style: Theme.of(context).textTheme.labelMedium?.copyWith(
                             color: isDark ? Colors.grey[400] : Colors.grey[600],
                           ),
                         ),
@@ -269,55 +312,162 @@ class _ConciseCaptureGuideModal extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 20),
-              _buildCompactTip(
+
+              const SizedBox(height: 24),
+
+              // ─── Illustration ───
+              Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(16),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: isDark
+                        ? [HexColor("2A2A2E"), HexColor("1A1A1E")]
+                        : [Colors.grey[50]!, Colors.white],
+                  ),
+                  border: Border.all(
+                    color: isDark ? Colors.white.withOpacity(0.08) : Colors.grey[200]!,
+                    width: 1,
+                  ),
+                ),
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    // The illustration – you can replace with your asset
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset(
+                        'assets/images/capture_guide.png', // ← Your asset image
+                        height: 180,
+                        width: double.infinity,
+                        fit: BoxFit.contain,
+                        errorBuilder: (_, __, ___) => Container(
+                          height: 180,
+                          decoration: BoxDecoration(
+                            color: isDark ? Colors.grey[800] : Colors.grey[200],
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.photo_camera_front,
+                                size: 48,
+                                color: isDark ? Colors.grey[600] : Colors.grey[400],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                '📸 Position the leaf in the frame',
+                                style: TextStyle(
+                                  color: isDark ? Colors.grey[400] : Colors.grey[600],
+                                  fontSize: 14,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // ─── Tip label below illustration (FIXED OVERFLOW) ───
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.08),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min, // Will expand to content width
+                        children: [
+                          Icon(Icons.lightbulb, size: 16, color: AppColors.primary),
+                          const SizedBox(width: 8),
+                          Flexible(
+                            child: Text(
+                              s.positionTheLeaf,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.primary,
+                              ),
+                              softWrap: true, // allow wrapping
+                              overflow: TextOverflow.visible,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // ─── Tips list ───
+              _buildTipItem(
                 context,
                 Icons.wb_sunny_outlined,
-                S.of(context).goodLightingCapture,
-                S.of(context).naturalLightWorks,
+                s.goodLightingCapture,
+                s.naturalLightWorks,
                 AppColors.primary,
                 isDark,
               ),
               const SizedBox(height: 12),
-              _buildCompactTip(
+              _buildTipItem(
                 context,
                 Icons.zoom_in,
-                S.of(context).closeAndClear,
-                S.of(context).distanceAndFocus,
+                s.closeAndClear,
+                s.distanceAndFocus,
                 HexColor("FF9500"),
                 isDark,
               ),
               const SizedBox(height: 12),
-              _buildCompactTip(
+              _buildTipItem(
                 context,
                 Icons.crop_square,
-                S.of(context).singleLeafCapture,
-                S.of(context).focusOnOneDiseased,
+                s.singleLeafCapture,
+                s.focusOnOneDiseased,
                 Colors.red,
                 isDark,
               ),
+              const SizedBox(height: 12),
+              _buildTipItem(
+                context,
+                Icons.high_quality,
+                s.steadyShot,
+                s.avoidBlur,
+                Colors.purple,
+                isDark,
+              ),
+
               const SizedBox(height: 28),
+
+              // ─── Buttons ───
               Row(
                 children: [
                   Expanded(
                     child: Material(
                       child: InkWell(
                         onTap: () => Navigator.pop(context, false),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(14),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(14),
                             border: Border.all(
                               color: isDark ? Colors.grey[700]! : Colors.grey[300]!,
+                              width: 1.5,
                             ),
                           ),
                           child: Text(
-                            S.of(context).cancel,
+                            s.cancel,
                             textAlign: TextAlign.center,
                             style: TextStyle(
                               color: isDark ? Colors.white70 : Colors.black87,
                               fontWeight: FontWeight.w600,
+                              fontSize: 16,
                             ),
                           ),
                         ),
@@ -329,19 +479,21 @@ class _ConciseCaptureGuideModal extends StatelessWidget {
                     child: Material(
                       child: InkWell(
                         onTap: () => Navigator.pop(context, true),
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(14),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          padding: const EdgeInsets.symmetric(vertical: 14),
                           decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(12),
+                            borderRadius: BorderRadius.circular(14),
                             gradient: LinearGradient(
                               colors: [AppColors.primary, AppColors.primary.withOpacity(0.8)],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
                             ),
                             boxShadow: [
                               BoxShadow(
                                 color: AppColors.primary.withOpacity(0.3),
-                                blurRadius: 8,
-                                spreadRadius: 1,
+                                blurRadius: 12,
+                                spreadRadius: 2,
                               )
                             ],
                           ),
@@ -349,9 +501,9 @@ class _ConciseCaptureGuideModal extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               const Icon(Icons.check, color: Colors.white, size: 20),
-                              const SizedBox(width: 6),
+                              const SizedBox(width: 8),
                               Text(
-                                S.of(context).continueButton,
+                                s.continueButton,
                                 textAlign: TextAlign.center,
                                 style: const TextStyle(
                                   color: Colors.white,
@@ -367,7 +519,7 @@ class _ConciseCaptureGuideModal extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 8),
             ],
           ),
         ),
@@ -375,7 +527,7 @@ class _ConciseCaptureGuideModal extends StatelessWidget {
     );
   }
 
-  Widget _buildCompactTip(
+  Widget _buildTipItem(
       BuildContext context,
       IconData icon,
       String title,
@@ -386,8 +538,11 @@ class _ConciseCaptureGuideModal extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
-        color: accentColor.withOpacity(0.08),
-        border: Border.all(color: accentColor.withOpacity(0.2)),
+        color: accentColor.withOpacity(isDark ? 0.08 : 0.04),
+        border: Border.all(
+          color: accentColor.withOpacity(0.2),
+          width: 1,
+        ),
       ),
       padding: const EdgeInsets.all(12),
       child: Row(
@@ -397,11 +552,11 @@ class _ConciseCaptureGuideModal extends StatelessWidget {
             height: 40,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: accentColor.withOpacity(0.25),
+              color: accentColor.withOpacity(0.15),
             ),
             child: Icon(icon, color: accentColor, size: 20),
           ),
-          const SizedBox(width: 12),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -410,12 +565,14 @@ class _ConciseCaptureGuideModal extends StatelessWidget {
                   title,
                   style: Theme.of(context).textTheme.labelMedium?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: accentColor,
+                    fontSize: 14,
+                    color: isDark ? Colors.white : Colors.black87,
                   ),
                 ),
                 Text(
                   description,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    fontSize: 12,
                     color: isDark ? Colors.grey[400] : Colors.grey[600],
                   ),
                   maxLines: 1,

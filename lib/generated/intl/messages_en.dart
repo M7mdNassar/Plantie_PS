@@ -28,45 +28,60 @@ class MessageLookup extends MessageLookupByLibrary {
 
   static String m3(emoji, name) => "${emoji} ${name} Fertilizer";
 
-  static String m4(value) =>
-      "Temperature is low (${value}°C). High risk of frost damage. Protect sensitive crops.";
+  static String m4(count) => "${count} free";
 
   static String m5(value) =>
-      "High evapotranspiration rate (${value} mm). Consider increasing irrigation frequency.";
+      "Temperature is low (${value}°C). High risk of frost damage. Protect sensitive crops.";
 
   static String m6(value) =>
+      "High evapotranspiration rate (${value} mm). Consider increasing irrigation frequency.";
+
+  static String m7(value) =>
       "Significant rain detected (${value} mm). Do not irrigate today to prevent waterlogging.";
 
-  static String m7(unit) => "Land Area (${unit}):";
+  static String m8(unit) => "Land Area (${unit}):";
 
-  static String m8(error) => "Error: ${error}";
+  static String m9(error) => "Error: ${error}";
 
-  static String m9(type) => "Type: ${type}";
+  static String m10(count) =>
+      "You have ${count} pending ${Intl.plural(count, one: 'item', other: 'items')} to sync.";
 
-  static String m10(calculationContext) =>
+  static String m11(type) => "Type: ${type}";
+
+  static String m12(calculationContext) =>
       "Required Fertilizers (${calculationContext}):";
 
-  static String m11(value) =>
+  static String m13(count) =>
+      "🎉 +1 free chat! You now have ${count} remaining.";
+
+  static String m14(value) =>
       "Soil temperature is ${value}°C, ideal for most seed germination.";
 
-  static String m12(treatment) => "${treatment}";
+  static String m15(treatment) => "${treatment}";
 
-  static String m13(age) =>
+  static String m16(age) =>
       "Note: Calculations include age factor for ${age} year old trees";
 
-  static String m14(error) => "Update failed: ${error}";
+  static String m17(error) => "Update failed: ${error}";
 
-  static String m15(error) => "Error sending verification: ${error}";
+  static String m18(error) => "Error sending verification: ${error}";
 
-  static String m16(error) => "Error fetching weather: ${error}";
+  static String m19(error) => "Error fetching weather: ${error}";
 
-  static String m17(value) =>
+  static String m20(value) =>
       "High wind speeds (${value} km/h). Avoid spraying pesticides as they may drift.";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
+    "about": MessageLookupByLibrary.simpleMessage("About"),
     "aboutMe": MessageLookupByLibrary.simpleMessage("About Me"),
     "acre": MessageLookupByLibrary.simpleMessage("Acre"),
+    "adFailedToShow": MessageLookupByLibrary.simpleMessage(
+      "Ad failed to show. Please try again.",
+    ),
+    "adNotAvailable": MessageLookupByLibrary.simpleMessage(
+      "Ad not available. Please try again later.",
+    ),
     "addPhotos": MessageLookupByLibrary.simpleMessage("Add Photos"),
     "aiAssistant": MessageLookupByLibrary.simpleMessage("AI Assistant"),
     "aiAssistantEmptySubtitle": MessageLookupByLibrary.simpleMessage(
@@ -76,6 +91,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "How can I help you?",
     ),
     "allowAccess": MessageLookupByLibrary.simpleMessage("Allow Access"),
+    "allow_access": MessageLookupByLibrary.simpleMessage("Allow"),
     "analyzing": MessageLookupByLibrary.simpleMessage("Analyzing Image..."),
     "analyzingImage": MessageLookupByLibrary.simpleMessage(
       "Analyzing Image...",
@@ -84,8 +100,15 @@ class MessageLookup extends MessageLookupByLibrary {
     "areaNote": MessageLookupByLibrary.simpleMessage(
       "Note: 1 Dunam = 1000 m² (10,000 sq ft)",
     ),
+    "askAIAssistant": MessageLookupByLibrary.simpleMessage("Ask AI Assistant"),
+    "askAIAssistantSubtitle": MessageLookupByLibrary.simpleMessage(
+      "Get instant farming advice",
+    ),
     "avatar": MessageLookupByLibrary.simpleMessage("avatar"),
     "avoid": MessageLookupByLibrary.simpleMessage("Avoid"),
+    "avoidBlur": MessageLookupByLibrary.simpleMessage(
+      "Hold still to avoid blur",
+    ),
     "avoidBlurred": MessageLookupByLibrary.simpleMessage(
       "Avoid blurred or tilted photos",
     ),
@@ -129,6 +152,18 @@ class MessageLookup extends MessageLookupByLibrary {
     "captureGuidelines": MessageLookupByLibrary.simpleMessage(
       "Capture Guidelines",
     ),
+    "chatOfflineMessage": MessageLookupByLibrary.simpleMessage(
+      "The AI Assistant needs an internet connection to work. Please connect and try again.",
+    ),
+    "chatOfflineTitle": MessageLookupByLibrary.simpleMessage(
+      "No Internet Connection",
+    ),
+    "chat_unavailable_subtitle": MessageLookupByLibrary.simpleMessage(
+      "Chat feature is currently disabled. Please try again later.",
+    ),
+    "chat_unavailable_title": MessageLookupByLibrary.simpleMessage(
+      "AI Chat Unavailable",
+    ),
     "checkNetwork": MessageLookupByLibrary.simpleMessage(
       "Please check your network status and try refreshing.",
     ),
@@ -154,7 +189,16 @@ class MessageLookup extends MessageLookupByLibrary {
       "Could not post comment. Please try again.",
     ),
     "comments": MessageLookupByLibrary.simpleMessage("Comments"),
+    "commentsNotAvailableForPending": MessageLookupByLibrary.simpleMessage(
+      "Comments are not available for pending posts.",
+    ),
     "community": MessageLookupByLibrary.simpleMessage("Community"),
+    "community_unavailable_subtitle": MessageLookupByLibrary.simpleMessage(
+      "Please check back later.",
+    ),
+    "community_unavailable_title": MessageLookupByLibrary.simpleMessage(
+      "Community feature is temporarily unavailable.",
+    ),
     "completeProfilePrompt": MessageLookupByLibrary.simpleMessage(
       "Complete Your Profile!",
     ),
@@ -162,7 +206,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Fill in your bio, location, and phone details to look official.",
     ),
     "confirmDelete": MessageLookupByLibrary.simpleMessage("Confirm Delete"),
-    "confirmLogout": MessageLookupByLibrary.simpleMessage("Confirm Sign Out"),
+    "confirmLogout": MessageLookupByLibrary.simpleMessage("Confirm Logout"),
     "contactInfo": MessageLookupByLibrary.simpleMessage("Contact Details"),
     "continueAsGuest": MessageLookupByLibrary.simpleMessage(
       "Continue as Guest",
@@ -220,7 +264,7 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "discard": MessageLookupByLibrary.simpleMessage("Discard"),
     "discoverPlantCare": MessageLookupByLibrary.simpleMessage(
-      "Discover expert plant care tips and join a community of plant lovers",
+      "Discover the art of plant care",
     ),
     "diseaseDetected": MessageLookupByLibrary.simpleMessage("Disease Detected"),
     "diseaseNotDetected": MessageLookupByLibrary.simpleMessage(
@@ -258,7 +302,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Error loading posts",
     ),
     "errorOccurred": m1,
-    "errorTitle": MessageLookupByLibrary.simpleMessage("Error"),
+    "errorTitle": MessageLookupByLibrary.simpleMessage("Error Occurred"),
     "evapotranspiration": MessageLookupByLibrary.simpleMessage(
       "Evapotranspiration",
     ),
@@ -275,6 +319,9 @@ class MessageLookup extends MessageLookupByLibrary {
     "feelsLike": m2,
     "feels_like": MessageLookupByLibrary.simpleMessage("Feels Like"),
     "fertilizerCalculator": m3,
+    "fetchingLocation": MessageLookupByLibrary.simpleMessage(
+      "Fetching location...",
+    ),
     "fetchingWeather": MessageLookupByLibrary.simpleMessage(
       "Fetching weather...",
     ),
@@ -298,11 +345,15 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "focusTip3": MessageLookupByLibrary.simpleMessage("Keep camera steady"),
     "foggy": MessageLookupByLibrary.simpleMessage("Foggy"),
+    "follow": MessageLookupByLibrary.simpleMessage("Follow"),
     "followTheseSteps": MessageLookupByLibrary.simpleMessage(
       "Follow these tips for best results",
     ),
+    "followers": MessageLookupByLibrary.simpleMessage("Followers"),
+    "following": MessageLookupByLibrary.simpleMessage("Following"),
     "forget_password": MessageLookupByLibrary.simpleMessage("Forget Password?"),
-    "frost_message": m4,
+    "freeCount": m4,
+    "frost_message": m5,
     "frost_risk": MessageLookupByLibrary.simpleMessage("Frost Risk"),
     "gallerySource": MessageLookupByLibrary.simpleMessage(
       "Choose from Gallery",
@@ -368,6 +419,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "guestPromptSignUp": MessageLookupByLibrary.simpleMessage("Sign Up"),
     "guestPromptTitle": MessageLookupByLibrary.simpleMessage("Sign up to join"),
     "guestSignIn": MessageLookupByLibrary.simpleMessage("Sign In"),
+    "hasNoPosts": MessageLookupByLibrary.simpleMessage("has no posts yet"),
     "have_account": MessageLookupByLibrary.simpleMessage(
       "Already have an account? ",
     ),
@@ -375,7 +427,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "high_evaporation": MessageLookupByLibrary.simpleMessage(
       "High Evaporation",
     ),
-    "high_evaporation_message": m5,
+    "high_evaporation_message": m6,
     "history": MessageLookupByLibrary.simpleMessage("History"),
     "historyPlaceholder": MessageLookupByLibrary.simpleMessage(
       "Your plant health scans will appear here",
@@ -403,12 +455,13 @@ class MessageLookup extends MessageLookupByLibrary {
     "irrigation_alert": MessageLookupByLibrary.simpleMessage(
       "Irrigation Alert",
     ),
-    "irrigation_message": m6,
+    "irrigation_message": m7,
     "itemDeleted": MessageLookupByLibrary.simpleMessage(
       "Your scan has been removed",
     ),
+    "joinDate": MessageLookupByLibrary.simpleMessage("Joined"),
     "keepEditing": MessageLookupByLibrary.simpleMessage("Keep Editing"),
-    "landArea": m7,
+    "landArea": m8,
     "language": MessageLookupByLibrary.simpleMessage("Language"),
     "languageChanged": MessageLookupByLibrary.simpleMessage(
       "Language changed. Restart the app?",
@@ -430,18 +483,39 @@ class MessageLookup extends MessageLookupByLibrary {
     "locationDenied": MessageLookupByLibrary.simpleMessage(
       "Location permission denied",
     ),
-    "locationError": m8,
+    "locationDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Please grant location permission to find the nearest store.",
+    ),
+    "locationDeniedTitle": MessageLookupByLibrary.simpleMessage(
+      "Location Denied",
+    ),
+    "locationError": m9,
+    "locationPermanentlyDeniedMessage": MessageLookupByLibrary.simpleMessage(
+      "Location permission is permanently denied. Please enable it in app settings.",
+    ),
+    "locationPermanentlyDeniedTitle": MessageLookupByLibrary.simpleMessage(
+      "Location Permanently Denied",
+    ),
     "locationRequired": MessageLookupByLibrary.simpleMessage(
       "Location permission required",
     ),
+    "locationServicesDisabledMessage": MessageLookupByLibrary.simpleMessage(
+      "Please enable location services to find the nearest store.",
+    ),
+    "locationServicesDisabledTitle": MessageLookupByLibrary.simpleMessage(
+      "Location Services Disabled",
+    ),
+    "location_permission_denied_forever": MessageLookupByLibrary.simpleMessage(
+      "Location permission has been permanently denied. Please enable it in your device settings to use weather features.",
+    ),
     "login": MessageLookupByLibrary.simpleMessage("Login"),
     "login_button": MessageLookupByLibrary.simpleMessage("Login"),
-    "logout": MessageLookupByLibrary.simpleMessage("Log Out"),
+    "logout": MessageLookupByLibrary.simpleMessage("Logout"),
     "logoutConfirm": MessageLookupByLibrary.simpleMessage(
       "Are you sure you want to logout?",
     ),
     "logoutMessage": MessageLookupByLibrary.simpleMessage(
-      "Are you sure you want to log out of your account?",
+      "Are you sure you want to log out?",
     ),
     "mop": MessageLookupByLibrary.simpleMessage("MOP"),
     "moreOptions": MessageLookupByLibrary.simpleMessage("More options"),
@@ -449,7 +523,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "nameField": MessageLookupByLibrary.simpleMessage("Full Name"),
     "nameHint": MessageLookupByLibrary.simpleMessage("Your name"),
     "nameRequired": MessageLookupByLibrary.simpleMessage(
-      "Name cannot be left empty",
+      "Name must not be empty",
     ),
     "nameTooShort": MessageLookupByLibrary.simpleMessage(
       "Name must be at least 2 characters",
@@ -475,6 +549,10 @@ class MessageLookup extends MessageLookupByLibrary {
       "No Detection History",
     ),
     "noDiseases": MessageLookupByLibrary.simpleMessage("No diseases recorded"),
+    "noFreeMessages": MessageLookupByLibrary.simpleMessage(
+      "No free messages left.",
+    ),
+    "noFreeMessagesShort": MessageLookupByLibrary.simpleMessage("0 free"),
     "noHistoryYet": MessageLookupByLibrary.simpleMessage("No history yet"),
     "noInternet": MessageLookupByLibrary.simpleMessage(
       "No Internet Connection",
@@ -488,9 +566,11 @@ class MessageLookup extends MessageLookupByLibrary {
     "noPostsMatch": MessageLookupByLibrary.simpleMessage(
       "No posts match your search",
     ),
+    "noPostsYet": MessageLookupByLibrary.simpleMessage("No posts yet"),
     "noStoresFound": MessageLookupByLibrary.simpleMessage(
       "No nearby stores found",
     ),
+    "noUsersFound": MessageLookupByLibrary.simpleMessage("No users found"),
     "no_insights": MessageLookupByLibrary.simpleMessage(
       "No specific alerts for today.",
     ),
@@ -499,6 +579,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "notAPlantError": MessageLookupByLibrary.simpleMessage(
       "The image does not appear to contain a plant leaf.",
     ),
+    "notNow": MessageLookupByLibrary.simpleMessage("Not now"),
     "notifications": MessageLookupByLibrary.simpleMessage("Notifications"),
     "npkFormula": MessageLookupByLibrary.simpleMessage("NPK Formula"),
     "numberOfTrees": MessageLookupByLibrary.simpleMessage("Number of Trees"),
@@ -509,11 +590,20 @@ class MessageLookup extends MessageLookupByLibrary {
     "offlineCommentError": MessageLookupByLibrary.simpleMessage(
       "No internet connection. Your comment will be saved when you\'re back online.",
     ),
+    "offlineDeleteMessage": MessageLookupByLibrary.simpleMessage(
+      "No internet connection. Please connect to delete this post.",
+    ),
     "offlineLikeError": MessageLookupByLibrary.simpleMessage(
       "No internet connection. Like will be saved when you\'re back online.",
     ),
+    "offlineLikeMessage": MessageLookupByLibrary.simpleMessage(
+      "You are offline. Please try again when you have a connection.",
+    ),
     "offlineLoadMoreError": MessageLookupByLibrary.simpleMessage(
       "No internet connection. Cannot load more posts.",
+    ),
+    "offlineMapMessage": MessageLookupByLibrary.simpleMessage(
+      "No internet connection. Please connect to open maps.",
     ),
     "offlinePostMessage": MessageLookupByLibrary.simpleMessage(
       "You are currently offline. Your post will be saved and uploaded when you regain internet connection.",
@@ -523,6 +613,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "offlineSubtitle": MessageLookupByLibrary.simpleMessage(
       "Please check your network status and try refreshing.",
+    ),
+    "offlineSyncWait": MessageLookupByLibrary.simpleMessage(
+      "Waiting for connection...",
     ),
     "offlineTitle": MessageLookupByLibrary.simpleMessage(
       "No Internet Connection",
@@ -553,6 +646,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Join the Plantie Community",
     ),
     "openSettings": MessageLookupByLibrary.simpleMessage("Open Settings"),
+    "open_settings": MessageLookupByLibrary.simpleMessage("Open Settings"),
     "or_login_by": MessageLookupByLibrary.simpleMessage("or login by"),
     "or_register_by": MessageLookupByLibrary.simpleMessage("or register by"),
     "outOfMemoryError": MessageLookupByLibrary.simpleMessage(
@@ -560,8 +654,22 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "partlyCloudy": MessageLookupByLibrary.simpleMessage("Partly Cloudy"),
     "password": MessageLookupByLibrary.simpleMessage("Password"),
+    "pending": MessageLookupByLibrary.simpleMessage("Pending"),
+    "pendingPostExistsMessage": MessageLookupByLibrary.simpleMessage(
+      "You already have a pending post. Please wait for it to sync or delete it before creating a new one.",
+    ),
+    "pendingPostExistsTitle": MessageLookupByLibrary.simpleMessage(
+      "Pending Post Exists",
+    ),
+    "pendingUploadsMessage": m10,
+    "pendingUploadsTitle": MessageLookupByLibrary.simpleMessage(
+      "Pending uploads",
+    ),
     "permanentDenial": MessageLookupByLibrary.simpleMessage(
       "Location permissions permanently denied. Please enable in settings.",
+    ),
+    "permission_required": MessageLookupByLibrary.simpleMessage(
+      "Permission Required",
     ),
     "phone": MessageLookupByLibrary.simpleMessage("Phone"),
     "phoneField": MessageLookupByLibrary.simpleMessage("Phone Number"),
@@ -576,12 +684,16 @@ class MessageLookup extends MessageLookupByLibrary {
     "phosphorus": MessageLookupByLibrary.simpleMessage("Phosphorus"),
     "photos": MessageLookupByLibrary.simpleMessage("Photos"),
     "plantDiagnosis": MessageLookupByLibrary.simpleMessage("Plant Diagnosis"),
-    "plantType": m9,
+    "plantName": MessageLookupByLibrary.simpleMessage("Plant"),
+    "plantType": m11,
     "plantingTime": MessageLookupByLibrary.simpleMessage("Planting Time"),
     "pleaseWait": MessageLookupByLibrary.simpleMessage(
       "Please wait while AI detects...",
     ),
     "popular": MessageLookupByLibrary.simpleMessage("Popular"),
+    "positionTheLeaf": MessageLookupByLibrary.simpleMessage(
+      "Position the leaf in the center of the frame",
+    ),
     "positioningTip1": MessageLookupByLibrary.simpleMessage(
       "Capture in good natural lighting",
     ),
@@ -598,11 +710,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "postCreatedSuccessfully": MessageLookupByLibrary.simpleMessage(
       "Post created successfully!",
     ),
+    "postDetails": MessageLookupByLibrary.simpleMessage("Post Details"),
+    "postNotFound": MessageLookupByLibrary.simpleMessage("Post not found"),
     "postOptions": MessageLookupByLibrary.simpleMessage("Post options"),
     "postedBy": MessageLookupByLibrary.simpleMessage("Post by"),
     "postingComment": MessageLookupByLibrary.simpleMessage(
       "Posting comment...",
     ),
+    "posts": MessageLookupByLibrary.simpleMessage("Posts"),
     "potassium": MessageLookupByLibrary.simpleMessage("Potassium"),
     "precipitation": MessageLookupByLibrary.simpleMessage("Precipitation"),
     "precipitation_chart": MessageLookupByLibrary.simpleMessage(
@@ -640,13 +755,14 @@ class MessageLookup extends MessageLookupByLibrary {
     "refresh": MessageLookupByLibrary.simpleMessage("Refresh"),
     "register": MessageLookupByLibrary.simpleMessage("Register"),
     "register_button": MessageLookupByLibrary.simpleMessage("Register"),
-    "requiredFertilizers": m10,
+    "requiredFertilizers": m12,
     "requiredField": MessageLookupByLibrary.simpleMessage(
       "This field is required",
     ),
     "reset_password": MessageLookupByLibrary.simpleMessage("Reset Password"),
     "retry": MessageLookupByLibrary.simpleMessage("Retry"),
     "retryButton": MessageLookupByLibrary.simpleMessage("Retry"),
+    "rewardReceived": m13,
     "save": MessageLookupByLibrary.simpleMessage("Save"),
     "saveAvatar": MessageLookupByLibrary.simpleMessage("Save Avatar"),
     "saveChanges": MessageLookupByLibrary.simpleMessage("Save Changes"),
@@ -661,6 +777,13 @@ class MessageLookup extends MessageLookupByLibrary {
       "Search by post content",
     ),
     "searchPosts": MessageLookupByLibrary.simpleMessage("Search posts"),
+    "searchUsers": MessageLookupByLibrary.simpleMessage("Search Users"),
+    "searchUsersEmpty": MessageLookupByLibrary.simpleMessage(
+      "Type a name to search",
+    ),
+    "searchUsersHint": MessageLookupByLibrary.simpleMessage(
+      "Search by name...",
+    ),
     "selectCountry": MessageLookupByLibrary.simpleMessage("Select country"),
     "selectLanguage": MessageLookupByLibrary.simpleMessage("Select Language"),
     "sendOtpSms": MessageLookupByLibrary.simpleMessage(
@@ -677,20 +800,25 @@ class MessageLookup extends MessageLookupByLibrary {
     "skip": MessageLookupByLibrary.simpleMessage("SKIP"),
     "snowy": MessageLookupByLibrary.simpleMessage("Snowy"),
     "soil_condition": MessageLookupByLibrary.simpleMessage("Soil Condition"),
-    "soil_condition_message": m11,
+    "soil_condition_message": m14,
     "soil_temp": MessageLookupByLibrary.simpleMessage("Soil Temperature"),
     "ssp": MessageLookupByLibrary.simpleMessage("SSP"),
     "startDetection": MessageLookupByLibrary.simpleMessage("Start Detection"),
     "startScan": MessageLookupByLibrary.simpleMessage("Start Scan"),
+    "steadyShot": MessageLookupByLibrary.simpleMessage("Steady your hand"),
     "storage": MessageLookupByLibrary.simpleMessage("Storage"),
     "submit": MessageLookupByLibrary.simpleMessage("Submit"),
     "successTitle": MessageLookupByLibrary.simpleMessage("Success"),
     "sunrise": MessageLookupByLibrary.simpleMessage("Sunrise"),
     "sunset": MessageLookupByLibrary.simpleMessage("Sunset"),
+    "syncNow": MessageLookupByLibrary.simpleMessage("Sync Now"),
     "takePhoto": MessageLookupByLibrary.simpleMessage("Take Photo"),
     "tapCamera": MessageLookupByLibrary.simpleMessage("Tap Camera"),
     "tapCameraToDetect": MessageLookupByLibrary.simpleMessage(
       "Tap the camera button to capture a plant image and start the diagnosis",
+    ),
+    "tapToGetWeather": MessageLookupByLibrary.simpleMessage(
+      "Tap to get weather",
     ),
     "tap_camera_to_scan": MessageLookupByLibrary.simpleMessage(
       "Tap the camera button below\nto start scanning your plants",
@@ -707,14 +835,16 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "today": MessageLookupByLibrary.simpleMessage("Today"),
     "treatment": MessageLookupByLibrary.simpleMessage("Treatment"),
-    "treatmentLabel": m12,
+    "treatmentLabel": m15,
     "treeAge": MessageLookupByLibrary.simpleMessage("Tree Age (Years)"),
-    "treeNote": m13,
+    "treeNote": m16,
     "trending": MessageLookupByLibrary.simpleMessage("Trending"),
     "tryAgain": MessageLookupByLibrary.simpleMessage("Try Again"),
     "typeMessage": MessageLookupByLibrary.simpleMessage("Type a message..."),
+    "unfollow": MessageLookupByLibrary.simpleMessage("Unfollow"),
     "unit": MessageLookupByLibrary.simpleMessage("Unit:"),
     "unknownDisease": MessageLookupByLibrary.simpleMessage("Unknown"),
+    "unknownLocation": MessageLookupByLibrary.simpleMessage("Unknown location"),
     "unlikePost": MessageLookupByLibrary.simpleMessage("Unlike post"),
     "unsavedChangesMsg": MessageLookupByLibrary.simpleMessage(
       "You have modified details. Leaving now will discard all edits.",
@@ -722,29 +852,51 @@ class MessageLookup extends MessageLookupByLibrary {
     "unsavedChangesTitle": MessageLookupByLibrary.simpleMessage(
       "Unsaved Changes",
     ),
-    "updateFailed": m14,
+    "updateFailed": m17,
+    "update_now": MessageLookupByLibrary.simpleMessage("Update Now"),
+    "update_required_message": MessageLookupByLibrary.simpleMessage(
+      "A new version of Plantie is available. Please update to continue using the app.",
+    ),
+    "update_required_title": MessageLookupByLibrary.simpleMessage(
+      "Update Required",
+    ),
     "urea": MessageLookupByLibrary.simpleMessage("UREA"),
     "userDataNotFound": MessageLookupByLibrary.simpleMessage(
       "User data not found. Please log in again.",
     ),
-    "verificationError": m15,
+    "userNotFound": MessageLookupByLibrary.simpleMessage("User not found"),
+    "verificationError": m18,
     "verificationSent": MessageLookupByLibrary.simpleMessage(
       "Verification email resent. Please check your inbox.",
     ),
     "viewDetails": MessageLookupByLibrary.simpleMessage("View Details"),
+    "viewProfile": MessageLookupByLibrary.simpleMessage("View Profile"),
     "warning_farming": MessageLookupByLibrary.simpleMessage(
       "Use caution with some farming activities.",
     ),
+    "watchAdButton": MessageLookupByLibrary.simpleMessage("Watch Ad"),
     "weather": MessageLookupByLibrary.simpleMessage("Weather"),
-    "weatherError": m16,
+    "weatherError": m19,
     "weatherErrorTitle": MessageLookupByLibrary.simpleMessage(
       "Error loading weather",
     ),
     "weather_details": MessageLookupByLibrary.simpleMessage("Weather Details"),
+    "weather_permission_message": MessageLookupByLibrary.simpleMessage(
+      "We need your location to show accurate weather and farming advice for your area.",
+    ),
+    "weather_permission_title": MessageLookupByLibrary.simpleMessage(
+      "Weather for Your Farm",
+    ),
     "weather_trends": MessageLookupByLibrary.simpleMessage("Weather Trends"),
+    "weather_unavailable_subtitle": MessageLookupByLibrary.simpleMessage(
+      "Please check back later.",
+    ),
+    "weather_unavailable_title": MessageLookupByLibrary.simpleMessage(
+      "Weather feature is temporarily unavailable.",
+    ),
     "welcome": MessageLookupByLibrary.simpleMessage("Welcome"),
     "welcomeToPlantie": MessageLookupByLibrary.simpleMessage(
-      "Welcome to Plantie!",
+      "Welcome to Plantie",
     ),
     "welcome_back": MessageLookupByLibrary.simpleMessage(
       "Hello, Welcome back to Plantie!",
@@ -759,7 +911,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "whatsYourName": MessageLookupByLibrary.simpleMessage(
       "What should we call you?",
     ),
-    "wind_message": m17,
+    "wind_message": m20,
     "wind_speed": MessageLookupByLibrary.simpleMessage("Wind Speed"),
     "wind_warning": MessageLookupByLibrary.simpleMessage("Wind Warning"),
     "writeComment": MessageLookupByLibrary.simpleMessage("Write comment"),

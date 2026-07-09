@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:google_mobile_ads/google_mobile_ads.dart';
+import 'package:plantie/config/config_manager.dart'; // new import
 import 'package:plantie/config/environment.dart';
 import 'package:plantie/shared/network/local/cache_helper.dart';
 import 'package:plantie/shared/styles/themes.dart';
@@ -16,12 +18,14 @@ import 'generated/l10n.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  MobileAds.instance.initialize();
 
-  // Load .env once – needed for App title and Supabase URL later in LottieLoadingScreen
   await dotenv.load(fileName: Environment.fileName);
-
-  // Minimal required initialisation (theme)
   await CacheHelper.init();
+
+  // Initialize ConfigManager (loads cache)
+  ConfigManager().init();
+
   final isDark = CacheHelper.getData(key: 'isDark') ?? false;
 
   runApp(MyApp(isDark: isDark));
@@ -29,7 +33,6 @@ void main() async {
 
 class MyApp extends StatelessWidget {
   final bool isDark;
-
   const MyApp({super.key, required this.isDark});
 
   @override
@@ -54,7 +57,7 @@ class MyApp extends StatelessWidget {
             theme: lightTheme,
             darkTheme: darkTheme,
             themeMode: cubit.isDark ? ThemeMode.dark : ThemeMode.light,
-            home: const LottieLoadingScreen(), // Immediate Lottie screen
+            home: const LottieLoadingScreen(),
             localizationsDelegates: const [
               S.delegate,
               GlobalMaterialLocalizations.delegate,

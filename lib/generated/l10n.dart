@@ -889,25 +889,25 @@ class S {
     return Intl.message('English', name: 'english', desc: '', args: []);
   }
 
-  /// `Log Out`
+  /// `Logout`
   String get logout {
-    return Intl.message('Log Out', name: 'logout', desc: '', args: []);
+    return Intl.message('Logout', name: 'logout', desc: '', args: []);
   }
 
-  /// `Confirm Sign Out`
+  /// `Confirm Logout`
   String get confirmLogout {
     return Intl.message(
-      'Confirm Sign Out',
+      'Confirm Logout',
       name: 'confirmLogout',
       desc: '',
       args: [],
     );
   }
 
-  /// `Are you sure you want to log out of your account?`
+  /// `Are you sure you want to log out?`
   String get logoutMessage {
     return Intl.message(
-      'Are you sure you want to log out of your account?',
+      'Are you sure you want to log out?',
       name: 'logoutMessage',
       desc: '',
       args: [],
@@ -959,10 +959,10 @@ class S {
     );
   }
 
-  /// `Name cannot be left empty`
+  /// `Name must not be empty`
   String get nameRequired {
     return Intl.message(
-      'Name cannot be left empty',
+      'Name must not be empty',
       name: 'nameRequired',
       desc: '',
       args: [],
@@ -2344,20 +2344,20 @@ class S {
     );
   }
 
-  /// `Welcome to Plantie!`
+  /// `Welcome to Plantie`
   String get welcomeToPlantie {
     return Intl.message(
-      'Welcome to Plantie!',
+      'Welcome to Plantie',
       name: 'welcomeToPlantie',
       desc: '',
       args: [],
     );
   }
 
-  /// `Discover expert plant care tips and join a community of plant lovers`
+  /// `Discover the art of plant care`
   String get discoverPlantCare {
     return Intl.message(
-      'Discover expert plant care tips and join a community of plant lovers',
+      'Discover the art of plant care',
       name: 'discoverPlantCare',
       desc: '',
       args: [],
@@ -2664,9 +2664,14 @@ class S {
     );
   }
 
-  /// `Error`
+  /// `Error Occurred`
   String get errorTitle {
-    return Intl.message('Error', name: 'errorTitle', desc: '', args: []);
+    return Intl.message(
+      'Error Occurred',
+      name: 'errorTitle',
+      desc: '',
+      args: [],
+    );
   }
 
   /// `Profile updated successfully`
@@ -3217,6 +3222,611 @@ class S {
   /// `Clear`
   String get clear {
     return Intl.message('Clear', name: 'clear', desc: '', args: []);
+  }
+
+  /// `No free messages left.`
+  String get noFreeMessages {
+    return Intl.message(
+      'No free messages left.',
+      name: 'noFreeMessages',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `0 free`
+  String get noFreeMessagesShort {
+    return Intl.message(
+      '0 free',
+      name: 'noFreeMessagesShort',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Watch Ad`
+  String get watchAdButton {
+    return Intl.message('Watch Ad', name: 'watchAdButton', desc: '', args: []);
+  }
+
+  /// `{count} free`
+  String freeCount(int count) {
+    return Intl.message(
+      '$count free',
+      name: 'freeCount',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `🎉 +1 free chat! You now have {count} remaining.`
+  String rewardReceived(int count) {
+    return Intl.message(
+      '🎉 +1 free chat! You now have $count remaining.',
+      name: 'rewardReceived',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Ad failed to show. Please try again.`
+  String get adFailedToShow {
+    return Intl.message(
+      'Ad failed to show. Please try again.',
+      name: 'adFailedToShow',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ad not available. Please try again later.`
+  String get adNotAvailable {
+    return Intl.message(
+      'Ad not available. Please try again later.',
+      name: 'adNotAvailable',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You are offline. Please try again when you have a connection.`
+  String get offlineLikeMessage {
+    return Intl.message(
+      'You are offline. Please try again when you have a connection.',
+      name: 'offlineLikeMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No Internet Connection`
+  String get chatOfflineTitle {
+    return Intl.message(
+      'No Internet Connection',
+      name: 'chatOfflineTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `The AI Assistant needs an internet connection to work. Please connect and try again.`
+  String get chatOfflineMessage {
+    return Intl.message(
+      'The AI Assistant needs an internet connection to work. Please connect and try again.',
+      name: 'chatOfflineMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ask AI Assistant`
+  String get askAIAssistant {
+    return Intl.message(
+      'Ask AI Assistant',
+      name: 'askAIAssistant',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Get instant farming advice`
+  String get askAIAssistantSubtitle {
+    return Intl.message(
+      'Get instant farming advice',
+      name: 'askAIAssistantSubtitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Weather for Your Farm`
+  String get weather_permission_title {
+    return Intl.message(
+      'Weather for Your Farm',
+      name: 'weather_permission_title',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `We need your location to show accurate weather and farming advice for your area.`
+  String get weather_permission_message {
+    return Intl.message(
+      'We need your location to show accurate weather and farming advice for your area.',
+      name: 'weather_permission_message',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Not now`
+  String get notNow {
+    return Intl.message('Not now', name: 'notNow', desc: '', args: []);
+  }
+
+  /// `Allow`
+  String get allow_access {
+    return Intl.message('Allow', name: 'allow_access', desc: '', args: []);
+  }
+
+  /// `Tap to get weather`
+  String get tapToGetWeather {
+    return Intl.message(
+      'Tap to get weather',
+      name: 'tapToGetWeather',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Permission Required`
+  String get permission_required {
+    return Intl.message(
+      'Permission Required',
+      name: 'permission_required',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Location permission has been permanently denied. Please enable it in your device settings to use weather features.`
+  String get location_permission_denied_forever {
+    return Intl.message(
+      'Location permission has been permanently denied. Please enable it in your device settings to use weather features.',
+      name: 'location_permission_denied_forever',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Open Settings`
+  String get open_settings {
+    return Intl.message(
+      'Open Settings',
+      name: 'open_settings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Followers`
+  String get followers {
+    return Intl.message('Followers', name: 'followers', desc: '', args: []);
+  }
+
+  /// `Following`
+  String get following {
+    return Intl.message('Following', name: 'following', desc: '', args: []);
+  }
+
+  /// `Follow`
+  String get follow {
+    return Intl.message('Follow', name: 'follow', desc: '', args: []);
+  }
+
+  /// `Unfollow`
+  String get unfollow {
+    return Intl.message('Unfollow', name: 'unfollow', desc: '', args: []);
+  }
+
+  /// `Joined`
+  String get joinDate {
+    return Intl.message('Joined', name: 'joinDate', desc: '', args: []);
+  }
+
+  /// `User not found`
+  String get userNotFound {
+    return Intl.message(
+      'User not found',
+      name: 'userNotFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No posts yet`
+  String get noPostsYet {
+    return Intl.message('No posts yet', name: 'noPostsYet', desc: '', args: []);
+  }
+
+  /// `has no posts yet`
+  String get hasNoPosts {
+    return Intl.message(
+      'has no posts yet',
+      name: 'hasNoPosts',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `About`
+  String get about {
+    return Intl.message('About', name: 'about', desc: '', args: []);
+  }
+
+  /// `Posts`
+  String get posts {
+    return Intl.message('Posts', name: 'posts', desc: '', args: []);
+  }
+
+  /// `Search Users`
+  String get searchUsers {
+    return Intl.message(
+      'Search Users',
+      name: 'searchUsers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Search by name...`
+  String get searchUsersHint {
+    return Intl.message(
+      'Search by name...',
+      name: 'searchUsersHint',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Type a name to search`
+  String get searchUsersEmpty {
+    return Intl.message(
+      'Type a name to search',
+      name: 'searchUsersEmpty',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No users found`
+  String get noUsersFound {
+    return Intl.message(
+      'No users found',
+      name: 'noUsersFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `View Profile`
+  String get viewProfile {
+    return Intl.message(
+      'View Profile',
+      name: 'viewProfile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Post Details`
+  String get postDetails {
+    return Intl.message(
+      'Post Details',
+      name: 'postDetails',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Post not found`
+  String get postNotFound {
+    return Intl.message(
+      'Post not found',
+      name: 'postNotFound',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Weather feature is temporarily unavailable.`
+  String get weather_unavailable_title {
+    return Intl.message(
+      'Weather feature is temporarily unavailable.',
+      name: 'weather_unavailable_title',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please check back later.`
+  String get weather_unavailable_subtitle {
+    return Intl.message(
+      'Please check back later.',
+      name: 'weather_unavailable_subtitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Community feature is temporarily unavailable.`
+  String get community_unavailable_title {
+    return Intl.message(
+      'Community feature is temporarily unavailable.',
+      name: 'community_unavailable_title',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please check back later.`
+  String get community_unavailable_subtitle {
+    return Intl.message(
+      'Please check back later.',
+      name: 'community_unavailable_subtitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update Required`
+  String get update_required_title {
+    return Intl.message(
+      'Update Required',
+      name: 'update_required_title',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `A new version of Plantie is available. Please update to continue using the app.`
+  String get update_required_message {
+    return Intl.message(
+      'A new version of Plantie is available. Please update to continue using the app.',
+      name: 'update_required_message',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Update Now`
+  String get update_now {
+    return Intl.message('Update Now', name: 'update_now', desc: '', args: []);
+  }
+
+  /// `Pending uploads`
+  String get pendingUploadsTitle {
+    return Intl.message(
+      'Pending uploads',
+      name: 'pendingUploadsTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You have {count} pending {count, plural, one{item} other{items}} to sync.`
+  String pendingUploadsMessage(num count) {
+    return Intl.message(
+      'You have $count pending ${Intl.plural(count, one: 'item', other: 'items')} to sync.',
+      name: 'pendingUploadsMessage',
+      desc: '',
+      args: [count],
+    );
+  }
+
+  /// `Sync Now`
+  String get syncNow {
+    return Intl.message('Sync Now', name: 'syncNow', desc: '', args: []);
+  }
+
+  /// `Waiting for connection...`
+  String get offlineSyncWait {
+    return Intl.message(
+      'Waiting for connection...',
+      name: 'offlineSyncWait',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Fetching location...`
+  String get fetchingLocation {
+    return Intl.message(
+      'Fetching location...',
+      name: 'fetchingLocation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Unknown location`
+  String get unknownLocation {
+    return Intl.message(
+      'Unknown location',
+      name: 'unknownLocation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `AI Chat Unavailable`
+  String get chat_unavailable_title {
+    return Intl.message(
+      'AI Chat Unavailable',
+      name: 'chat_unavailable_title',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Chat feature is currently disabled. Please try again later.`
+  String get chat_unavailable_subtitle {
+    return Intl.message(
+      'Chat feature is currently disabled. Please try again later.',
+      name: 'chat_unavailable_subtitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pending`
+  String get pending {
+    return Intl.message('Pending', name: 'pending', desc: '', args: []);
+  }
+
+  /// `Comments are not available for pending posts.`
+  String get commentsNotAvailableForPending {
+    return Intl.message(
+      'Comments are not available for pending posts.',
+      name: 'commentsNotAvailableForPending',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Pending Post Exists`
+  String get pendingPostExistsTitle {
+    return Intl.message(
+      'Pending Post Exists',
+      name: 'pendingPostExistsTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `You already have a pending post. Please wait for it to sync or delete it before creating a new one.`
+  String get pendingPostExistsMessage {
+    return Intl.message(
+      'You already have a pending post. Please wait for it to sync or delete it before creating a new one.',
+      name: 'pendingPostExistsMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Position the leaf in the center of the frame`
+  String get positionTheLeaf {
+    return Intl.message(
+      'Position the leaf in the center of the frame',
+      name: 'positionTheLeaf',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Steady your hand`
+  String get steadyShot {
+    return Intl.message(
+      'Steady your hand',
+      name: 'steadyShot',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hold still to avoid blur`
+  String get avoidBlur {
+    return Intl.message(
+      'Hold still to avoid blur',
+      name: 'avoidBlur',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Plant`
+  String get plantName {
+    return Intl.message('Plant', name: 'plantName', desc: '', args: []);
+  }
+
+  /// `No internet connection. Please connect to delete this post.`
+  String get offlineDeleteMessage {
+    return Intl.message(
+      'No internet connection. Please connect to delete this post.',
+      name: 'offlineDeleteMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Location Services Disabled`
+  String get locationServicesDisabledTitle {
+    return Intl.message(
+      'Location Services Disabled',
+      name: 'locationServicesDisabledTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please enable location services to find the nearest store.`
+  String get locationServicesDisabledMessage {
+    return Intl.message(
+      'Please enable location services to find the nearest store.',
+      name: 'locationServicesDisabledMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Location Denied`
+  String get locationDeniedTitle {
+    return Intl.message(
+      'Location Denied',
+      name: 'locationDeniedTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Please grant location permission to find the nearest store.`
+  String get locationDeniedMessage {
+    return Intl.message(
+      'Please grant location permission to find the nearest store.',
+      name: 'locationDeniedMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Location Permanently Denied`
+  String get locationPermanentlyDeniedTitle {
+    return Intl.message(
+      'Location Permanently Denied',
+      name: 'locationPermanentlyDeniedTitle',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Location permission is permanently denied. Please enable it in app settings.`
+  String get locationPermanentlyDeniedMessage {
+    return Intl.message(
+      'Location permission is permanently denied. Please enable it in app settings.',
+      name: 'locationPermanentlyDeniedMessage',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No internet connection. Please connect to open maps.`
+  String get offlineMapMessage {
+    return Intl.message(
+      'No internet connection. Please connect to open maps.',
+      name: 'offlineMapMessage',
+      desc: '',
+      args: [],
+    );
   }
 }
 

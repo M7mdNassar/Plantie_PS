@@ -11,15 +11,15 @@ import 'package:plantie/shared/network/remote/supabase_service.dart';
 import '../../../models/post/post_model.dart';
 import '../../../models/user/user_model.dart';
 import '../../../shared/network/local/history_db.dart';
-import '../../../shared/network/local/upload_queue_service.dart';
+import '../../../shared/network/local/image_storage_helper.dart';
+import '../../../shared/network/local/social_upload_service.dart';
 import '../../../shared/network/remote/supabase_auth_service.dart';
+import '../../../shared/components/components.dart';
 
 class CommunityCubit extends Cubit<CommunityStates> {
   static CommunityCubit get(context) => BlocProvider.of(context);
 
-  CommunityCubit() : super(CommunityInitialState()) {
-    // Initialize real-time after first load
-  }
+  CommunityCubit() : super(CommunityInitialState());
 
   final ImagePicker _picker = ImagePicker();
   final List<File> _postImages = [];
@@ -35,7 +35,6 @@ class CommunityCubit extends Cubit<CommunityStates> {
   RealtimeChannel? _commentsChannel;
   RealtimeChannel? _likesChannel;
 
-  bool isLoading = false;
   bool isCreatingPost = false;
 
   Timer? _searchTimer;
@@ -55,6 +54,27 @@ class CommunityCubit extends Cubit<CommunityStates> {
 
   final HistoryDBHelper _historyDb = HistoryDBHelper();
 
+  int _requestId = 0;
+
+  // ✅ Track if posts were already loaded to prevent refetching on tab switch
+  bool _postsLoaded = false;
+
+  // ✅ Config fetch cooldown (10 minutes)
+  static DateTime? _lastConfigFetch;
+
+  // ✅ Pending post count
+  int get pendingPostCount => _posts.where((p) => p.postId.startsWith('pending_')).length;
+
+  bool get hasPendingPost => pendingPostCount > 0;
+
+  // ✅ Force refresh – clears loaded flag and fetches fresh
+  Future<void> forceRefresh() async {
+    _postsLoaded = false;
+    _currentPage = 0;
+    _hasMore = true;
+    await getPosts(refresh: true);
+  }
+
   Future<void> setSortFilter(String sortType) async {
     if (_feedSort == sortType) return;
 
@@ -66,12 +86,13 @@ class CommunityCubit extends Cubit<CommunityStates> {
     final hasInternet = await authService.isConnectedFast();
     if (!hasInternet) {
       _feedSort = previousSort;
-      emit(CommunityErrorState('offline_filter'));
+      emit(CommunityOfflineState());
       return;
     }
 
     _currentPage = 0;
     _hasMore = true;
+    _postsLoaded = false;
     await getPosts(refresh: true);
   }
 
@@ -230,15 +251,45 @@ class CommunityCubit extends Cubit<CommunityStates> {
   }
 
   // --------------------------------------------------------------------------
-  // POST FETCHING
+  // POST FETCHING – ALWAYS SHOW CACHED POSTS FIRST
   // --------------------------------------------------------------------------
   Future<void> getPosts({bool refresh = false}) async {
+    // ✅ If posts are already loaded and not refreshing, skip fetch
+    if (_postsLoaded && !refresh) {
+      debugPrint('📋 Posts already loaded, skipping fetch');
+      return;
+    }
+
     if (refresh) {
       _currentPage = 0;
       _hasMore = true;
     }
     if (isFetchingMore || (!_hasMore && !refresh)) return;
 
+    final currentRequestId = ++_requestId;
+
+    final authService = SupabaseAuthService();
+    final hasInternet = await authService.isConnectedFast();
+
+    // ✅ ALWAYS load cached posts first (if available)
+    final cached = await _loadCachedPosts();
+    if (cached.isNotEmpty) {
+      _posts = cached;
+      _postsLoaded = true;
+      if (currentRequestId == _requestId) {
+        emit(CommunityPostsLoadedState(List.from(_posts)));
+      }
+    }
+
+    // ✅ If offline or no internet, stop here (cached posts are already shown)
+    if (!hasInternet) {
+      if (cached.isEmpty && currentRequestId == _requestId) {
+        emit(CommunityOfflineState());
+      }
+      return;
+    }
+
+    // ✅ Online – fetch fresh posts in background
     try {
       isFetchingMore = true;
       if (!refresh && _posts.isNotEmpty) {
@@ -264,6 +315,11 @@ class CommunityCubit extends Cubit<CommunityStates> {
       final response = await query
           .range(_currentPage * _pageSize, (_currentPage + 1) * _pageSize - 1);
 
+      if (currentRequestId != _requestId) {
+        debugPrint('⏳ Stale request $currentRequestId ignored');
+        return;
+      }
+
       final List<dynamic> data = response;
       final newPosts = data.map((json) => PostModel.fromJson(json)).toList();
 
@@ -271,8 +327,21 @@ class CommunityCubit extends Cubit<CommunityStates> {
         _posts.clear();
         _posts.addAll(newPosts);
       } else {
-        _posts.addAll(newPosts);
+        // Merge new posts with existing (avoid duplicates)
+        final existingIds = _posts.map((p) => p.postId).toSet();
+        for (final post in newPosts) {
+          if (!existingIds.contains(post.postId)) {
+            _posts.add(post);
+          } else {
+            // Update existing post
+            final index = _posts.indexWhere((p) => p.postId == post.postId);
+            if (index != -1) {
+              _posts[index] = post;
+            }
+          }
+        }
       }
+
       if (_posts.length > 100) {
         _posts.removeRange(100, _posts.length);
       }
@@ -280,7 +349,11 @@ class CommunityCubit extends Cubit<CommunityStates> {
       await _fetchCurrentUserLikes(_posts);
       _hasMore = newPosts.length == _pageSize;
       _currentPage++;
-      emit(CommunityPostsLoadedState(List.from(_posts)));
+      _postsLoaded = true;
+
+      if (currentRequestId == _requestId) {
+        emit(CommunityPostsLoadedState(List.from(_posts)));
+      }
 
       if (!_realtimeInitiated && _posts.isNotEmpty) {
         _initRealtimeSubscriptions();
@@ -288,6 +361,11 @@ class CommunityCubit extends Cubit<CommunityStates> {
 
       _cachePosts(_posts);
     } catch (e) {
+      if (currentRequestId != _requestId) {
+        debugPrint('⏳ Stale request $currentRequestId error ignored');
+        return;
+      }
+
       debugPrint('❌ getPosts error: $e');
       final errorStr = e.toString().toLowerCase();
       if (errorStr.contains('socketexception') ||
@@ -295,15 +373,13 @@ class CommunityCubit extends Cubit<CommunityStates> {
           errorStr.contains('network is unreachable') ||
           errorStr.contains('connection failed') ||
           errorStr.contains('timeout')) {
-        final cached = await _loadCachedPosts();
-        if (cached.isNotEmpty) {
-          _posts = cached;
-          emit(CommunityPostsLoadedState(List.from(_posts)));
-        } else {
+        if (_posts.isEmpty && currentRequestId == _requestId) {
           emit(CommunityOfflineState());
         }
       } else {
-        emit(CommunityErrorState(e.toString()));
+        if (currentRequestId == _requestId) {
+          emit(CommunityErrorState(e.toString()));
+        }
       }
     } finally {
       isFetchingMore = false;
@@ -328,14 +404,24 @@ class CommunityCubit extends Cubit<CommunityStates> {
     }
   }
 
+  // ✅ Improved: skip corrupt posts
   Future<List<PostModel>> _loadCachedPosts() async {
     try {
       final db = await _historyDb.database;
       final result = await db.query('cached_posts', orderBy: 'cached_at DESC');
-      return result.map((row) {
-        final json = jsonDecode(row['post_data'] as String);
-        return PostModel.fromJson(json);
-      }).toList();
+      final posts = <PostModel>[];
+      for (final row in result) {
+        try {
+          final json = jsonDecode(row['post_data'] as String);
+          final post = PostModel.fromJson(json);
+          posts.add(post);
+        } catch (e) {
+          debugPrint('⚠️ Failed to parse cached post: $e');
+          // Skip corrupt post
+        }
+      }
+      debugPrint('✅ Loaded ${posts.length} cached posts');
+      return posts;
     } catch (e) {
       debugPrint('❌ Failed to load cached posts: $e');
       return [];
@@ -343,10 +429,9 @@ class CommunityCubit extends Cubit<CommunityStates> {
   }
 
   Future<void> loadMorePosts() async {
-    if (isLoading || isFetchingMore || !_hasMore) return;
+    if (isFetchingMore || !_hasMore) return;
 
     try {
-      isFetchingMore = true;
       await getPosts();
     } catch (e) {
       if (_posts.isNotEmpty) {
@@ -359,15 +444,13 @@ class CommunityCubit extends Cubit<CommunityStates> {
           emit(CommunityErrorState(e.toString()));
         }
       }
-      isFetchingMore = false;
     }
   }
 
   // --------------------------------------------------------------------------
-  // LIKES (with null safety)
+  // LIKES
   // --------------------------------------------------------------------------
   Future<void> _fetchCurrentUserLikes(List<PostModel> posts) async {
-    // ✅ Null safety check
     final user = CurrentUser.user;
     if (user == null) {
       debugPrint('⚠️ CurrentUser is null, skipping likes fetch');
@@ -400,7 +483,6 @@ class CommunityCubit extends Cubit<CommunityStates> {
   }
 
   Future<void> toggleLike(String postId) async {
-    // ✅ Null safety check
     final user = CurrentUser.user;
     if (user == null) {
       emit(CommunityErrorState("User not logged in"));
@@ -481,7 +563,7 @@ class CommunityCubit extends Cubit<CommunityStates> {
   }
 
   // --------------------------------------------------------------------------
-  // COMMENTS (with null safety on userId? Already uses parameter)
+  // COMMENTS
   // --------------------------------------------------------------------------
   Future<void> addComment({
     required String postId,
@@ -490,8 +572,12 @@ class CommunityCubit extends Cubit<CommunityStates> {
     required String userName,
     required String? userImage,
   }) async {
-    // userId is passed, but we still need to ensure sync works.
-    // We'll check if CurrentUser.user exists (for consistency).
+    // ✅ Block comments on pending posts
+    if (postId.startsWith('pending_')) {
+      emit(CommunityErrorState('comments_not_allowed_on_pending'));
+      return;
+    }
+
     final user = CurrentUser.user;
     if (user == null) {
       emit(CommunityErrorState("User not logged in"));
@@ -501,7 +587,7 @@ class CommunityCubit extends Cubit<CommunityStates> {
     final authService = SupabaseAuthService();
     final hasInternet = await authService.isConnectedFast();
     if (!hasInternet) {
-      await uploadQueueService.addOfflineAction(
+      await socialUploadService.addOfflineAction(
         type: 'comment',
         userId: userId,
         data: {
@@ -516,7 +602,7 @@ class CommunityCubit extends Cubit<CommunityStates> {
 
     final online = await authService.syncUserIfNeeded(userId);
     if (!online) {
-      await uploadQueueService.addOfflineAction(
+      await socialUploadService.addOfflineAction(
         type: 'comment',
         userId: userId,
         data: {
@@ -593,6 +679,11 @@ class CommunityCubit extends Cubit<CommunityStates> {
       return;
     }
 
+    if (hasPendingPost) {
+      emit(CommunityErrorState('pending_post_exists'));
+      return;
+    }
+
     isCreatingPost = true;
     emit(CreatePostLoadingState());
 
@@ -607,6 +698,7 @@ class CommunityCubit extends Cubit<CommunityStates> {
       likeCount: 0,
       userLiked: false,
       postImage: null,
+      offlineActionId: null,
     );
 
     _posts.insert(0, pendingPost);
@@ -615,46 +707,42 @@ class CommunityCubit extends Cubit<CommunityStates> {
     final authService = SupabaseAuthService();
     final hasInternet = await authService.isConnectedFast();
     if (!hasInternet) {
-      final imagePaths = _postImages.map((f) => f.path).toList();
-      await uploadQueueService.addOfflineAction(
+      List<String> imagePaths = [];
+      for (final file in _postImages) {
+        final saved = await ImageStorageHelper.saveImagePermanently(file);
+        imagePaths.add(saved.path);
+      }
+
+      final actionId = await socialUploadService.addOfflineAction(
         type: 'post',
         userId: user.id,
         data: {
           'user_id': user.id,
           'text': text,
           'images': imagePaths,
+          'pending_id': pendingId,
         },
       );
-      _posts.removeWhere((p) => p.postId == pendingId);
+
+      final index = _posts.indexWhere((p) => p.postId == pendingId);
+      if (index != -1) {
+        _posts[index] = _posts[index].copyWith(offlineActionId: actionId);
+      }
+
+      _postImages.clear();
+      emit(CreatePostSuccessState());
       emit(CommunityPostsLoadedState(List.from(_posts)));
-      emit(CommunityErrorState('offline_queued'));
       isCreatingPost = false;
       return;
     }
 
-    final online = await authService.syncUserIfNeeded(user.id);
-    if (!online) {
-      final imagePaths = _postImages.map((f) => f.path).toList();
-      await uploadQueueService.addOfflineAction(
-        type: 'post',
-        userId: user.id,
-        data: {
-          'user_id': user.id,
-          'text': text,
-          'images': imagePaths,
-        },
-      );
-      _posts.removeWhere((p) => p.postId == pendingId);
-      emit(CommunityPostsLoadedState(List.from(_posts)));
-      emit(CommunityErrorState('offline_queued'));
-      isCreatingPost = false;
-      return;
-    }
-
+    // Online path
     try {
       List<String> uploadedUrls = [];
       if (_postImages.isNotEmpty) {
-        uploadedUrls = await _uploadPostImages(pendingId);
+        final permanentImages = await Future.wait(
+            _postImages.map((f) => ImageStorageHelper.saveImagePermanently(f)));
+        uploadedUrls = await _uploadPostImagesFromFiles(permanentImages, pendingId);
       }
 
       final postResponse = await supabaseService.client
@@ -695,9 +783,9 @@ class CommunityCubit extends Cubit<CommunityStates> {
     }
   }
 
-  Future<List<String>> _uploadPostImages(String tempId) async {
+  Future<List<String>> _uploadPostImagesFromFiles(List<File> images, String tempId) async {
     final bucket = supabaseService.client.storage.from('post-images');
-    final futures = _postImages.asMap().entries.map((entry) async {
+    final futures = images.asMap().entries.map((entry) async {
       final idx = entry.key;
       final file = entry.value;
       final ext = path.extension(file.path);
@@ -791,6 +879,22 @@ class CommunityCubit extends Cubit<CommunityStates> {
   // DELETE POST
   // --------------------------------------------------------------------------
   Future<void> deletePost(PostModel post) async {
+    // ✅ Clean up _likesInFlight
+    _likesInFlight.remove(post.postId);
+
+    if (post.postId.startsWith('pending_') && post.offlineActionId != null) {
+      _posts.removeWhere((p) => p.postId == post.postId);
+      filteredPosts.removeWhere((p) => p.postId == post.postId);
+      emit(CommunityPostsLoadedState(List.from(_posts)));
+
+      await socialUploadService.deleteOfflineAction(post.offlineActionId!);
+      showToast(
+        text: 'Pending post removed.',
+        state: ToastStates.success,
+      );
+      return;
+    }
+
     final authService = SupabaseAuthService();
     final hasInternet = await authService.isConnectedFast();
     if (!hasInternet) {
