@@ -1,110 +1,183 @@
-# 🌱 Plantie - Smart Image Processing & Farmer Assistant
+# 🌱 Plantie - Your Smart Farming Companion
 
+> **Plant Disease Detection • AI Assistant • Weather Insights • Community**
 
-<img src="https://i.ibb.co/2Dn2NnM/Colored-Logo.png" alt="Plantie Logo" width="150">
+<p align="center">
+  <img src="https://i.ibb.co/2Dn2NnM/Colored-Logo.png" alt="Plantie Logo" width="180">
+</p>
 
-
-**Plantie** is a mobile application designed to assist farmers by using **smart image processing** to detect plant diseases and provide **real-time weather updates**, **fertilizer calculations**, and **community support**.
+<p align="center">
+  <a href="#-what-is-plantie">What is Plantie?</a> •
+  <a href="#-key-features">Features</a> •
+  <a href="#-screenshots">Screenshots</a> •
+  <a href="#-supported-plants">Supported Plants</a> •
+  <a href="#-download">Download</a>
+</p>
 
 ---
 
-## 🎯 Features
-- 📸 **Plant Disease Detection**  
-  Detect plant diseases instantly by capturing a photo with your phone’s camera.
+## 💚 What is Plantie?
 
-- 🌦️ **Real-Time Weather Updates**  
-  Stay informed about the weather and receive personalized plant care tips.
+**Plantie** is a smart mobile app that helps farmers and plant lovers take care of their crops. Just take a photo of a sick plant, and Plantie will instantly tell you what disease it has, how to treat it, and give you expert advice — all without needing internet!
 
-- 🗨️ **Community Interaction**  
-  Join a community of farmers to share experiences and solutions.
+---
 
-- 🛍️ **Nearby Plant Stores**  
-  Locate nearby plant stores via Google Maps integration.
+## ✨ Key Features
 
-- 🌿 **Fertilizer Calculator**  
-  Calculate fertilizer requirements based on the type of plant (fruits or vegetables).
+### 📸 **Instant Disease Detection**
+- Take a photo of any plant leaf
+- Get instant disease diagnosis
+- See treatment recommendations
+- Works completely **offline** — no internet needed!
+
+### 🤖 **AI Farming Assistant**
+- Ask any farming question
+- Get personalized advice based on your location
+- Real-time responses with practical tips
+- **Free messages** — get 3 free chats, watch ads for more!
+
+### 🌦️ **Smart Weather Updates**
+- Real-time weather for your location
+- Get farming tips based on weather:
+  - ☔ Too much rain? Irrigation alerts
+  - 🌬️ Windy? Spraying warnings
+  - ❄️ Cold? Frost risk alerts
+- Works **offline** with cached weather data
+
+### 👥 **Community & Social Feed**
+- Share your farming experiences
+- Post photos and stories
+- Like and comment on posts
+- Follow other farmers
+- Works **offline** — posts save and upload later!
+
+### 🗺️ **Find Nearby Stores**
+- Locate the nearest plant stores
+- Get directions with Google/Apple Maps
+- Store data works **offline**
+
+### 🌍 **Available in Two Languages**
+- 🇬🇧 English
+- 🇸🇦 العربية (Arabic)
 
 ---
 
 ## 📱 Screenshots
 
-| Home Screen | Disease Detection | Community | Fertilizer Calculator |
-| ----------- | ----------------- | ------------ | --------------------- |
-| ![Home](https://i.ibb.co/8nCmy5Xr/Simulator-Screenshot-i-Phone-16-Pro-2025-02-17-at-22-55-27.png) | ![Detection](https://i.ibb.co/5WY73mMh/Simulator-Screenshot-i-Phone-16-Pro-2025-02-17-at-22-57-09.png) | ![Community](https://i.ibb.co/5xJjcFMp/Simulator-Screenshot-i-Phone-16-Pro-2025-02-17-at-22-56-28.png) | ![Calculator](https://i.ibb.co/qF5BwySW/Simulator-Screenshot-i-Phone-16-Pro-2025-02-17-at-22-55-47.png) |
+| Home Screen | Disease Detection | Community Feed | AI Chat Assistant |
+|-------------|-------------------|----------------|-------------------|
+| <img src="https://i.ibb.co/MyKm63QP/home.png" width="200"> | <img src="https://i.ibb.co/RpfH005t/Detection.png" width="200"> | <img src="https://i.ibb.co/Ng79TZ1f/Community.png" width="200"> | <img src="https://i.ibb.co/wN1KKRCv/Chat.png" width="200"> |
+
+| Weather Details | User Profile | Edit Profile | Detection History |
+|-----------------|--------------|--------------|-------------------|
+| <img src="https://i.ibb.co/nNwKqyFJ/Weather.png" width="200"> | <img src="https://i.ibb.co/mVXw2qXh/User.png" width="200"> | <img src="https://i.ibb.co/ds4nqTDk/Edit.png" width="200"> | <img src="https://i.ibb.co/cSdz8dWn/detection-history.png" width="200"> |
 
 ---
 
-## 🚀 Getting Started
+## 🌿 Supported Plants & Diseases
 
-### Prerequisites
-- [Flutter](https://flutter.dev/docs/get-started/install) installed on your system.
-- A device or emulator to run the app.
-
-### Installation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/M7mdNassar/Plantie_PS.git
-   cd plantie
-2. Install dependencies:
-   ```bash
-   flutter pub get
-3. Run the app:
-   ```bash
-   flutter run
-
-
-## 💡 How It Works
-
-1. **Take a Photo:** Use the camera to capture an image of the plant.
-2. **Disease Detection:** The app uses **MobileNet V2** to analyze the image and detect diseases in real-time.
-3. **Weather-Based Tips:** Receive real-time weather-based plant care advice tailored to your crops.
-4. **Fertilizer Calculator:** Get accurate fertilizer recommendations for fruits or vegetables based on their type and planting area.
-5. **Community Support:** Interact with other farmers, share experiences, and exchange valuable farming knowledge.
+| Plant | Diseases Detected |
+|-------|-------------------|
+| 🍎 **Apple** | Apple scab, Black rot, Cedar apple rust |
+| 🌱 **Bean** | Angular leaf spot, Rust |
+| 🌽 **Corn** | Cercospora leaf spot, Common rust, Northern leaf blight |
+| 🥒 **Cucumber** | Anthracnose, Gummy stem blight |
+| 🍇 **Grape** | Black rot, Esca, Leaf blight |
+| 🫒 **Olive** | Peacock spot, Aculus olearius |
+| 🌶️ **Pepper** | Bacterial spot |
+| 🥔 **Potato** | Early blight, Late blight |
+| 🍓 **Strawberry** | Leaf scorch |
+| 🍅 **Tomato** | Bacterial spot, Early blight, Late blight, Leaf mold, Septoria leaf spot, Spider mites, Target spot, Tomato mosaic virus |
 
 ---
 
-## 🛠️ Tech Stack
+## 🎯 How It Works
 
-- **Flutter** — Cross-platform mobile development framework.
-- **MobileNet V2** — Machine learning model for plant disease detection.
-- **Google Maps API** — Locate nearby plant stores.
-- **OpenWeather API** — Real-time weather updates.
+### 1. **Detect Plant Disease**
+1. Tap the camera button 📷
+2. Take a photo of a plant leaf
+3. Wait 2-3 seconds
+4. Get instant results!
+
+### 2. **Get AI Farming Advice**
+1. Tap the AI Assistant button 🤖
+2. Type your farming question
+3. Get personalized advice instantly
+
+### 3. **Connect with Farmers**
+1. Open the Community tab 👥
+2. Scroll through posts
+3. Like, comment, and share
+4. Create your own posts
+
+### 4. **Check Weather Insights**
+1. Open the Home tab 🌤️
+2. See current weather
+3. View farming tips based on weather
+4. Tap for detailed forecast
 
 ---
 
-## 📚 Supported Plant Diseases
+## 💡 Why Plantie?
 
-| 🌱 Plant   | 🛠️ Diseases Detected                                           |
-|------------|---------------------------------------------------------------|
-| **Apple**  | Apple scab, Black rot, Cedar apple rust, Healthy               |
-| **Bean**   | Angular leaf spot, Rust, Healthy                               |
-| **Corn**   | Cercospora leaf spot, Common rust, Northern leaf blight, Healthy |
-| **Cucumber** | Anthracnose, Gummy stem blight, Healthy                     |
-| **Grape**  | Black rot, Esca (Black Measles), Leaf blight, Healthy         |
-| **Olive**  | Peacock spot, Aculus olearius, Healthy                        |
-| **Pepper** | Bacterial spot, Healthy                                       |
-| **Potato** | Early blight, Late blight, Healthy                            |
-| **Strawberry** | Leaf scorch, Healthy                                      |
-| **Tomato** | Bacterial spot, Early blight, Late blight, Leaf mold, Septoria leaf spot, Healthy |
+| Problem | Plantie Solution |
+|---------|------------------|
+| ❌ Don't know what's wrong with your plant | ✅ Instant disease detection |
+| ❌ No farming expert nearby | ✅ AI assistant 24/7 |
+| ❌ Bad internet in rural areas | ✅ Works offline |
+| ❌ No community support | ✅ Connect with other farmers |
+| ❌ Weather affects crops unpredictably | ✅ Smart weather insights |
 
 ---
 
-## 👨‍💻 Developer
+## 📲 Download
+
+### Coming Soon!
+
+- 📱 **Google Play Store**
+- 🍏 **Apple App Store**
+
+---
+
+## 👨‍🌾 Who Is This For?
+
+- 🌾 **Farmers** — Get instant disease diagnosis and farming advice
+- 🌿 **Gardeners** — Learn proper plant care
+- 🌱 **Plant Enthusiasts** — Connect with a community
+- 👨‍🎓 **Agricultural Students** — Learn about plant diseases
+
+---
+
+## 📝 User Reviews
+
+> *"Plantie saved my tomato crop! I took a photo and it told me exactly what disease it had and how to treat it. Amazing!"*
+> — **Ahmed, Farmer**
+
+> *"I'm not a farmer, but I love my garden. Plantie helps me keep my plants healthy with simple tips."*
+> — **Sarah, Gardener**
+
+> *"The AI chat gives me advice like a real expert. I ask anything about farming and get answers instantly."*
+> — **Mohammad, Agricultural Student**
+
+---
+
+## 📞 Contact
 
 **Mohammad Nassar**  
-🌍 From Palestine | Software Engineer | Passionate about Mobile Development and AI
-
-📧 **Contact:** m.nassar4004@gmail.com  
-🔗 **LinkedIn:** [Connect with me](https://www.linkedin.com/in/m7mdnassar/)
-
----
-
-## 📄 License
-
-This project is licensed under the **MIT License**. See the [LICENSE](https://github.com/M7mdNassar/Plantie_PS/blob/master/License) file for more details.
+📍 Palestine  
+📧 m.nassar4004@gmail.com  
+🔗 [LinkedIn](https://www.linkedin.com/in/m7mdnassar/)
 
 ---
 
 ## ❤️ Support
 
-If you find this project helpful, please give it a ⭐ on GitHub and share it with others!  
+If you like Plantie, share it with other farmers and plant lovers! 🌱
+
+<p align="center">
+  <img src="https://i.ibb.co/2Dn2NnM/Colored-Logo.png" alt="Plantie Logo" width="120">
+</p>
+
+<p align="center">
+  <strong>🌱 Smart Farming. Simple. Offline. Powerful.</strong>
+</p>
