@@ -8,56 +8,34 @@ class AIChatService {
   static String get _baseUrl => AppConfig.chatBaseUrl;
   static String get _chatEndpoint => AppConfig.chatEndpoint;
 
+  // ─── Chat streaming ──────────────────────────────────────────────
   Stream<String> sendMessage({
-    required String query,
+    required String message,
+    required String conversationId,
     required String sessionId,
     required String userId,
     required double latitude,
     required double longitude,
+    Map<String, dynamic>? weather,
   }) async* {
-    // First check if chat feature is enabled (config)
     if (!AppConfig.isChatEnabled) {
-      yield 'Chat is currently unavailable. Please try again later.';
+      yield 'Chat is currently unavailable.';
       return;
     }
-
-    // Check that baseUrl and endpoint are not empty (config may be missing)
     if (_baseUrl.isEmpty || _chatEndpoint.isEmpty) {
-      yield 'Chat service is not configured. Please try again later.';
+      yield 'Chat service is not configured.';
       return;
     }
 
-    // Debug: log the actual URL being used
     final url = Uri.parse('$_baseUrl$_chatEndpoint');
-    print('🔗 [AIChatService] Using URL: $url');
 
-    // Get Supabase JWT token
-    final session = supabaseService.client.auth.currentSession;
-    String? token = session?.accessToken;
-
-    print('🔑 [AIChatService] Supabase JWT Token:');
-    print(token ?? 'No token found (offline)');
-
-    if (token == null) {
-      try {
-        await supabaseService.client.auth.refreshSession();
-        final refreshed = supabaseService.client.auth.currentSession;
-        token = refreshed?.accessToken;
-      } catch (_) {
-        // Offline
-      }
-    }
-
+    final token = await _getToken();
     final body = jsonEncode({
-      'query': query,
+      'message': message,
+      'conversation_id': conversationId,
       'session_id': sessionId,
-      'user_id': userId,
-      'location': {
-        'latitude': latitude,
-        'longitude': longitude,
-      },
-      'history': [],
-      'top_k': 5,
+      'location': {'latitude': latitude, 'longitude': longitude},
+      'weather': weather, // will be null if not provided
     });
 
     final request = http.Request('POST', url)
@@ -80,7 +58,6 @@ class AIChatService {
       yield 'Authentication failed. Please try again.';
       return;
     }
-
     if (streamedResponse.statusCode != 200) {
       final errorBody = await streamedResponse.stream.bytesToString();
       yield 'Server error: ${streamedResponse.statusCode} - $errorBody';
@@ -93,21 +70,68 @@ class AIChatService {
 
     await for (final line in stream) {
       if (line.startsWith('data: ')) {
-        final data = line.substring(6).trim();
-        if (data.isNotEmpty && data != '[DONE]') {
+        final data = line.substring(6);
+        if (data.trim() == '[DONE]') break;
+        if (data.isNotEmpty) {
           try {
             final json = jsonDecode(data);
-            final content = json['content'] ?? json['delta'] ?? json['text'] ?? data;
-            yield content.toString();
+            final content = json['content'] ?? json['delta'] ?? json['text'];
+            if (content != null) yield content.toString();
+            else yield data;
           } catch (_) {
+            // Only reached for a non-JSON backend response — don't trim
+            // here either, a raw chunk's leading/trailing space is real
+            // content, not incidental whitespace.
             yield data;
           }
         }
-      } else if (line.isNotEmpty && !line.startsWith(':')) {
-        if (!line.startsWith('event:') && !line.startsWith('id:')) {
-          yield line;
-        }
       }
     }
+  }
+
+  // ─── Conversation list ──────────────────────────────────────────
+  Future<List<Map<String, dynamic>>> getConversations({int limit = 20}) async {
+    final token = await _getToken();
+    final url = Uri.parse('$_baseUrl/api/v1/chat/conversations?limit=$limit');
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      return List<Map<String, dynamic>>.from(data['conversations'] ?? []);
+    }
+    return [];
+  }
+
+  // ─── Delete conversation ────────────────────────────────────────
+  Future<bool> deleteConversation(String conversationId) async {
+    final token = await _getToken();
+    final url = Uri.parse('$_baseUrl/api/v1/chat/conversations/$conversationId');
+    final response = await http.delete(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+    return response.statusCode == 200;
+  }
+
+  // ─── Helper ──────────────────────────────────────────────────────
+  Future<String?> _getToken() async {
+    final session = supabaseService.client.auth.currentSession;
+    String? token = session?.accessToken;
+    if (token == null) {
+      try {
+        await supabaseService.client.auth.refreshSession();
+        final refreshed = supabaseService.client.auth.currentSession;
+        token = refreshed?.accessToken;
+      } catch (_) {}
+    }
+    return token;
   }
 }

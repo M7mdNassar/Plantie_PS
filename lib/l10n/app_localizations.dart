@@ -2724,6 +2724,84 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Plant'**
   String get plantName;
+
+  /// No description provided for @offlineDeleteMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection. Please connect to delete this post.'**
+  String get offlineDeleteMessage;
+
+  /// No description provided for @locationServicesDisabledTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location Services Disabled'**
+  String get locationServicesDisabledTitle;
+
+  /// No description provided for @locationServicesDisabledMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enable location services to find the nearest store.'**
+  String get locationServicesDisabledMessage;
+
+  /// No description provided for @locationDeniedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location Denied'**
+  String get locationDeniedTitle;
+
+  /// No description provided for @locationDeniedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Please grant location permission to find the nearest store.'**
+  String get locationDeniedMessage;
+
+  /// No description provided for @locationPermanentlyDeniedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Location Permanently Denied'**
+  String get locationPermanentlyDeniedTitle;
+
+  /// No description provided for @locationPermanentlyDeniedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Location permission is permanently denied. Please enable it in app settings.'**
+  String get locationPermanentlyDeniedMessage;
+
+  /// No description provided for @offlineMapMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection. Please connect to open maps.'**
+  String get offlineMapMessage;
+
+  /// No description provided for @appTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Plantie'**
+  String get appTitle;
+
+  /// No description provided for @conversations.
+  ///
+  /// In en, this message translates to:
+  /// **'Conversations'**
+  String get conversations;
+
+  /// No description provided for @noConversations.
+  ///
+  /// In en, this message translates to:
+  /// **'No conversations yet.'**
+  String get noConversations;
+
+  /// No description provided for @deleteConversation.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Conversation'**
+  String get deleteConversation;
+
+  /// No description provided for @deleteConversationConfirmation.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this conversation? This action cannot be undone.'**
+  String get deleteConversationConfirmation;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

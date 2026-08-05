@@ -10,6 +10,7 @@ import 'package:plantie/modules/AIAssistant/widgets/typing_indicator.dart';
 import 'package:plantie/shared/styles/app_colors.dart';
 import '../../generated/l10n.dart';
 import '../../models/chat_message.dart';
+import 'ConversationListScreen.dart';
 
 class AIChatScreen extends StatefulWidget {
   const AIChatScreen({super.key});
@@ -26,6 +27,10 @@ class _AIChatScreenState extends State<AIChatScreen> {
   bool _configChecked = false;
   bool _chatEnabled = false;
 
+  // We'll store current weather from HomeCubit (or we can get it from a provider)
+  // For simplicity, we'll assume the screen has access to weather data via a provider.
+  // We'll use a placeholder; you should inject the actual weather from HomeCubit.
+
   @override
   void initState() {
     super.initState();
@@ -33,7 +38,6 @@ class _AIChatScreenState extends State<AIChatScreen> {
   }
 
   Future<void> _checkConfigAndSetup() async {
-    // Fetch fresh config (non‑blocking)
     await ConfigManager().fetchIfNeeded();
     final enabled = AppConfig.isChatEnabled;
     setState(() {
@@ -41,7 +45,6 @@ class _AIChatScreenState extends State<AIChatScreen> {
       _configChecked = true;
     });
 
-    // If chat is disabled, show a dialog (but we'll also show a disabled UI)
     if (!enabled && mounted) {
       await showDialog(
         context: context,
@@ -57,7 +60,6 @@ class _AIChatScreenState extends State<AIChatScreen> {
           ],
         ),
       );
-      // Optionally, we could pop the screen after dialog, but we keep it to show disabled UI.
     }
   }
 
@@ -93,10 +95,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
           Expanded(
             child: Text(
               S.of(context).rewardReceived(remaining),
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 15,
-              ),
+              style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
             ),
           ),
         ],
@@ -106,10 +105,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
       actions: [
         TextButton(
           onPressed: () => messenger.hideCurrentMaterialBanner(),
-          child: Text(
-            S.of(context).ok,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-          ),
+          child: Text(S.of(context).ok, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
         ),
       ],
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -119,19 +115,33 @@ class _AIChatScreenState extends State<AIChatScreen> {
     messenger.showMaterialBanner(banner);
 
     Future.delayed(const Duration(seconds: 3), () {
-      if (mounted) {
-        messenger.hideCurrentMaterialBanner();
-      }
+      if (mounted) messenger.hideCurrentMaterialBanner();
     });
   }
 
   void _triggerInputHighlight() {
     _highlightInput.value = true;
     Future.delayed(const Duration(milliseconds: 800), () {
-      if (mounted) {
-        _highlightInput.value = false;
-      }
+      if (mounted) _highlightInput.value = false;
     });
+  }
+
+  // Helper to get current weather from anywhere (e.g., HomeCubit or a global store)
+  // We'll use a placeholder; you can replace with actual logic.
+  Map<String, dynamic>? _getCurrentWeather() {
+    // Example: if you have a HomeCubit with weather data:
+    // final cubit = context.read<HomeCubit>();
+    // if (cubit.weatherData != null) {
+    //   return {
+    //     'temperature': cubit.weatherData.current.temperature,
+    //     'humidity': cubit.weatherData.current.relativeHumidity,
+    //     'condition': _getWeatherCondition(cubit.weatherData.current.weatherCode),
+    //     'wind_speed': cubit.weatherData.current.windSpeed,
+    //     'precipitation': cubit.weatherData.current.precipitation,
+    //   };
+    // }
+    // For now, return null.
+    return null;
   }
 
   @override
@@ -143,12 +153,10 @@ class _AIChatScreenState extends State<AIChatScreen> {
       );
     }
 
-    // If chat is disabled, show a dedicated disabled screen
     if (!_chatEnabled) {
       return _buildDisabledScreen(context);
     }
 
-    // Normal chat screen (enabled)
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return BlocProvider(
@@ -190,62 +198,88 @@ class _AIChatScreenState extends State<AIChatScreen> {
           final isAdLoading = state is AIChatAdLoading;
           final canType = !hasNoAttempts && !isAdLoading && state is! AIChatLoading && state is! AIChatStreaming;
 
-          final bool isLoadingRemaining = cubit.isLoadingRemaining;
-
           return Scaffold(
             appBar: AppBar(
               title: Row(
                 children: [
-                  Text(S.of(context).aiAssistant),
-                  const Spacer(),
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: hasNoAttempts ? Colors.orange : Colors.green,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: isLoadingRemaining
-                        ? const SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                        : Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          hasNoAttempts ? Icons.lock_outline : Icons.chat_bubble_outline,
-                          color: Colors.white,
-                          size: 14,
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          hasNoAttempts
-                              ? S.of(context).noFreeMessagesShort
-                              : S.of(context).freeCount(state.remainingFreeChats),
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
+                  Expanded(
+                    child: Text(
+                      S.of(context).aiAssistant,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   const SizedBox(width: 8),
-                  if (hasNoAttempts)
+                  Flexible(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: hasNoAttempts ? Colors.orange : Colors.green,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: cubit.isLoadingRemaining
+                          ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                          : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            hasNoAttempts ? Icons.lock_outline : Icons.chat_bubble_outline,
+                            color: Colors.white,
+                            size: 14,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            hasNoAttempts
+                                ? S.of(context).noFreeMessagesShort
+                                : S.of(context).freeCount(state.remainingFreeChats),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (hasNoAttempts) ...[
+                    const SizedBox(width: 4),
                     IconButton(
                       icon: const Icon(Icons.add_circle_outline, color: Colors.orange),
                       onPressed: cubit.watchAdToGetMore,
                       tooltip: S.of(context).watchAdButton,
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(),
                     ),
+                  ],
                 ],
               ),
               backgroundColor: isDark ? AppColors.darkSurface : AppColors.lightSurface,
               actions: [
+                IconButton(
+                  icon: const Icon(Icons.list_alt),
+                  onPressed: () async {
+                    final newId = await Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => BlocProvider.value(
+                          value: cubit,
+                          child: const ConversationListScreen(),
+                        ),
+                      ),
+                    );
+                    if (newId != null) {
+                      cubit.switchToConversation(newId);
+                    }
+                  },
+                  tooltip: S.of(context).conversations,
+                ),
                 IconButton(
                   icon: const Icon(Icons.delete_outline),
                   onPressed: () => _showClearDialog(context, cubit),
@@ -307,7 +341,8 @@ class _AIChatScreenState extends State<AIChatScreen> {
                       }
                       return;
                     }
-                    cubit.sendMessage(text);
+                    // Pass weather when sending
+                    cubit.sendMessage(text, weather: _getCurrentWeather());
                   },
                   isLoading: state is AIChatLoading || state is AIChatStreaming || isAdLoading,
                   isEnabled: canType,
@@ -322,7 +357,6 @@ class _AIChatScreenState extends State<AIChatScreen> {
     );
   }
 
-  /// Disabled screen when chat feature is turned off remotely
   Widget _buildDisabledScreen(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
@@ -336,31 +370,22 @@ class _AIChatScreenState extends State<AIChatScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(
-                Icons.chat_bubble_outline,
-                size: 72,
-                color: isDark ? Colors.grey[600] : Colors.grey[400],
-              ),
+              Icon(Icons.chat_bubble_outline, size: 72, color: isDark ? Colors.grey[600] : Colors.grey[400]),
               const SizedBox(height: 16),
               Text(
                 S.of(context).chat_unavailable_title,
-                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.w700,
-                ),
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(fontWeight: FontWeight.w700),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 8),
               Text(
                 S.of(context).chat_unavailable_subtitle,
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: isDark ? Colors.grey[400] : Colors.grey[600],
-                ),
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: isDark ? Colors.grey[400] : Colors.grey[600]),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 24),
               ElevatedButton.icon(
                 onPressed: () async {
-                  // Try to fetch config again and refresh
                   await ConfigManager().fetchIfNeeded(force: true);
                   final enabled = AppConfig.isChatEnabled;
                   if (mounted) {
@@ -375,9 +400,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
             ],
@@ -401,17 +424,53 @@ class _AIChatScreenState extends State<AIChatScreen> {
       return _buildEmptyState(context);
     }
 
-    return ListView.builder(
+    final List<Widget> items = [];
+    for (var i = 0; i < messages.length; i++) {
+      final message = messages[i];
+      items.add(ChatBubble(key: ValueKey(message.id), message: message));
+      // If this is the last message and it's from assistant and we have suggestions, show them.
+      if (i == messages.length - 1 &&
+          message.role == MessageRole.assistant &&
+          state.suggestions.isNotEmpty &&
+          state is! AIChatStreaming) {
+        items.add(_buildSuggestions(context, state.suggestions, cubit));
+      }
+    }
+
+    if (state is AIChatStreaming) {
+      items.add(const TypingIndicator());
+    }
+
+    return ListView(
       controller: _scrollController,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      itemCount: messages.length + (state is AIChatStreaming ? 1 : 0),
-      itemBuilder: (context, index) {
-        if (state is AIChatStreaming && index == messages.length) {
-          return const TypingIndicator();
-        }
-        final message = messages[index];
-        return ChatBubble(key: ValueKey(message.id), message: message);
-      },
+      children: items,
+    );
+  }
+
+  Widget _buildSuggestions(BuildContext context, List<String> suggestions, AIChatCubit cubit) {
+    if (suggestions.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 8, bottom: 12),
+      child: Wrap(
+        spacing: 8,
+        runSpacing: 8,
+        children: suggestions.map((suggestion) {
+          return ActionChip(
+            label: Text(suggestion),
+            onPressed: () {
+              // Send the suggestion as a new message
+              cubit.sendMessage(suggestion, weather: _getCurrentWeather());
+            },
+            backgroundColor: AppColors.primary.withOpacity(0.1),
+            labelStyle: const TextStyle(color: AppColors.primary),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(20),
+              side: const BorderSide(color: AppColors.primary, width: 1),
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 
@@ -423,24 +482,16 @@ class _AIChatScreenState extends State<AIChatScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.chat_bubble_outline,
-              size: 64,
-              color: isDark ? Colors.grey[600] : Colors.grey[400],
-            ),
+            Icon(Icons.chat_bubble_outline, size: 64, color: isDark ? Colors.grey[600] : Colors.grey[400]),
             const SizedBox(height: 16),
             Text(
               S.of(context).aiAssistantEmptyTitle,
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 8),
             Text(
               S.of(context).aiAssistantEmptySubtitle,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: isDark ? Colors.grey[400] : Colors.grey[600],
-              ),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: isDark ? Colors.grey[400] : Colors.grey[600]),
               textAlign: TextAlign.center,
             ),
           ],
@@ -465,10 +516,7 @@ class _AIChatScreenState extends State<AIChatScreen> {
               Navigator.pop(ctx);
               cubit.clearConversation();
             },
-            child: Text(
-              S.of(context).clear,
-              style: const TextStyle(color: Colors.red),
-            ),
+            child: Text(S.of(context).clear, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),

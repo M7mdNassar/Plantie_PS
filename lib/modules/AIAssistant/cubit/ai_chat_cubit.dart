@@ -11,43 +11,109 @@ import '../../../models/chat_message.dart';
 import '../../../models/user/user_model.dart';
 import '../../../shared/network/local/chat_history_db.dart';
 import '../../../shared/network/remote/supabase_service.dart';
-import '../../../shared/network/remote/supabase_auth_service.dart';
 import '../ai_chat_service.dart';
 import 'ai_chat_state.dart';
 
 class AIChatCubit extends Cubit<AIChatState> {
   final AIChatService _service = AIChatService();
-  // final ChatHistoryDB _db = ChatHistoryDB();
-  final String _sessionId;
+  final ChatHistoryDB _db = ChatHistoryDB();
+  String _conversationId;
+  String _sessionId;
   List<ChatMessage> _messages = [];
   StreamSubscription<String>? _subscription;
   String? _currentAssistantMessageId;
+  List<String> _currentSuggestions = [];
 
-  // ---------- Ad related ----------
+  // Ad related
   RewardedAd? _rewardedAd;
   int _remainingFreeChats = 0;
   static const String _prefKey = 'remaining_free_chats';
   bool _isAdLoading = false;
   bool _isClosed = false;
-
-  // ✅ Public flag to indicate loading state of remaining chats
   bool isLoadingRemaining = true;
 
-  AIChatCubit({String? sessionId})
-      : _sessionId = sessionId ?? const Uuid().v4(),
+  // Conversation list (stored locally)
+  List<Map<String, dynamic>> _conversations = [];
+
+  AIChatCubit({String? conversationId, String? sessionId})
+      : _conversationId = conversationId ?? const Uuid().v4(),
+        _sessionId = sessionId ?? const Uuid().v4(),
         super(const AIChatInitial(remainingFreeChats: 0)) {
     _loadRemainingChats();
-    // _loadConversation();
+    _loadConversation();
+    loadConversations();
   }
 
+  String get conversationId => _conversationId;
   String get sessionId => _sessionId;
 
-  // ---------- Persistence ----------
+  // ─── Public getter for conversations ────────────────────────────
+  List<Map<String, dynamic>> get conversations => _conversations;
+
+  // ─── Conversation list ──────────────────────────────────────────
+  Future<void> loadConversations() async {
+    _conversations = await _service.getConversations();
+    final currentState = state;
+    emit(AIChatInitial(
+      messages: currentState.messages,
+      sessionId: currentState.sessionId,
+      remainingFreeChats: currentState.remainingFreeChats,
+      conversations: _conversations,
+      suggestions: currentState.suggestions,
+    ));
+  }
+
+  Future<void> deleteConversation(String id) async {
+    final success = await _service.deleteConversation(id);
+    if (success) {
+      if (id == _conversationId) {
+        _messages.clear();
+        _conversationId = const Uuid().v4();
+        await _db.deleteConversation(id);
+        emit(AIChatInitial(
+          messages: [],
+          sessionId: _sessionId,
+          remainingFreeChats: _remainingFreeChats,
+          conversations: _conversations,
+          suggestions: [],
+        ));
+      }
+      await loadConversations();
+    }
+  }
+
+  void switchToConversation(String id) {
+    if (id == _conversationId) return;
+    _conversationId = id;
+    _messages.clear();
+    _currentSuggestions = [];
+    _loadConversation();
+  }
+
+  // ─── Persistence ────────────────────────────────────────────────
+  Future<void> _loadConversation() async {
+    final messages = await _db.getConversation(_conversationId);
+    if (messages != null && messages.isNotEmpty) {
+      _messages = messages;
+      emit(AIChatInitial(
+        messages: _messages,
+        sessionId: _sessionId,
+        remainingFreeChats: _remainingFreeChats,
+        conversations: _conversations,
+        suggestions: _currentSuggestions,
+      ));
+    }
+  }
+
+  Future<void> _saveConversation() async {
+    await _db.saveConversation(_conversationId, _messages);
+  }
+
+  // ─── Remaining chats ────────────────────────────────────────────
   Future<void> _loadRemainingChats() async {
     isLoadingRemaining = true;
     final prefs = await SharedPreferences.getInstance();
 
-    // 1. Load from local cache first (instant)
     final localCount = prefs.getInt(_prefKey);
     if (localCount != null) {
       _remainingFreeChats = localCount;
@@ -55,7 +121,6 @@ class AIChatCubit extends Cubit<AIChatState> {
       _updateStateWithRemaining();
     }
 
-    // 2. Fetch from Supabase (source of truth)
     final user = CurrentUser.user;
     if (user != null) {
       try {
@@ -70,20 +135,15 @@ class AIChatCubit extends Cubit<AIChatState> {
           _remainingFreeChats = cloudCount;
           await prefs.setInt(_prefKey, cloudCount);
         }
-        isLoadingRemaining = false;
-        debugPrint('✅ Free chat attempts synced from cloud: $_remainingFreeChats');
+        debugPrint('✅ Free chat attempts synced: $_remainingFreeChats');
       } catch (e) {
-        debugPrint('⚠️ Failed to fetch free chat attempts from cloud');
+        debugPrint('⚠️ Failed to sync free chat attempts: $e');
         if (localCount == null) {
           _remainingFreeChats = 3;
-          isLoadingRemaining = false;
         }
       }
-    } else {
-      if (localCount == null) {
-        _remainingFreeChats = 3;
-        isLoadingRemaining = false;
-      }
+    } else if (localCount == null) {
+      _remainingFreeChats = 3;
     }
 
     isLoadingRemaining = false;
@@ -106,51 +166,36 @@ class AIChatCubit extends Cubit<AIChatState> {
           .from('users')
           .update({'free_chat_attempts': count})
           .eq('id', CurrentUser.user.id);
-      debugPrint('✅ Free chat attempts synced to cloud: $count');
     } catch (e) {
       debugPrint('⚠️ Failed to sync free chat attempts: $e');
     }
   }
 
-  // ---------- Conversation ----------
-  // Future<void> _loadConversation() async {
-  //   final saved = await _db.getConversation(_sessionId);
-  //   if (saved != null) {
-  //     _messages = saved;
-  //     _safeEmit(AIChatInitial(
-  //       messages: _messages,
-  //       sessionId: _sessionId,
-  //       remainingFreeChats: _remainingFreeChats,
-  //     ));
-  //   }
-  // }
-  //
-  // Future<void> _saveConversation() async {
-  //   await _db.saveConversation(_sessionId, _messages);
-  // }
-
-  // ---------- Public: watch ad to get more attempts ----------
+  // ─── Ad ──────────────────────────────────────────────────────────
   void watchAdToGetMore() {
     if (_isAdLoading || _isClosed) return;
     if (_remainingFreeChats > 0) return;
-    _safeEmit(AIChatAdLoading(
+    emit(AIChatAdLoading(
       messages: _messages,
       remainingFreeChats: _remainingFreeChats,
+      conversations: _conversations,
+      suggestions: _currentSuggestions,
     ));
     _showRewardedAd();
   }
 
-  // ---------- Core: send message with offline check ----------
-  Future<void> sendMessage(String text) async {
+  // ─── Send message ───────────────────────────────────────────────
+  void sendMessage(String text, {Map<String, dynamic>? weather}) {
     if (_isClosed) return;
     if (text.trim().isEmpty) return;
 
-    // Check if chat is enabled (config)
     if (!AppConfig.isChatEnabled) {
-      _safeEmit(AIChatError(
-        error: 'Chat feature is currently disabled.',
+      emit(AIChatError(
+        error: 'Chat is currently disabled.',
         messages: _messages,
         remainingFreeChats: _remainingFreeChats,
+        conversations: _conversations,
+        suggestions: _currentSuggestions,
       ));
       return;
     }
@@ -159,20 +204,9 @@ class AIChatCubit extends Cubit<AIChatState> {
       return;
     }
 
-    // ✅ Check connectivity before sending
-    final hasInternet = await SupabaseAuthService().isConnectedFast();
-    if (!hasInternet) {
-      _safeEmit(AIChatError(
-        error: 'offline_chat',
-        messages: _messages,
-        remainingFreeChats: _remainingFreeChats,
-      ));
-      return;
-    }
-
     // Consume one free chat
     _remainingFreeChats--;
-    await _saveRemainingChats(_remainingFreeChats);
+    _saveRemainingChats(_remainingFreeChats);
     _updateStateWithRemaining();
 
     final userMessage = ChatMessage.user(text.trim());
@@ -182,89 +216,122 @@ class AIChatCubit extends Cubit<AIChatState> {
     _messages.add(assistantPlaceholder);
     _currentAssistantMessageId = assistantPlaceholder.id;
 
-    _safeEmit(AIChatLoading(
+    // Clear old suggestions while streaming
+    _currentSuggestions = [];
+
+    emit(AIChatLoading(
       messages: _messages,
       remainingFreeChats: _remainingFreeChats,
+      conversations: _conversations,
+      suggestions: _currentSuggestions,
     ));
 
-    try {
-      final stream = _service.sendMessage(
-        query: text,
-        sessionId: _sessionId,
-        userId: CurrentUser.user.id,
-        latitude: 0,
-        longitude: 0,
-      );
-
-      _subscription = stream.listen(
-            (chunk) {
-          final index = _messages.indexWhere((m) => m.id == _currentAssistantMessageId);
-          if (index != -1) {
-            String currentContent = _messages[index].content;
-            if (currentContent.isNotEmpty &&
-                chunk.isNotEmpty &&
-                !currentContent.endsWith(' ') &&
-                !chunk.startsWith(' ')) {
-              currentContent += ' ';
-            }
-            currentContent += chunk;
-            _messages[index] = _messages[index].copyWith(content: currentContent);
-            _safeEmit(AIChatStreaming(
-              messages: _messages,
-              partialResponse: currentContent,
-              remainingFreeChats: _remainingFreeChats,
-            ));
-          }
-        },
-        onDone: () {
-          _subscription?.cancel();
-          _subscription = null;
-
-          final assistantIndex = _messages.indexWhere((m) => m.id == _currentAssistantMessageId);
-          if (assistantIndex != -1) {
-            final rawContent = _messages[assistantIndex].content;
-            final formattedContent = _formatMarkdown(rawContent);
-            _messages[assistantIndex] = _messages[assistantIndex].copyWith(
-              content: formattedContent,
-            );
-          }
-
-          // _saveConversation();
-          _safeEmit(AIChatSuccess(
-            messages: _messages,
-            remainingFreeChats: _remainingFreeChats,
-          ));
-        },
-        onError: (error) {
-          _subscription?.cancel();
-          _subscription = null;
-          _messages.removeWhere((m) => m.id == _currentAssistantMessageId);
-          String errorMsg = error.toString();
-          if (error is SocketException || error.toString().contains('SocketException')) {
-            errorMsg = 'network_error';
-          }
-          _safeEmit(AIChatError(
-            error: errorMsg,
-            messages: _messages,
-            remainingFreeChats: _remainingFreeChats,
-          ));
-        },
-      );
-    } catch (e) {
-      _messages.removeWhere((m) => m.id == _currentAssistantMessageId);
-      String errorMsg = e.toString();
-      if (e is SocketException || e.toString().contains('SocketException')) {
-        errorMsg = 'network_error';
-      }
-      _safeEmit(AIChatError(
-        error: errorMsg,
+    final user = CurrentUser.user;
+    if (user == null) {
+      // Should not happen; fallback to anonymous or show error.
+      emit(AIChatError(
+        error: 'User not authenticated',
         messages: _messages,
         remainingFreeChats: _remainingFreeChats,
+        conversations: _conversations,
+        suggestions: _currentSuggestions,
       ));
+      return;
     }
+
+    _subscription = _service.sendMessage(
+      message: text,
+      conversationId: _conversationId,
+      sessionId: _sessionId,
+      userId: user.id,
+      latitude: 0,
+      longitude: 0,
+      weather: weather,
+    ).listen(
+          (chunk) {
+            final index = _messages.indexWhere((m) => m.id == _currentAssistantMessageId);
+            if (index != -1) {
+              String currentContent = _messages[index].content + chunk;
+              _messages[index] = _messages[index].copyWith(content: currentContent);
+
+          emit(AIChatStreaming(
+            messages: _messages,
+            partialResponse: currentContent,
+            remainingFreeChats: _remainingFreeChats,
+            conversations: _conversations,
+            suggestions: _currentSuggestions,
+          ));
+        }
+      },
+      onDone: () {
+        _subscription?.cancel();
+        _subscription = null;
+
+        final assistantIndex = _messages.indexWhere((m) => m.id == _currentAssistantMessageId);
+        if (assistantIndex != -1) {
+          String raw = _messages[assistantIndex].content;
+          // Extract suggestions by splitting on newlines and looking for "- "
+          final lines = raw.split('\n');
+          final suggestionLines = <String>[];
+          final contentLines = <String>[];
+          for (var line in lines) {
+            final trimmed = line.trim();
+            if (trimmed.startsWith('- ')) {
+              suggestionLines.add(trimmed.substring(2).trim());
+            } else {
+              contentLines.add(line);
+            }
+          }
+          // If no suggestions found, try a fallback regex to find "- " anywhere
+          if (suggestionLines.isEmpty) {
+            final regex = RegExp(r'-\s+([^\n]+)');
+            final matches = regex.allMatches(raw);
+            if (matches.isNotEmpty) {
+              for (var match in matches) {
+                suggestionLines.add(match.group(1)?.trim() ?? '');
+              }
+              // Remove all "- " patterns from the content
+              String cleaned = raw.replaceAll(regex, '');
+              // Remove trailing dashes and clean up
+              cleaned = cleaned.replaceAll(RegExp(r'-\s*$'), '').trim();
+              contentLines.clear();
+              contentLines.add(cleaned);
+            }
+          }
+          final cleanedContent = contentLines.join('\n').trim();
+          _currentSuggestions = suggestionLines;
+          _messages[assistantIndex] = _messages[assistantIndex].copyWith(
+            content: cleanedContent,
+          );
+        }
+
+        _saveConversation();
+        emit(AIChatSuccess(
+          messages: _messages,
+          remainingFreeChats: _remainingFreeChats,
+          conversations: _conversations,
+          suggestions: _currentSuggestions,
+        ));
+      },
+      onError: (error) {
+        _subscription?.cancel();
+        _subscription = null;
+        _messages.removeWhere((m) => m.id == _currentAssistantMessageId);
+        String errorMsg = error.toString();
+        if (error is SocketException || error.toString().contains('SocketException')) {
+          errorMsg = 'network_error';
+        }
+        emit(AIChatError(
+          error: errorMsg,
+          messages: _messages,
+          remainingFreeChats: _remainingFreeChats,
+          conversations: _conversations,
+          suggestions: _currentSuggestions,
+        ));
+      },
+    );
   }
 
-  // ---------- Markdown formatter ----------
   String _formatMarkdown(String raw) {
     String text = raw.replaceFirst(RegExp(r'^rag_tool\s*'), '');
     text = text.replaceAllMapped(
@@ -282,149 +349,149 @@ class AIChatCubit extends Cubit<AIChatState> {
     return text.trim();
   }
 
-  // ---------- Private Ad Logic ----------
+  // ─── Ad loading ──────────────────────────────────────────────────
   void _showRewardedAd() {
     if (_isAdLoading || _isClosed) return;
     _isAdLoading = true;
 
     final String adUnitId = Environment.rewardedAdUnitId;
 
-    // Log which Ad Unit ID we're using (mask the last 4 characters)
-    final maskedId = adUnitId.length > 8
-        ? '${adUnitId.substring(0, adUnitId.length - 4)}****'
-        : adUnitId;
-    print('📢 [AdMob] Requesting rewarded ad with unit ID: $maskedId');
-    print('📢 [AdMob] Environment isProduction: ${const bool.fromEnvironment('dart.vm.product')}');
-
     RewardedAd.load(
       adUnitId: adUnitId,
       request: const AdRequest(),
       rewardedAdLoadCallback: RewardedAdLoadCallback(
         onAdLoaded: (RewardedAd ad) {
-          print('✅ [AdMob] Ad loaded successfully');
           _rewardedAd = ad;
           _isAdLoading = false;
           _rewardedAd?.show(
             onUserEarnedReward: (ad, reward) {
-              print('🎉 [AdMob] User earned reward: ${reward.amount} ${reward.type}');
               _remainingFreeChats += 1;
               _saveRemainingChats(_remainingFreeChats);
               _updateStateWithRemaining();
-              _safeEmit(AIChatAdRewardSuccess(
+              emit(AIChatAdRewardSuccess(
                 messages: _messages,
                 remainingFreeChats: _remainingFreeChats,
+                conversations: _conversations,
+                suggestions: _currentSuggestions,
               ));
             },
           );
           _rewardedAd?.fullScreenContentCallback = FullScreenContentCallback(
             onAdDismissedFullScreenContent: (ad) {
-              print('ℹ️ [AdMob] Ad dismissed by user');
               ad.dispose();
               _rewardedAd = null;
               _updateStateWithRemaining();
             },
             onAdFailedToShowFullScreenContent: (ad, error) {
-              print('❌ [AdMob] Failed to show full-screen content');
-              print('   Error code: ${error.code}');
-              print('   Error message: ${error.message}');
-              print('   Error details: ${error.toString()}');
               ad.dispose();
               _rewardedAd = null;
               _isAdLoading = false;
-              _safeEmit(AIChatError(
+              emit(AIChatError(
                 error: 'ad_failed_to_show',
                 messages: _messages,
                 remainingFreeChats: _remainingFreeChats,
+                conversations: _conversations,
+                suggestions: _currentSuggestions,
               ));
             },
           );
         },
         onAdFailedToLoad: (LoadAdError error) {
-          print('❌ [AdMob] Ad failed to load');
-          print('   Error code: ${error.code}');
-          print('   Error message: ${error.message}');
-          print('   Error details: ${error.toString()}');
-          print('   Ad unit ID was: $maskedId');
           _isAdLoading = false;
-          _safeEmit(AIChatError(
+          emit(AIChatError(
             error: 'ad_not_available',
             messages: _messages,
             remainingFreeChats: _remainingFreeChats,
+            conversations: _conversations,
+            suggestions: _currentSuggestions,
           ));
         },
       ),
     ).catchError((error) {
-      print('❌ [AdMob] Exception during ad load: $error');
       _isAdLoading = false;
-      _safeEmit(AIChatError(
+      emit(AIChatError(
         error: 'ad_not_available',
         messages: _messages,
         remainingFreeChats: _remainingFreeChats,
+        conversations: _conversations,
+        suggestions: _currentSuggestions,
       ));
     });
   }
 
-
-  // ---------- Safe emit ----------
   void _safeEmit(AIChatState state) {
-    if (!_isClosed) {
-      emit(state);
-    }
+    if (!_isClosed) emit(state);
   }
 
-  // ---------- Helper to update state ----------
   void _updateStateWithRemaining() {
     final currentState = state;
     if (currentState is AIChatInitial) {
-      _safeEmit(AIChatInitial(
+      emit(AIChatInitial(
         messages: currentState.messages,
         sessionId: currentState.sessionId,
         remainingFreeChats: _remainingFreeChats,
+        conversations: _conversations,
+        suggestions: _currentSuggestions,
       ));
     } else if (currentState is AIChatLoading) {
-      _safeEmit(AIChatLoading(
+      emit(AIChatLoading(
         messages: currentState.messages,
         remainingFreeChats: _remainingFreeChats,
+        conversations: _conversations,
+        suggestions: _currentSuggestions,
       ));
     } else if (currentState is AIChatStreaming) {
-      _safeEmit(AIChatStreaming(
+      emit(AIChatStreaming(
         messages: currentState.messages,
         partialResponse: currentState.partialResponse,
         remainingFreeChats: _remainingFreeChats,
+        conversations: _conversations,
+        suggestions: _currentSuggestions,
       ));
     } else if (currentState is AIChatSuccess) {
-      _safeEmit(AIChatSuccess(
+      emit(AIChatSuccess(
         messages: currentState.messages,
         remainingFreeChats: _remainingFreeChats,
+        conversations: _conversations,
+        suggestions: _currentSuggestions,
       ));
     } else if (currentState is AIChatError) {
-      _safeEmit(AIChatError(
+      emit(AIChatError(
         error: currentState.error,
         messages: currentState.messages,
         remainingFreeChats: _remainingFreeChats,
+        conversations: _conversations,
+        suggestions: _currentSuggestions,
       ));
     } else if (currentState is AIChatAdRewardSuccess) {
-      _safeEmit(AIChatAdRewardSuccess(
+      emit(AIChatAdRewardSuccess(
         messages: currentState.messages,
         remainingFreeChats: _remainingFreeChats,
+        conversations: _conversations,
+        suggestions: _currentSuggestions,
       ));
     } else if (currentState is AIChatAdLoading) {
-      _safeEmit(AIChatAdLoading(
+      emit(AIChatAdLoading(
         messages: currentState.messages,
         remainingFreeChats: _remainingFreeChats,
+        conversations: _conversations,
+        suggestions: _currentSuggestions,
       ));
     }
   }
 
-  void clearConversation() async {
+  void clearConversation() {
     _subscription?.cancel();
     _subscription = null;
     _messages.clear();
-    // await _db.deleteConversation(_sessionId);
-    _safeEmit(AIChatInitial(
+    _currentSuggestions = [];
+    _db.deleteConversation(_conversationId);
+    emit(AIChatInitial(
       messages: [],
       sessionId: _sessionId,
       remainingFreeChats: _remainingFreeChats,
+      conversations: _conversations,
+      suggestions: _currentSuggestions,
     ));
   }
 
@@ -441,7 +508,7 @@ class AIChatCubit extends Cubit<AIChatState> {
   Future<void> close() {
     _isClosed = true;
     _subscription?.cancel();
-    // _saveConversation();
+    _saveConversation();
     _rewardedAd?.dispose();
     return super.close();
   }

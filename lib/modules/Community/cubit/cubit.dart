@@ -404,11 +404,11 @@ class CommunityCubit extends Cubit<CommunityStates> {
     }
   }
 
-  // ✅ Improved: skip corrupt posts
   Future<List<PostModel>> _loadCachedPosts() async {
     try {
       final db = await _historyDb.database;
-      final result = await db.query('cached_posts', orderBy: 'cached_at DESC');
+      final result = await db.query('cached_posts');
+
       final posts = <PostModel>[];
       for (final row in result) {
         try {
@@ -417,10 +417,14 @@ class CommunityCubit extends Cubit<CommunityStates> {
           posts.add(post);
         } catch (e) {
           debugPrint('⚠️ Failed to parse cached post: $e');
-          // Skip corrupt post
+          // Skip this post and continue with others
         }
       }
-      debugPrint('✅ Loaded ${posts.length} cached posts');
+
+      // ✅ Sort by actual post creation time (newest first)
+      posts.sort((a, b) => b.dateTime.compareTo(a.dateTime));
+
+      debugPrint('✅ Loaded ${posts.length} cached posts (sorted by dateTime)');
       return posts;
     } catch (e) {
       debugPrint('❌ Failed to load cached posts: $e');

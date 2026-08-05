@@ -588,7 +588,12 @@
   "locationDeniedMessage": "Please grant location permission to find the nearest store.",
   "locationPermanentlyDeniedTitle": "Location Permanently Denied",
   "locationPermanentlyDeniedMessage": "Location permission is permanently denied. Please enable it in app settings.",
-  "offlineMapMessage": "No internet connection. Please connect to open maps."
+  "offlineMapMessage": "No internet connection. Please connect to open maps.",
+  "appTitle": "Plantie",
+  "conversations": "Conversations",
+  "noConversations": "No conversations yet.",
+  "deleteConversation": "Delete Conversation",
+  "deleteConversationConfirmation": "Are you sure you want to delete this conversation? This action cannot be undone."
 
 
 

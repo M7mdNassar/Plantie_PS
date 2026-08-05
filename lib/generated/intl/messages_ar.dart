@@ -95,6 +95,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "analyzingImage": MessageLookupByLibrary.simpleMessage(
       "جاري تحليل الصورة...",
     ),
+    "appTitle": MessageLookupByLibrary.simpleMessage("بلانتي"),
     "arShort": MessageLookupByLibrary.simpleMessage("ع"),
     "areaNote": MessageLookupByLibrary.simpleMessage(
       "ملاحظة: 1 دونم = 1000 متر مربع (10,000 قدم مربع)",
@@ -207,6 +208,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "contactInfo": MessageLookupByLibrary.simpleMessage("تفاصيل الاتصال"),
     "continueAsGuest": MessageLookupByLibrary.simpleMessage("المتابعة كضيف"),
     "continueButton": MessageLookupByLibrary.simpleMessage("متابعة"),
+    "conversations": MessageLookupByLibrary.simpleMessage("المحادثات"),
     "country": MessageLookupByLibrary.simpleMessage("الدولة"),
     "countryField": MessageLookupByLibrary.simpleMessage("البلد"),
     "countryOptional": MessageLookupByLibrary.simpleMessage("الدولة (اختياري)"),
@@ -232,6 +234,10 @@ class MessageLookup extends MessageLookupByLibrary {
     "delete": MessageLookupByLibrary.simpleMessage("حذف"),
     "deleteConfirmation": MessageLookupByLibrary.simpleMessage(
       "هل أنت متأكد من رغبتك في حذف هذا العنصر؟",
+    ),
+    "deleteConversation": MessageLookupByLibrary.simpleMessage("حذف المحادثة"),
+    "deleteConversationConfirmation": MessageLookupByLibrary.simpleMessage(
+      "هل أنت متأكد من حذف هذه المحادثة؟ لا يمكن التراجع عن هذا الإجراء.",
     ),
     "deletePost": MessageLookupByLibrary.simpleMessage("حذف المنشور"),
     "deletePostConfirmation": MessageLookupByLibrary.simpleMessage(
@@ -506,6 +512,9 @@ class MessageLookup extends MessageLookupByLibrary {
     ),
     "noCommentsYet": MessageLookupByLibrary.simpleMessage(
       "لا توجد تعليقات بعد",
+    ),
+    "noConversations": MessageLookupByLibrary.simpleMessage(
+      "لا توجد محادثات بعد.",
     ),
     "noDetails": MessageLookupByLibrary.simpleMessage(""),
     "noDetectionHistory": MessageLookupByLibrary.simpleMessage(

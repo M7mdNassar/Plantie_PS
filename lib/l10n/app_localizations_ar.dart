@@ -1408,4 +1408,49 @@ class SAr extends S {
 
   @override
   String get plantName => 'النبتة';
+
+  @override
+  String get offlineDeleteMessage =>
+      'لا يوجد اتصال بالإنترنت. يرجى الاتصال لحذف هذا المنشور.';
+
+  @override
+  String get locationServicesDisabledTitle => 'خدمات الموقع معطلة';
+
+  @override
+  String get locationServicesDisabledMessage =>
+      'يرجى تفعيل خدمات الموقع للعثور على أقرب متجر.';
+
+  @override
+  String get locationDeniedTitle => 'الموقع مرفوض';
+
+  @override
+  String get locationDeniedMessage =>
+      'الرجاء منح صلاحية الموقع للعثور على أقرب متجر.';
+
+  @override
+  String get locationPermanentlyDeniedTitle => 'الموقع مرفوض نهائياً';
+
+  @override
+  String get locationPermanentlyDeniedMessage =>
+      'تم رفض صلاحية الموقع نهائياً. يرجى تفعيلها من إعدادات التطبيق.';
+
+  @override
+  String get offlineMapMessage =>
+      'لا يوجد اتصال بالإنترنت. يرجى الاتصال لفتح الخريطة.';
+
+  @override
+  String get appTitle => 'بلانتي';
+
+  @override
+  String get conversations => 'المحادثات';
+
+  @override
+  String get noConversations => 'لا توجد محادثات بعد.';
+
+  @override
+  String get deleteConversation => 'حذف المحادثة';
+
+  @override
+  String get deleteConversationConfirmation =>
+      'هل أنت متأكد من حذف هذه المحادثة؟ لا يمكن التراجع عن هذا الإجراء.';
 }

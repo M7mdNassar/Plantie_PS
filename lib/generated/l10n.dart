@@ -3828,6 +3828,51 @@ class S {
       args: [],
     );
   }
+
+  /// `Plantie`
+  String get appTitle {
+    return Intl.message('Plantie', name: 'appTitle', desc: '', args: []);
+  }
+
+  /// `Conversations`
+  String get conversations {
+    return Intl.message(
+      'Conversations',
+      name: 'conversations',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `No conversations yet.`
+  String get noConversations {
+    return Intl.message(
+      'No conversations yet.',
+      name: 'noConversations',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Delete Conversation`
+  String get deleteConversation {
+    return Intl.message(
+      'Delete Conversation',
+      name: 'deleteConversation',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Are you sure you want to delete this conversation? This action cannot be undone.`
+  String get deleteConversationConfirmation {
+    return Intl.message(
+      'Are you sure you want to delete this conversation? This action cannot be undone.',
+      name: 'deleteConversationConfirmation',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

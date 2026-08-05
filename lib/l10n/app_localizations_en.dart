@@ -1418,4 +1418,49 @@ class SEn extends S {
 
   @override
   String get plantName => 'Plant';
+
+  @override
+  String get offlineDeleteMessage =>
+      'No internet connection. Please connect to delete this post.';
+
+  @override
+  String get locationServicesDisabledTitle => 'Location Services Disabled';
+
+  @override
+  String get locationServicesDisabledMessage =>
+      'Please enable location services to find the nearest store.';
+
+  @override
+  String get locationDeniedTitle => 'Location Denied';
+
+  @override
+  String get locationDeniedMessage =>
+      'Please grant location permission to find the nearest store.';
+
+  @override
+  String get locationPermanentlyDeniedTitle => 'Location Permanently Denied';
+
+  @override
+  String get locationPermanentlyDeniedMessage =>
+      'Location permission is permanently denied. Please enable it in app settings.';
+
+  @override
+  String get offlineMapMessage =>
+      'No internet connection. Please connect to open maps.';
+
+  @override
+  String get appTitle => 'Plantie';
+
+  @override
+  String get conversations => 'Conversations';
+
+  @override
+  String get noConversations => 'No conversations yet.';
+
+  @override
+  String get deleteConversation => 'Delete Conversation';
+
+  @override
+  String get deleteConversationConfirmation =>
+      'Are you sure you want to delete this conversation? This action cannot be undone.';
 }

@@ -96,6 +96,7 @@ class MessageLookup extends MessageLookupByLibrary {
     "analyzingImage": MessageLookupByLibrary.simpleMessage(
       "Analyzing Image...",
     ),
+    "appTitle": MessageLookupByLibrary.simpleMessage("Plantie"),
     "arShort": MessageLookupByLibrary.simpleMessage("AR"),
     "areaNote": MessageLookupByLibrary.simpleMessage(
       "Note: 1 Dunam = 1000 m² (10,000 sq ft)",
@@ -212,6 +213,7 @@ class MessageLookup extends MessageLookupByLibrary {
       "Continue as Guest",
     ),
     "continueButton": MessageLookupByLibrary.simpleMessage("Continue"),
+    "conversations": MessageLookupByLibrary.simpleMessage("Conversations"),
     "country": MessageLookupByLibrary.simpleMessage("Country"),
     "countryField": MessageLookupByLibrary.simpleMessage("Country"),
     "countryOptional": MessageLookupByLibrary.simpleMessage(
@@ -241,6 +243,12 @@ class MessageLookup extends MessageLookupByLibrary {
     "delete": MessageLookupByLibrary.simpleMessage("Delete"),
     "deleteConfirmation": MessageLookupByLibrary.simpleMessage(
       "Are you sure you want to delete this item?",
+    ),
+    "deleteConversation": MessageLookupByLibrary.simpleMessage(
+      "Delete Conversation",
+    ),
+    "deleteConversationConfirmation": MessageLookupByLibrary.simpleMessage(
+      "Are you sure you want to delete this conversation? This action cannot be undone.",
     ),
     "deletePost": MessageLookupByLibrary.simpleMessage("Delete Post"),
     "deletePostConfirmation": MessageLookupByLibrary.simpleMessage(
@@ -544,6 +552,9 @@ class MessageLookup extends MessageLookupByLibrary {
       "No account or password needed",
     ),
     "noCommentsYet": MessageLookupByLibrary.simpleMessage("No comments yet"),
+    "noConversations": MessageLookupByLibrary.simpleMessage(
+      "No conversations yet.",
+    ),
     "noDetails": MessageLookupByLibrary.simpleMessage(""),
     "noDetectionHistory": MessageLookupByLibrary.simpleMessage(
       "No Detection History",

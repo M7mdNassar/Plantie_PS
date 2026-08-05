@@ -589,5 +589,10 @@
   "locationDeniedMessage": "الرجاء منح صلاحية الموقع للعثور على أقرب متجر.",
   "locationPermanentlyDeniedTitle": "الموقع مرفوض نهائياً",
   "locationPermanentlyDeniedMessage": "تم رفض صلاحية الموقع نهائياً. يرجى تفعيلها من إعدادات التطبيق.",
-  "offlineMapMessage": "لا يوجد اتصال بالإنترنت. يرجى الاتصال لفتح الخريطة."
+  "offlineMapMessage": "لا يوجد اتصال بالإنترنت. يرجى الاتصال لفتح الخريطة.",
+  "appTitle": "بلانتي",
+  "conversations": "المحادثات",
+  "noConversations": "لا توجد محادثات بعد.",
+  "deleteConversation": "حذف المحادثة",
+  "deleteConversationConfirmation": "هل أنت متأكد من حذف هذه المحادثة؟ لا يمكن التراجع عن هذا الإجراء."
 }
